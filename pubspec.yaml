@@ -1,39 +1,39 @@
 name: advent_song
-description: A song lyric app built with Flutter.
+description: A song lyrics app built with Flutter.
 
-# Version of your application
+publish_to: 'none' # Prevents publishing to pub.dev.
+
 version: 1.0.0+1
 
 environment:
-  sdk: '>=2.18.0 <3.0.0'
+  sdk: '>=2.17.0 <3.0.0' # Ensure the SDK version matches your Flutter setup.
 
 dependencies:
   flutter:
     sdk: flutter
-
-  # Flutter material design package
   cupertino_icons: ^1.0.2
-
-  # Package for saving user preferences locally
   shared_preferences: ^2.0.15
-
-  # Logger package for structured logging instead of print statements
-  logger: ^2.4.0
+  intl: ^0.18.0 # For date formatting in your app.
+  logger: ^1.1.0 # For logging purposes.
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-
-  # Lint rules for flutter projects
-  flutter_lints: ^4.0.0
+  flutter_lints: ^2.0.1
 
 flutter:
-  uses-material-design: true
+  uses-material-design: true # Enables the use of Material Icons in your app.
 
-  # Assets used in the application
+  # Specify your assets here.
   assets:
+    - assets/header_image.png
     - assets/lpmi.json
     - assets/srd.json
     - assets/iban.json
     - assets/pandak.json
-    - assets/header_image.png  # Ensure the path is correct.
+
+  # Uncomment and customize fonts if needed.
+  # fonts:
+  #   - family: CustomFont
+  #     fonts:
+  #       - asset: fonts/CustomFont-Regular.ttf

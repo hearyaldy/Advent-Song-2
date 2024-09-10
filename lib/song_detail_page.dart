@@ -1,14 +1,14 @@
 // song_detail_page.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; // Import MethodChannel
+import 'package:flutter/services.dart'; 
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logger/logger.dart'; // Import the logger package
+import 'package:logger/logger.dart'; 
 import 'settings_popup.dart';
 
 class SongDetailPage extends StatefulWidget {
   final Map<String, dynamic> song;
 
-  const SongDetailPage({super.key, required this.song});
+  const SongDetailPage({Key? key, required this.song}) : super(key: key);
 
   @override
   SongDetailPageState createState() => SongDetailPageState();
@@ -21,10 +21,7 @@ class SongDetailPageState extends State<SongDetailPage> {
   bool _isFavorite = false;
   bool _isDarkMode = false;
 
-  // Define a MethodChannel
   static const platform = MethodChannel('com.haweeinc.advent_song/share');
-
-  // Create a logger instance
   final Logger _logger = Logger();
 
   @override
@@ -57,7 +54,6 @@ class SongDetailPageState extends State<SongDetailPage> {
     });
   }
 
-  // Method to invoke native share functionality
   Future<void> _shareSong() async {
     try {
       await platform.invokeMethod('share', {
@@ -74,7 +70,7 @@ class SongDetailPageState extends State<SongDetailPage> {
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
       case 0:
-        Navigator.pop(context); // Navigate back to the home page
+        Navigator.pop(context); 
         break;
       case 1:
         showDialog(
@@ -110,7 +106,7 @@ class SongDetailPageState extends State<SongDetailPage> {
               Image.asset(
                 'assets/header_image.png',
                 width: double.infinity,
-                height: 170,
+                height: 120, // Adjusted to match new header size
                 fit: BoxFit.cover,
               ),
               Positioned(
@@ -127,7 +123,6 @@ class SongDetailPageState extends State<SongDetailPage> {
               ),
             ],
           ),
-          // Align the share and favorite button to the right
           Row(
             mainAxisAlignment: MainAxisAlignment.end,
             children: [
@@ -150,16 +145,34 @@ class SongDetailPageState extends State<SongDetailPage> {
                 itemCount: widget.song['verses'].length,
                 itemBuilder: (context, index) {
                   final verse = widget.song['verses'][index];
+                  final isKorus = verse['verse_number'].toLowerCase() == 'korus';
                   return Padding(
                     padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    child: Text(
-                      "${verse['verse_number']}. ${verse['lyrics']}",
-                      style: TextStyle(
-                        fontSize: _fontSize,
-                        fontFamily: _fontFamily,
-                        color: _isDarkMode ? Colors.white : Colors.black,
-                      ),
-                      textAlign: _textAlign,
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          verse['verse_number'],
+                          style: TextStyle(
+                            fontSize: _fontSize + 4,
+                            fontFamily: _fontFamily,
+                            fontStyle: isKorus ? FontStyle.italic : FontStyle.normal,
+                            fontWeight: FontWeight.bold,
+                            color: _isDarkMode ? Colors.white : Colors.black,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          verse['lyrics'],
+                          style: TextStyle(
+                            fontSize: _fontSize,
+                            fontFamily: _fontFamily,
+                            fontStyle: isKorus ? FontStyle.italic : FontStyle.normal,
+                            color: _isDarkMode ? Colors.white : Colors.black,
+                          ),
+                          textAlign: _textAlign,
+                        ),
+                      ],
                     ),
                   );
                 },

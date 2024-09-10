@@ -1,6 +1,7 @@
 // song_list_page.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
+import 'package:intl/intl.dart'; // Import for formatting the date
 import 'package:shared_preferences/shared_preferences.dart';
 import 'song_detail_page.dart';
 import 'settings_popup.dart';
@@ -26,11 +27,22 @@ class SongListPageState extends State<SongListPage> {
   List<Map<String, dynamic>> _iban = [];
   List<Map<String, dynamic>> _pandak = [];
 
+  String _currentDate = '';
+
   @override
   void initState() {
     super.initState();
     _loadSongs();
     _loadFavorites();
+    _getCurrentDate();
+  }
+
+  void _getCurrentDate() {
+    final now = DateTime.now();
+    final formattedDate = DateFormat('EEEE | MMMM d, yyyy').format(now);
+    setState(() {
+      _currentDate = formattedDate;
+    });
   }
 
   Future<void> _loadSongs() async {
@@ -105,20 +117,14 @@ class SongListPageState extends State<SongListPage> {
     });
   }
 
-  void _onFilterChanged(String filter) {
+  void _onSortChanged(String sort) {
     setState(() {
-      _selectedFilter = filter;
-      if (filter == 'All') {
-        _filteredSongs = _songs;
-      } else if (filter == 'Favorites') {
-        _filteredSongs = _favorites;
-      } else if (filter == 'Alphabet') {
-        _filteredSongs = [..._songs]
-          ..sort((a, b) => a['song_title'].toLowerCase().compareTo(b['song_title'].toLowerCase()));
-      } else if (filter == 'Number') {
-        _filteredSongs = [..._songs]..sort((a, b) => a['song_number'].compareTo(b['song_number']));
+      if (sort == 'Alphabet') {
+        _filteredSongs.sort(
+            (a, b) => a['song_title'].toLowerCase().compareTo(b['song_title'].toLowerCase()));
+      } else if (sort == 'Number') {
+        _filteredSongs.sort((a, b) => a['song_number'].compareTo(b['song_number']));
       }
-      _filterSongs('');
     });
   }
 
@@ -128,7 +134,7 @@ class SongListPageState extends State<SongListPage> {
         context: context,
         builder: (context) => SettingsPopup(
           onSettingsChanged: (fontSize, fontFamily, textAlign) {
-            // Settings changes
+            // Handle settings changes
           },
         ),
       );
@@ -159,19 +165,31 @@ class SongListPageState extends State<SongListPage> {
               Image.asset(
                 'assets/header_image.png',
                 width: double.infinity,
-                height: 170,
+                height: 120, // Adjusted header image size to 120px
                 fit: BoxFit.cover,
               ),
-              const Positioned(
+              Positioned(
                 bottom: 10,
                 left: 20,
-                child: Text(
-                  'Lagu Advent',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontSize: 24,
-                    fontWeight: FontWeight.bold,
-                  ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    const Text(
+                      'Lagu Advent',
+                      style: TextStyle(
+                        color: Colors.white,
+                        fontSize: 24,
+                        fontWeight: FontWeight.bold,
+                      ),
+                    ),
+                    Text(
+                      _currentDate,
+                      style: const TextStyle(
+                        color: Colors.white70,
+                        fontSize: 14,
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ],
@@ -190,8 +208,9 @@ class SongListPageState extends State<SongListPage> {
             ),
           ),
           Container(
-            height: 40, // Smaller height for the menu
+            height: 40,
             margin: const EdgeInsets.symmetric(vertical: 4.0),
+            padding: const EdgeInsets.symmetric(horizontal: 8.0),
             decoration: BoxDecoration(
               color: Colors.grey[200],
               borderRadius: BorderRadius.circular(10),
@@ -203,54 +222,71 @@ class SongListPageState extends State<SongListPage> {
                 ),
               ],
             ),
-            child: SingleChildScrollView(
+            child: ListView(
               scrollDirection: Axis.horizontal,
-              child: Row(
-                children: ['All', 'Favorites', 'Alphabet', 'Number']
-                    .map((filter) => Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                          child: ChoiceChip(
-                            label: Text(filter),
-                            selected: _selectedFilter == filter,
-                            onSelected: (selected) {
-                              _onFilterChanged(filter);
-                            },
-                          ),
-                        ))
-                    .toList(),
-              ),
+              children: ['All', 'Favorites', 'Alphabet', 'Number']
+                  .map((filter) => Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
+                        child: ChoiceChip(
+                          label: Text(filter),
+                          selected: _selectedFilter == filter,
+                          onSelected: (selected) {
+                            setState(() {
+                              _selectedFilter = filter;
+                              if (filter == 'All') {
+                                _filteredSongs = _songs;
+                              } else if (filter == 'Favorites') {
+                                _filteredSongs = _favorites;
+                              } else {
+                                _onSortChanged(filter);
+                              }
+                            });
+                          },
+                        ),
+                      ))
+                  .toList(),
             ),
           ),
           Expanded(
-            child: ListView.separated(
+            child: ListView.builder(
               itemCount: _filteredSongs.length,
-              separatorBuilder: (context, index) => Divider(
-                color: Colors.grey[400], // Divider for modern look
-                thickness: 1,
-              ),
               itemBuilder: (context, index) {
                 final song = _filteredSongs[index];
-                return ListTile(
-                  title: Text(
-                    '${song['song_number']}. ${song['song_title']}',
-                    style: TextStyle(
-                      color: _isDarkMode ? Colors.white : Colors.black,
-                    ),
-                  ),
-                  trailing: IconButton(
-                    icon: Icon(
-                      _favorites.contains(song) ? Icons.favorite : Icons.favorite_border,
-                    ),
-                    onPressed: () => _toggleFavorite(song),
-                  ),
-                  onTap: () {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SongDetailPage(song: song),
+                return Container(
+                  margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
+                  decoration: BoxDecoration(
+                    color: _isDarkMode ? Colors.grey[900] : Colors.white,
+                    borderRadius: BorderRadius.circular(8),
+                    boxShadow: [
+                      BoxShadow(
+                        color: Colors.black.withOpacity(0.1),
+                        blurRadius: 5,
+                        offset: const Offset(0, 3),
                       ),
-                    );
-                  },
+                    ],
+                  ),
+                  child: ListTile(
+                    title: Text(
+                      '${song['song_number']}. ${song['song_title']}',
+                      style: TextStyle(
+                        color: _isDarkMode ? Colors.white : Colors.black,
+                      ),
+                    ),
+                    trailing: IconButton(
+                      icon: Icon(
+                        _favorites.contains(song) ? Icons.favorite : Icons.favorite_border,
+                      ),
+                      onPressed: () => _toggleFavorite(song),
+                    ),
+                    onTap: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SongDetailPage(song: song),
+                        ),
+                      );
+                    },
+                  ),
                 );
               },
             ),
@@ -258,14 +294,14 @@ class SongListPageState extends State<SongListPage> {
         ],
       ),
       floatingActionButton: FloatingActionButton(
-        onPressed: _showCollectionMenu,
         backgroundColor: Colors.blueAccent,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(20),
         ),
+        onPressed: _showCollectionMenu,
         child: const Icon(Icons.library_music),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat, // Move FAB to the right
+      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: BottomNavigationBar(
         items: const [
           BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
