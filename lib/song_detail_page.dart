@@ -8,7 +8,7 @@ import 'settings_popup.dart';
 class SongDetailPage extends StatefulWidget {
   final Map<String, dynamic> song;
 
-  const SongDetailPage({Key? key, required this.song}) : super(key: key);
+  const SongDetailPage({super.key, required this.song});
 
   @override
   SongDetailPageState createState() => SongDetailPageState();

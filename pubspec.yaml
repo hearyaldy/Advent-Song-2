@@ -20,6 +20,14 @@ dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^2.0.1
+  flutter_launcher_icons: ^0.10.0 # Add the flutter_launcher_icons package for icon generation
+
+flutter_icons:
+  android: true
+  ios: true
+  image_path: "assets/icon/icon.png" # Path to your custom icon file (1024x1024 recommended)
+  adaptive_icon_background: "#FFFFFF" # Background color for adaptive icons on Android
+  adaptive_icon_foreground: "assets/icon/icon.png" # Optional: Foreground layer for adaptive icons on Android
 
 flutter:
   uses-material-design: true # Enables the use of Material Icons in your app.
