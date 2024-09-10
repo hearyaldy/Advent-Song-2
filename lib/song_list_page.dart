@@ -99,16 +99,16 @@ class SongListPageState extends State<SongListPage> {
   void _onCollectionChanged(String collection) {
     setState(() {
       switch (collection) {
-        case 'LPMI':
+        case 'Lagu Pujian Masa Ini':
           _songs = _lpmi;
           break;
-        case 'SRD':
+        case 'Syair Rindu dendam':
           _songs = _srd;
           break;
-        case 'IBAN':
+        case 'Lagu Iban':
           _songs = _iban;
           break;
-        case 'PANDAK':
+        case 'Lagu-Lagu Pandak':
           _songs = _pandak;
           break;
       }
