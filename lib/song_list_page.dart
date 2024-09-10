@@ -102,13 +102,13 @@ class SongListPageState extends State<SongListPage> {
         case 'Lagu Pujian Masa Ini':
           _songs = _lpmi;
           break;
-        case 'Syair Rindu dendam':
+        case 'Syair Rindu Dendam':
           _songs = _srd;
           break;
         case 'Lagu Iban':
           _songs = _iban;
           break;
-        case 'Lagu-Lagu Pandak':
+        case 'Lagu Pandak':
           _songs = _pandak;
           break;
       }
@@ -199,7 +199,7 @@ class SongListPageState extends State<SongListPage> {
             child: TextField(
               onChanged: _filterSongs,
               decoration: InputDecoration(
-                hintText: 'Search by title or number...',
+                hintText: 'Carian lagu melalui Tajuk atau Perkataan...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
@@ -320,7 +320,7 @@ class SongListPageState extends State<SongListPage> {
       context: context,
       builder: (context) => ListView(
         shrinkWrap: true,
-        children: ['LPMI', 'SRD', 'IBAN', 'PANDAK']
+        children: ['Lagu Pujian Masa Ini', 'Syair Rindu Dendam', 'Lagu Iban', 'Lagu Pandak']
             .map((collection) => ListTile(
                   title: Text(collection),
                   onTap: () {

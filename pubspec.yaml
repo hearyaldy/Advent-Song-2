@@ -31,6 +31,7 @@ flutter:
     - assets/srd.json
     - assets/iban.json
     - assets/pandak.json
+    - assets/icon/icon.png # Path to your icon
 
   # Uncomment and customize fonts if needed.
   # fonts:
