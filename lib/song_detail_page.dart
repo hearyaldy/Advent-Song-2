@@ -106,7 +106,7 @@ class SongDetailPageState extends State<SongDetailPage> {
               Image.asset(
                 'assets/header_image.png',
                 width: double.infinity,
-                height: 120, // Adjusted to match new header size
+                height: 150, // Adjusted to match new header size
                 fit: BoxFit.cover,
               ),
               Positioned(
