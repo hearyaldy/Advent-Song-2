@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1065655353423",
+    "firebase_url": "https://lmpi-c5c5c.firebaseio.com",
+    "project_id": "lmpi-c5c5c",
+    "storage_bucket": "lmpi-c5c5c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1065655353423:android:0a306011e4b4488037aa3a",
+        "android_client_info": {
+          "package_name": "com.haweeinc.lpmi40"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1065655353423-mbasshk9t6m50inrnjh4h1rgmm6qa2as.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyDwTI5DB8386-LS_jcOXR3Z7dS48qtaEVU"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1065655353423-mbasshk9t6m50inrnjh4h1rgmm6qa2as.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
