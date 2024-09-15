@@ -1,14 +1,15 @@
 // song_detail_page.dart
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart'; 
+import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:logger/logger.dart'; 
+import 'package:logger/logger.dart';
 import 'settings_popup.dart';
 
 class SongDetailPage extends StatefulWidget {
   final Map<String, dynamic> song;
+  final String collectionName; // Accept the collection name
 
-  const SongDetailPage({super.key, required this.song});
+  const SongDetailPage({super.key, required this.song, required this.collectionName});
 
   @override
   SongDetailPageState createState() => SongDetailPageState();
@@ -70,7 +71,7 @@ class SongDetailPageState extends State<SongDetailPage> {
   void _onItemTapped(BuildContext context, int index) {
     switch (index) {
       case 0:
-        Navigator.pop(context); 
+        Navigator.pop(context);
         break;
       case 1:
         showDialog(
@@ -106,19 +107,36 @@ class SongDetailPageState extends State<SongDetailPage> {
               Image.asset(
                 'assets/header_image.png',
                 width: double.infinity,
-                height: 150, // Adjusted to match new header size
+                height: 150, // Adjusted header size
                 fit: BoxFit.cover,
               ),
               Positioned(
                 bottom: 10,
                 left: 20,
-                child: Text(
-                  widget.song['song_title'],
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 22,
-                    fontWeight: FontWeight.bold,
-                  ),
+                right: 20, // Ensure it doesn't overflow
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      '${widget.song['song_number']} | ${widget.collectionName}', // Display song number and collection name
+                      style: const TextStyle(
+                        fontSize: 15, // Larger size for song number
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white, // White color for song number
+                      ),
+                    ),
+                    const SizedBox(height: 4), // Spacing between number and title
+                    Text(
+                      widget.song['song_title'], // Display song title
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                      ),
+                      maxLines: 2, // Allow title to wrap to a second line if needed
+                      overflow: TextOverflow.ellipsis, // Add ellipsis if the text is too long
+                    ),
+                  ],
                 ),
               ),
             ],

@@ -21,6 +21,7 @@ class SongListPageState extends State<SongListPage> {
   List<Map<String, dynamic>> _filteredSongs = [];
   List<Map<String, dynamic>> _favorites = [];
   String _selectedFilter = 'All';
+  String selectedCollectionName = 'Lagu Pujian Masa Ini'; // Default collection name
 
   List<Map<String, dynamic>> _lpmi = [];
   List<Map<String, dynamic>> _srd = [];
@@ -101,15 +102,19 @@ class SongListPageState extends State<SongListPage> {
       switch (collection) {
         case 'Lagu Pujian Masa Ini':
           _songs = _lpmi;
+          selectedCollectionName = 'Lagu Pujian Masa Ini';
           break;
         case 'Syair Rindu Dendam':
           _songs = _srd;
+          selectedCollectionName = 'Syair Rindu Dendam';
           break;
         case 'Lagu Iban':
           _songs = _iban;
+          selectedCollectionName = 'Lagu Iban';
           break;
         case 'Lagu Pandak':
           _songs = _pandak;
+          selectedCollectionName = 'Lagu Pandak';
           break;
       }
       _filteredSongs = _songs;
@@ -134,7 +139,7 @@ class SongListPageState extends State<SongListPage> {
         context: context,
         builder: (context) => SettingsPopup(
           onSettingsChanged: (fontSize, fontFamily, textAlign) {
-            // Handle settings changes
+            // Settings changes
           },
         ),
       );
@@ -165,7 +170,7 @@ class SongListPageState extends State<SongListPage> {
               Image.asset(
                 'assets/header_image.png',
                 width: double.infinity,
-                height: 170, // Adjusted header image size to 120px
+                height: 120, // Adjusted header image size to 120px
                 fit: BoxFit.cover,
               ),
               Positioned(
@@ -195,11 +200,24 @@ class SongListPageState extends State<SongListPage> {
             ],
           ),
           Padding(
+            padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
+            child: Align(
+              alignment: Alignment.centerLeft,
+              child: Text(
+                'Koleksi Lagu: $selectedCollectionName', // Display selected collection name
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.bold,
+                ),
+              ),
+            ),
+          ),
+          Padding(
             padding: const EdgeInsets.all(8.0),
             child: TextField(
               onChanged: _filterSongs,
               decoration: InputDecoration(
-                hintText: 'Carian lagu melalui Tajuk atau Perkataan...',
+                hintText: 'Search by title or number...',
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(8.0),
@@ -282,7 +300,10 @@ class SongListPageState extends State<SongListPage> {
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => SongDetailPage(song: song),
+                          builder: (context) => SongDetailPage(
+                            song: song,
+                            collectionName: selectedCollectionName, // Pass the selected collection name
+                          ),
                         ),
                       );
                     },
