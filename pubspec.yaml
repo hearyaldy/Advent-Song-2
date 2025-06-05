@@ -13,14 +13,14 @@ dependencies:
     sdk: flutter
   cupertino_icons: ^1.0.2
   shared_preferences: ^2.0.15
-  intl: ^0.18.0 # For date formatting in your app.
-  logger: ^1.1.0 # For logging purposes.
+  intl: ^0.20.2 # For date formatting in your app.
+  logger: ^2.5.0 # For logging purposes.
 
 dev_dependencies:
   flutter_test:
     sdk: flutter
-  flutter_lints: ^2.0.1
-  flutter_launcher_icons: ^0.10.0 # Add this line if not already present
+  flutter_lints: ^5.0.0
+  flutter_launcher_icons: ^0.14.3 # Add this line if not already present
 
 flutter_icons:
   android: true
