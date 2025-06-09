@@ -11,8 +11,13 @@ import 'settings_page.dart';
 
 class LandingPage extends StatefulWidget {
   final Function(bool)? onThemeChanged;
+  final Function(String)? onColorThemeChanged;
 
-  const LandingPage({super.key, this.onThemeChanged});
+  const LandingPage({
+    super.key,
+    this.onThemeChanged,
+    this.onColorThemeChanged,
+  });
 
   @override
   State<LandingPage> createState() => _LandingPageState();
@@ -88,7 +93,6 @@ class _LandingPageState extends State<LandingPage> {
         final List<dynamic> songs = json.decode(data);
         _collectionCounts[entry.key] = songs.length;
       } catch (e) {
-        debugPrint('Error loading ${entry.key}: $e');
         _collectionCounts[entry.key] = 0;
       }
     }
@@ -116,7 +120,6 @@ class _LandingPageState extends State<LandingPage> {
         }
       } catch (e) {
         // Handle error silently
-        debugPrint('Error loading ${entry.key}: $e');
       }
     }
 
@@ -170,7 +173,6 @@ class _LandingPageState extends State<LandingPage> {
       }
     } catch (e) {
       // Handle error silently
-      debugPrint('Error loading verse of the day: $e');
     }
   }
 
@@ -266,6 +268,7 @@ class _LandingPageState extends State<LandingPage> {
                     MaterialPageRoute(
                       builder: (context) => SettingsPage(
                         onThemeChanged: widget.onThemeChanged,
+                        onColorThemeChanged: widget.onColorThemeChanged,
                       ),
                     ),
                   );
@@ -276,40 +279,40 @@ class _LandingPageState extends State<LandingPage> {
 
           // Content
           SliverPadding(
-            padding: const EdgeInsets.all(16.0),
+            padding: const EdgeInsets.all(20.0),
             sliver: SliverList(
               delegate: SliverChildListDelegate([
                 // Greeting
                 _buildGreetingCard(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 24),
 
                 // Verse of the Day
                 if (_verseOfTheDay != null) ...[
                   _buildVerseOfTheDayCard(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 24),
                 ],
 
                 // Quick Stats
                 _buildStatsCard(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 32),
 
                 // Collections
-                _buildSectionHeader('Song Collections', Icons.library_music),
-                const SizedBox(height: 12),
+                _buildSectionHeader('Collections'),
+                const SizedBox(height: 16),
                 _buildCollectionsGrid(),
-                const SizedBox(height: 20),
+                const SizedBox(height: 32),
 
                 // Recent Favorites
                 if (_recentFavorites.isNotEmpty) ...[
-                  _buildSectionHeader('Recent Favorites', Icons.favorite),
-                  const SizedBox(height: 12),
+                  _buildSectionHeader('Recent Favorites'),
+                  const SizedBox(height: 16),
                   _buildRecentFavorites(),
-                  const SizedBox(height: 20),
+                  const SizedBox(height: 32),
                 ],
 
                 // Quick Actions
-                _buildSectionHeader('Quick Actions', Icons.flash_on),
-                const SizedBox(height: 12),
+                _buildSectionHeader('Quick Actions'),
+                const SizedBox(height: 16),
                 _buildQuickActions(),
 
                 const SizedBox(height: 40), // Bottom padding
@@ -322,51 +325,55 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Widget _buildGreetingCard() {
-    return Card(
-      elevation: 2,
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          children: [
-            Container(
-              width: 60,
-              height: 60,
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(30),
-              ),
-              child: Icon(
-                _getGreetingIcon(),
-                size: 30,
-                color: Theme.of(context).colorScheme.primary,
-              ),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    _greeting,
-                    style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                          fontWeight: FontWeight.bold,
-                        ),
-                  ),
-                  const SizedBox(height: 4),
-                  Text(
-                    'Welcome to your song collection',
-                    style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withOpacity(0.7),
-                        ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+    return Container(
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
         ),
+      ),
+      child: Row(
+        children: [
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  _greeting,
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                        color: Theme.of(context).colorScheme.onSurface,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Welcome back to your music collection',
+                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.6),
+                      ),
+                ),
+              ],
+            ),
+          ),
+          Container(
+            width: 48,
+            height: 48,
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Icon(
+              _getGreetingIcon(),
+              color: Theme.of(context).colorScheme.primary,
+              size: 24,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -374,84 +381,107 @@ class _LandingPageState extends State<LandingPage> {
   Widget _buildVerseOfTheDayCard() {
     if (_verseOfTheDay == null) return const SizedBox();
 
-    return Card(
-      elevation: 3,
-      child: Container(
-        decoration: BoxDecoration(
-          borderRadius: BorderRadius.circular(12),
-          gradient: LinearGradient(
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-            colors: [
-              Theme.of(context).colorScheme.primary.withOpacity(0.1),
-              Theme.of(context).colorScheme.secondary.withOpacity(0.1),
-            ],
-          ),
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 4.0),
+      decoration: BoxDecoration(
+        color: colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: colorScheme.outline.withOpacity(0.1),
+          width: 1,
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(20.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Icon(
-                    Icons.auto_awesome,
-                    color: Theme.of(context).colorScheme.primary,
+      ),
+      child: Padding(
+        padding: const EdgeInsets.all(24.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            // Simple header
+            Row(
+              children: [
+                Text(
+                  'Today\'s Verse',
+                  style: theme.textTheme.titleMedium?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
                   ),
-                  const SizedBox(width: 8),
-                  Text(
-                    'Verse of the Day',
-                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                          fontWeight: FontWeight.bold,
-                          color: Theme.of(context).colorScheme.primary,
+                ),
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    DateFormat('MMM d').format(DateTime.now()),
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                ),
+              ],
+            ),
+
+            const SizedBox(height: 20),
+
+            // Clean verse display
+            Text(
+              _verseOfTheDay!['lyrics']?.toString() ?? 'No lyrics available',
+              style: theme.textTheme.bodyLarge?.copyWith(
+                fontStyle: FontStyle.italic,
+                height: 1.6,
+                color: colorScheme.onSurface,
+                fontSize: 16,
+              ),
+            ),
+
+            const SizedBox(height: 16),
+
+            // Minimal attribution
+            Row(
+              children: [
+                Expanded(
+                  child: Text(
+                    _verseOfTheDay!['song_title']?.toString() ?? 'Unknown',
+                    style: theme.textTheme.bodyMedium?.copyWith(
+                      fontWeight: FontWeight.w500,
+                      color: colorScheme.onSurface.withOpacity(0.7),
+                    ),
+                  ),
+                ),
+                TextButton(
+                  onPressed: () {
+                    final fullSong = _verseOfTheDay!['full_song'];
+                    final collection = _verseOfTheDay!['collection'];
+                    if (fullSong != null && collection != null) {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SongDetailPage(
+                            song: fullSong,
+                            collectionName: collection.toString(),
+                            onFavoriteChanged: () {},
+                          ),
                         ),
+                      );
+                    }
+                  },
+                  style: TextButton.styleFrom(
+                    foregroundColor: colorScheme.primary,
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                   ),
-                ],
-              ),
-              const SizedBox(height: 16),
-              Text(
-                _verseOfTheDay!['lyrics']?.toString() ?? 'No lyrics available',
-                style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                      fontStyle: FontStyle.italic,
-                      height: 1.6,
-                    ),
-              ),
-              const SizedBox(height: 12),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Expanded(
-                    child: Text(
-                      _buildVerseAttribution(),
-                      style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                            fontWeight: FontWeight.w600,
-                            color: Theme.of(context).colorScheme.primary,
-                          ),
-                    ),
-                  ),
-                  TextButton(
-                    onPressed: () {
-                      final fullSong = _verseOfTheDay!['full_song'];
-                      final collection = _verseOfTheDay!['collection'];
-                      if (fullSong != null && collection != null) {
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (context) => SongDetailPage(
-                              song: fullSong,
-                              collectionName: collection.toString(),
-                            ),
-                          ),
-                        );
-                      }
-                    },
-                    child: const Text('Read Full Song'),
-                  ),
-                ],
-              ),
-            ],
-          ),
+                  child: const Text('Read More'),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
@@ -462,89 +492,117 @@ class _LandingPageState extends State<LandingPage> {
         _collectionCounts.values.fold<int>(0, (sum, count) => sum + count);
     final favoritesCount = _recentFavorites.length;
 
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(20.0),
-        child: Row(
-          children: [
-            _buildStatItem(
-              icon: Icons.library_music,
-              label: 'Total Songs',
-              value: totalSongs.toString(),
-              color: Theme.of(context).colorScheme.primary,
-            ),
-            const SizedBox(width: 20),
-            _buildStatItem(
-              icon: Icons.collections,
-              label: 'Collections',
-              value: _collectionCounts.length.toString(),
-              color: Theme.of(context).colorScheme.secondary,
-            ),
-            const SizedBox(width: 20),
-            _buildStatItem(
-              icon: Icons.favorite,
-              label: 'Favorites',
-              value: favoritesCount.toString(),
-              color: Colors.red,
-            ),
-          ],
+    return Container(
+      padding: const EdgeInsets.all(24.0),
+      decoration: BoxDecoration(
+        color: Theme.of(context).colorScheme.surface,
+        borderRadius: BorderRadius.circular(20),
+        border: Border.all(
+          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
         ),
       ),
-    );
-  }
-
-  Widget _buildStatItem({
-    required IconData icon,
-    required String label,
-    required String value,
-    required Color color,
-  }) {
-    return Expanded(
-      child: Column(
+      child: Row(
         children: [
-          Container(
-            width: 48,
-            height: 48,
-            decoration: BoxDecoration(
-              color: color.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(24),
-            ),
-            child: Icon(icon, color: color, size: 24),
-          ),
-          const SizedBox(height: 8),
-          Text(
-            value,
-            style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                  fontWeight: FontWeight.bold,
-                  color: color,
+          Expanded(
+            child: Column(
+              children: [
+                Text(
+                  totalSongs.toString(),
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.primary,
+                      ),
                 ),
+                const SizedBox(height: 4),
+                Text(
+                  'Songs',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.6),
+                        fontWeight: FontWeight.w500,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
-          Text(
-            label,
-            style: Theme.of(context).textTheme.bodySmall,
-            textAlign: TextAlign.center,
+          const SizedBox(width: 32),
+          Expanded(
+            child: Column(
+              children: [
+                Text(
+                  _collectionCounts.length.toString(),
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.secondary,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Collections',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.6),
+                        fontWeight: FontWeight.w500,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(width: 32),
+          Expanded(
+            child: Column(
+              children: [
+                Text(
+                  favoritesCount.toString(),
+                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
+                        fontWeight: FontWeight.bold,
+                        color: Colors.red,
+                      ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  'Favorites',
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onSurface
+                            .withOpacity(0.6),
+                        fontWeight: FontWeight.w500,
+                      ),
+                  textAlign: TextAlign.center,
+                ),
+              ],
+            ),
           ),
         ],
       ),
     );
   }
 
-  Widget _buildSectionHeader(String title, IconData icon) {
-    return Row(
-      children: [
-        Icon(icon, color: Theme.of(context).colorScheme.primary),
-        const SizedBox(width: 8),
-        Text(
-          title,
-          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                fontWeight: FontWeight.bold,
-              ),
-        ),
-      ],
+  Widget _buildSectionHeader(String title) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 4.0),
+      child: Text(
+        title,
+        style: Theme.of(context).textTheme.titleLarge?.copyWith(
+              fontWeight: FontWeight.w600,
+              color: Theme.of(context).colorScheme.onSurface,
+            ),
+      ),
     );
   }
 
   Widget _buildCollectionsGrid() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
@@ -552,74 +610,88 @@ class _LandingPageState extends State<LandingPage> {
         crossAxisCount: 2,
         crossAxisSpacing: 12,
         mainAxisSpacing: 12,
-        childAspectRatio:
-            1.4, // Increased from 1.2 to give more width, less height
+        childAspectRatio: 1.1,
       ),
       itemCount: _collectionFiles.length,
       itemBuilder: (context, index) {
         final collection = _collectionFiles.keys.elementAt(index);
         final count = _collectionCounts[collection] ?? 0;
         final icon = _collectionIcons[collection] ?? Icons.music_note;
-        final color = _collectionColors[collection] ??
-            Theme.of(context).colorScheme.primary;
+        final color = _collectionColors[collection] ?? colorScheme.primary;
 
         return Card(
-          elevation: 2,
-          child: InkWell(
-            borderRadius: BorderRadius.circular(12),
-            onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SongListPage(
-                    onThemeChanged: widget.onThemeChanged,
-                    initialCollection: collection,
-                  ),
-                ),
-              );
-            },
-            child: Padding(
-              padding: const EdgeInsets.all(12.0), // Reduced from 16.0
-              child: Column(
-                mainAxisAlignment: MainAxisAlignment.center,
-                mainAxisSize: MainAxisSize.min, // Added to prevent overflow
-                children: [
-                  Container(
-                    width: 48, // Reduced from 56
-                    height: 48, // Reduced from 56
-                    decoration: BoxDecoration(
-                      color: color.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(24), // Adjusted
+          elevation: isDarkMode ? 8 : 2,
+          shadowColor: isDarkMode ? Colors.black.withOpacity(0.5) : null,
+          child: Container(
+            decoration: BoxDecoration(
+              borderRadius: BorderRadius.circular(12),
+              color: colorScheme.surface,
+              border: isDarkMode
+                  ? Border.all(
+                      color: colorScheme.outline.withOpacity(0.2),
+                      width: 1,
+                    )
+                  : null,
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SongListPage(
+                      onThemeChanged: widget.onThemeChanged,
+                      initialCollection: collection,
                     ),
-                    child:
-                        Icon(icon, color: color, size: 24), // Reduced from 28
                   ),
-                  const SizedBox(height: 8), // Reduced from 12
-                  Flexible(
-                    // Added Flexible to prevent overflow
-                    child: Text(
-                      collection,
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 12, // Reduced font size
+                );
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 40,
+                      decoration: BoxDecoration(
+                        color: color.withOpacity(isDarkMode ? 0.2 : 0.1),
+                        borderRadius: BorderRadius.circular(20),
+                        border: isDarkMode
+                            ? Border.all(
+                                color: color.withOpacity(0.3), width: 1)
+                            : null,
+                      ),
+                      child: Icon(icon, color: color, size: 22),
+                    ),
+                    Expanded(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          Text(
+                            collection,
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              fontWeight: FontWeight.bold,
+                              fontSize: 11,
+                              color: colorScheme.onSurface,
+                            ),
+                            textAlign: TextAlign.center,
+                            maxLines: 3,
+                            overflow: TextOverflow.visible,
                           ),
-                      textAlign: TextAlign.center,
-                      maxLines: 2,
-                      overflow: TextOverflow.ellipsis,
+                          const SizedBox(height: 4),
+                          Text(
+                            '$count songs',
+                            style: theme.textTheme.bodySmall?.copyWith(
+                              color: colorScheme.onSurface.withOpacity(0.7),
+                              fontSize: 9,
+                            ),
+                          ),
+                        ],
+                      ),
                     ),
-                  ),
-                  const SizedBox(height: 2), // Reduced from 4
-                  Text(
-                    '$count songs',
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          color: Theme.of(context)
-                              .colorScheme
-                              .onSurface
-                              .withOpacity(0.7),
-                          fontSize: 10, // Reduced font size
-                        ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -685,7 +757,7 @@ class _LandingPageState extends State<LandingPage> {
                       const SizedBox(height: 8),
                       Expanded(
                         child: Text(
-                          song['song_title'],
+                          song['song_title']?.toString() ?? 'Unknown Song',
                           style:
                               Theme.of(context).textTheme.titleSmall?.copyWith(
                                     fontWeight: FontWeight.w600,
@@ -695,7 +767,7 @@ class _LandingPageState extends State<LandingPage> {
                         ),
                       ),
                       Text(
-                        song['collection'],
+                        song['collection']?.toString() ?? 'Unknown Collection',
                         style: Theme.of(context).textTheme.bodySmall?.copyWith(
                               color: Theme.of(context)
                                   .colorScheme
@@ -720,33 +792,43 @@ class _LandingPageState extends State<LandingPage> {
     return Row(
       children: [
         Expanded(
-          child: Card(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+              ),
+            ),
             child: InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => SongListPage(
                       onThemeChanged: widget.onThemeChanged,
+                      onColorThemeChanged: widget.onColorThemeChanged,
                       showFavoritesOnly: true,
                     ),
                   ),
                 );
               },
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
                     Icon(
                       Icons.favorite,
                       color: Colors.red,
-                      size: 32,
+                      size: 28,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
-                      'View All\nFavorites',
-                      style: Theme.of(context).textTheme.titleSmall,
+                      'Favorites',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -757,33 +839,43 @@ class _LandingPageState extends State<LandingPage> {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Card(
+          child: Container(
+            decoration: BoxDecoration(
+              color: Theme.of(context).colorScheme.surface,
+              borderRadius: BorderRadius.circular(16),
+              border: Border.all(
+                color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+              ),
+            ),
             child: InkWell(
-              borderRadius: BorderRadius.circular(12),
+              borderRadius: BorderRadius.circular(16),
               onTap: () {
                 Navigator.push(
                   context,
                   MaterialPageRoute(
                     builder: (context) => SongListPage(
                       onThemeChanged: widget.onThemeChanged,
+                      onColorThemeChanged: widget.onColorThemeChanged,
                       openSearch: true,
                     ),
                   ),
                 );
               },
               child: Padding(
-                padding: const EdgeInsets.all(16.0),
+                padding: const EdgeInsets.all(20.0),
                 child: Column(
                   children: [
                     Icon(
                       Icons.search,
                       color: Theme.of(context).colorScheme.primary,
-                      size: 32,
+                      size: 28,
                     ),
-                    const SizedBox(height: 8),
+                    const SizedBox(height: 12),
                     Text(
-                      'Search\nSongs',
-                      style: Theme.of(context).textTheme.titleSmall,
+                      'Search',
+                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
+                            fontWeight: FontWeight.w500,
+                          ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -794,18 +886,6 @@ class _LandingPageState extends State<LandingPage> {
         ),
       ],
     );
-  }
-
-  String _buildVerseAttribution() {
-    if (_verseOfTheDay == null) return 'Unknown';
-
-    final songTitleRaw = _verseOfTheDay!['song_title'];
-    final verseNumberRaw = _verseOfTheDay!['verse_number'];
-
-    final songTitle = songTitleRaw?.toString() ?? 'Unknown';
-    final verseNumber = verseNumberRaw?.toString() ?? 'Unknown';
-
-    return '$songTitle - $verseNumber';
   }
 
   IconData _getGreetingIcon() {

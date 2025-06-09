@@ -5,10 +5,12 @@ import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'song_detail_page.dart';
 import 'settings_page.dart';
+import 'landing_page.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class SongListPage extends StatefulWidget {
   final Function(bool)? onThemeChanged;
+  final Function(String)? onColorThemeChanged;
   final String? initialCollection;
   final bool showFavoritesOnly;
   final bool openSearch;
@@ -16,6 +18,7 @@ class SongListPage extends StatefulWidget {
   const SongListPage({
     super.key,
     this.onThemeChanged,
+    this.onColorThemeChanged,
     this.initialCollection,
     this.showFavoritesOnly = false,
     this.openSearch = false,
@@ -87,19 +90,40 @@ class SongListPageState extends State<SongListPage>
 
   Future<void> _loadCollections() async {
     try {
-      for (final entry in _collectionFiles.entries) {
-        final String data =
-            await rootBundle.loadString('assets/${entry.value}');
-        _collections[entry.key] =
-            List<Map<String, dynamic>>.from(json.decode(data));
+      // SAFETY CHECK: Re-apply initial collection if it was passed
+      if (widget.initialCollection != null &&
+          widget.initialCollection!.isNotEmpty) {
+        _selectedCollectionName = widget.initialCollection!;
       }
 
-      setState(() {
+      for (final entry in _collectionFiles.entries) {
+        try {
+          final String data =
+              await rootBundle.loadString('assets/${entry.value}');
+          final List<dynamic> jsonData = json.decode(data);
+          _collections[entry.key] = List<Map<String, dynamic>>.from(jsonData);
+        } catch (fileError) {
+          _collections[entry.key] = [];
+        }
+      }
+
+      // Set songs based on selected collection (after collections are loaded)
+      if (_collections.containsKey(_selectedCollectionName)) {
         _songs = _collections[_selectedCollectionName] ?? [];
-        _filteredSongs = _songs;
-      });
+      } else {
+        // Fallback to first available collection if selected one doesn't exist
+        if (_collections.isNotEmpty) {
+          final fallbackCollection = _collections.keys.first;
+          _selectedCollectionName = fallbackCollection;
+          _songs = _collections[fallbackCollection] ?? [];
+        } else {
+          _songs = [];
+        }
+      }
+
+      _filteredSongs = _songs;
     } catch (e) {
-      debugPrint('Error loading collections: $e');
+      // Handle error silently
     }
   }
 
@@ -215,7 +239,17 @@ class SongListPageState extends State<SongListPage>
 
     switch (index) {
       case 0:
-        // Home - already here
+        // Navigate back to dashboard/landing page
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (context) => LandingPage(
+              onThemeChanged: widget.onThemeChanged,
+              onColorThemeChanged: widget.onColorThemeChanged,
+            ),
+          ),
+          (route) => false, // Remove all previous routes
+        );
         break;
       case 1:
         // Navigate to dedicated settings page
@@ -224,6 +258,7 @@ class SongListPageState extends State<SongListPage>
           MaterialPageRoute(
             builder: (context) => SettingsPage(
               onThemeChanged: widget.onThemeChanged,
+              onColorThemeChanged: widget.onColorThemeChanged,
             ),
           ),
         );
@@ -345,10 +380,19 @@ class SongListPageState extends State<SongListPage>
                     ),
                   ),
                 ),
-                Text(
-                  '${_songs.length} songs',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    '${_songs.length} songs',
+                    style: theme.textTheme.bodySmall?.copyWith(
+                      color: colorScheme.primary,
+                      fontWeight: FontWeight.w600,
+                    ),
                   ),
                 ),
               ],
@@ -600,7 +644,7 @@ class SongListPageState extends State<SongListPage>
         items: const [
           BottomNavigationBarItem(
             icon: Icon(Icons.home),
-            label: 'Home',
+            label: 'Dashboard',
           ),
           BottomNavigationBarItem(
             icon: Icon(Icons.settings),

@@ -4,8 +4,13 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 class SettingsPage extends StatefulWidget {
   final Function(bool)? onThemeChanged;
+  final Function(String)? onColorThemeChanged;
 
-  const SettingsPage({super.key, this.onThemeChanged});
+  const SettingsPage({
+    super.key,
+    this.onThemeChanged,
+    this.onColorThemeChanged,
+  });
 
   @override
   State<SettingsPage> createState() => _SettingsPageState();
@@ -16,8 +21,53 @@ class _SettingsPageState extends State<SettingsPage> {
   String _fontFamily = 'Roboto';
   TextAlign _textAlign = TextAlign.left;
   bool _isDarkMode = false;
+  String _selectedColorTheme = 'default';
   bool _isLoading = true;
   bool _hasUnsavedChanges = false;
+
+  // Available color themes
+  final Map<String, Map<String, dynamic>> _colorThemes = {
+    'default': {
+      'name': 'Default Blue',
+      'primary': Color(0xFF6366F1),
+      'secondary': Color(0xFF8B5CF6),
+    },
+    'emerald': {
+      'name': 'Emerald Green',
+      'primary': Color(0xFF059669),
+      'secondary': Color(0xFF10B981),
+    },
+    'rose': {
+      'name': 'Rose Pink',
+      'primary': Color(0xFFE11D48),
+      'secondary': Color(0xFFF43F5E),
+    },
+    'amber': {
+      'name': 'Amber Orange',
+      'primary': Color(0xFFF59E0B),
+      'secondary': Color(0xFFFBBF24),
+    },
+    'violet': {
+      'name': 'Deep Violet',
+      'primary': Color(0xFF7C3AED),
+      'secondary': Color(0xFF8B5CF6),
+    },
+    'teal': {
+      'name': 'Ocean Teal',
+      'primary': Color(0xFF0D9488),
+      'secondary': Color(0xFF14B8A6),
+    },
+    'burgundy': {
+      'name': 'Burgundy Red',
+      'primary': Color(0xFF991B1B),
+      'secondary': Color(0xFFDC2626),
+    },
+    'forest': {
+      'name': 'Forest Green',
+      'primary': Color(0xFF166534),
+      'secondary': Color(0xFF15803D),
+    },
+  };
 
   @override
   void initState() {
@@ -32,6 +82,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _fontFamily = prefs.getString('fontFamily') ?? 'Roboto';
       _textAlign = TextAlign.values[prefs.getInt('textAlign') ?? 0];
       _isDarkMode = prefs.getBool('isDarkMode') ?? false;
+      _selectedColorTheme = prefs.getString('colorTheme') ?? 'default';
       _isLoading = false;
     });
   }
@@ -42,6 +93,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setString('fontFamily', _fontFamily);
     await prefs.setInt('textAlign', _textAlign.index);
     await prefs.setBool('isDarkMode', _isDarkMode);
+    await prefs.setString('colorTheme', _selectedColorTheme);
 
     setState(() {
       _hasUnsavedChanges = false;
@@ -63,12 +115,14 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.remove('fontFamily');
     await prefs.remove('textAlign');
     await prefs.remove('isDarkMode');
+    await prefs.remove('colorTheme');
 
     setState(() {
       _fontSize = 16.0;
       _fontFamily = 'Roboto';
       _textAlign = TextAlign.left;
       _isDarkMode = false;
+      _selectedColorTheme = 'default';
       _hasUnsavedChanges = true;
     });
 
@@ -175,7 +229,7 @@ class _SettingsPageState extends State<SettingsPage> {
         body: ListView(
           padding: const EdgeInsets.all(16.0),
           children: [
-            // Text Display Settings
+            // Text Settings Section
             _buildSectionCard(
               title: 'Text Display',
               icon: Icons.text_fields,
@@ -190,12 +244,14 @@ class _SettingsPageState extends State<SettingsPage> {
 
             const SizedBox(height: 16),
 
-            // Appearance Settings
+            // Theme Settings Section
             _buildSectionCard(
               title: 'Appearance',
               icon: Icons.palette,
               children: [
                 _buildDarkModeSwitch(),
+                const Divider(),
+                _buildColorThemeSelector(),
               ],
             ),
 
@@ -437,7 +493,114 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget _buildColorThemeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Color Theme'),
+        const SizedBox(height: 12),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 3.5,
+          ),
+          itemCount: _colorThemes.length,
+          itemBuilder: (context, index) {
+            final themeKey = _colorThemes.keys.elementAt(index);
+            final themeData = _colorThemes[themeKey]!;
+            final isSelected = _selectedColorTheme == themeKey;
+
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isSelected
+                      ? themeData['primary'] as Color
+                      : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                  width: isSelected ? 2 : 1,
+                ),
+                color: isSelected
+                    ? (themeData['primary'] as Color).withOpacity(0.1)
+                    : null,
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () {
+                  setState(() {
+                    _selectedColorTheme = themeKey;
+                  });
+                  _onSettingChanged();
+
+                  // Notify app immediately for preview
+                  widget.onColorThemeChanged?.call(themeKey);
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    children: [
+                      // Color preview circles
+                      Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: themeData['primary'] as Color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: themeData['secondary'] as Color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      // Theme name
+                      Expanded(
+                        child: Text(
+                          themeData['name'].toString(),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? themeData['primary'] as Color
+                                        : null,
+                                  ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isSelected)
+                        Icon(
+                          Icons.check_circle,
+                          size: 16,
+                          color: themeData['primary'] as Color,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildPreviewCard() {
+    final selectedTheme = _colorThemes[_selectedColorTheme]!;
+    final primaryColor = selectedTheme['primary'] as Color;
+    final secondaryColor = selectedTheme['secondary'] as Color;
+
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(16.0),
@@ -446,14 +609,29 @@ class _SettingsPageState extends State<SettingsPage> {
           children: [
             Row(
               children: [
-                Icon(Icons.preview,
-                    color: Theme.of(context).colorScheme.primary),
+                Icon(Icons.preview, color: primaryColor),
                 const SizedBox(width: 8),
                 Text(
                   'Preview',
                   style: Theme.of(context).textTheme.titleLarge?.copyWith(
                         fontWeight: FontWeight.bold,
                       ),
+                ),
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: primaryColor.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    selectedTheme['name'].toString(),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          color: primaryColor,
+                          fontWeight: FontWeight.w600,
+                        ),
+                  ),
                 ),
               ],
             ),
@@ -467,24 +645,33 @@ class _SettingsPageState extends State<SettingsPage> {
                     : Theme.of(context).colorScheme.surfaceVariant,
                 borderRadius: BorderRadius.circular(8),
                 border: Border.all(
-                  color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+                  color: primaryColor.withOpacity(0.2),
                 ),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(
-                    'Verse 1',
-                    style: TextStyle(
-                      fontSize: _fontSize + 4,
-                      fontFamily: _fontFamily,
-                      fontWeight: FontWeight.bold,
-                      color: _isDarkMode ? Colors.white : Colors.black,
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: primaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: primaryColor.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      'Verse 1',
+                      style: TextStyle(
+                        fontSize: _fontSize + 4,
+                        fontFamily: _fontFamily,
+                        fontWeight: FontWeight.bold,
+                        color: primaryColor,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'This is how your song lyrics will appear with the current settings. You can adjust the font size, style, and alignment to match your reading preferences.',
+                    'This is how your song lyrics will appear with the current settings. You can adjust the font size, style, alignment, and color theme to match your reading preferences.',
                     style: TextStyle(
                       fontSize: _fontSize,
                       fontFamily: _fontFamily,
@@ -494,19 +681,29 @@ class _SettingsPageState extends State<SettingsPage> {
                     textAlign: _textAlign,
                   ),
                   const SizedBox(height: 16),
-                  Text(
-                    'Korus',
-                    style: TextStyle(
-                      fontSize: _fontSize + 4,
-                      fontFamily: _fontFamily,
-                      fontWeight: FontWeight.bold,
-                      fontStyle: FontStyle.italic,
-                      color: _isDarkMode ? Colors.white70 : Colors.black87,
+                  Container(
+                    padding:
+                        const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                    decoration: BoxDecoration(
+                      color: secondaryColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border:
+                          Border.all(color: secondaryColor.withOpacity(0.3)),
+                    ),
+                    child: Text(
+                      'Korus',
+                      style: TextStyle(
+                        fontSize: _fontSize + 4,
+                        fontFamily: _fontFamily,
+                        fontWeight: FontWeight.bold,
+                        fontStyle: FontStyle.italic,
+                        color: secondaryColor,
+                      ),
                     ),
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Chorus text appears in italic style to distinguish it from regular verses.',
+                    'Chorus text appears in italic style with secondary color to distinguish it from regular verses.',
                     style: TextStyle(
                       fontSize: _fontSize,
                       fontFamily: _fontFamily,
@@ -565,6 +762,7 @@ class _SettingsPageState extends State<SettingsPage> {
             Text('• Font Family: Changes the typeface used for lyrics'),
             Text('• Text Alignment: Controls how text is aligned on screen'),
             Text('• Dark Mode: Switches between light and dark themes'),
+            Text('• Color Theme: Choose your preferred color scheme'),
             SizedBox(height: 12),
             Text(
                 'All settings are automatically saved and will persist between app launches.'),
