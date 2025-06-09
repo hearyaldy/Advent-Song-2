@@ -18,6 +18,7 @@ class _MyAppState extends State<MyApp> {
   bool _isDarkMode = false;
   String _selectedColorTheme = 'default';
   bool _isLoading = true;
+  GlobalKey<NavigatorState> _navigatorKey = GlobalKey<NavigatorState>();
 
   // Color themes map
   final Map<String, Map<String, Color>> _colorThemes = {
@@ -70,16 +71,24 @@ class _MyAppState extends State<MyApp> {
     });
   }
 
-  void _updateTheme(bool isDarkMode) {
+  void _updateTheme(bool isDarkMode) async {
     setState(() {
       _isDarkMode = isDarkMode;
     });
+    // Also save immediately
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setBool('isDarkMode', isDarkMode);
   }
 
-  void _updateColorTheme(String colorTheme) {
+  void _updateColorTheme(String colorTheme) async {
     setState(() {
       _selectedColorTheme = colorTheme;
+      // Force navigator rebuild
+      _navigatorKey = GlobalKey<NavigatorState>();
     });
+    // Also save immediately
+    final prefs = await SharedPreferences.getInstance();
+    await prefs.setString('colorTheme', colorTheme);
   }
 
   ColorScheme _buildColorScheme(bool isDark) {
@@ -131,6 +140,9 @@ class _MyAppState extends State<MyApp> {
     final darkColorScheme = _buildColorScheme(true);
 
     return MaterialApp(
+      key: ValueKey(
+          '${_selectedColorTheme}_${_isDarkMode}'), // Force rebuild on theme change
+      navigatorKey: _navigatorKey,
       title: 'Song Lyric App',
       theme: ThemeData(
         useMaterial3: true,

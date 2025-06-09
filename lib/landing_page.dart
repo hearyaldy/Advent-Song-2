@@ -75,11 +75,11 @@ class _LandingPageState extends State<LandingPage> {
     final hour = now.hour;
 
     if (hour < 12) {
-      _greeting = 'Good Morning';
+      _greeting = 'Selamat Pagi';
     } else if (hour < 17) {
-      _greeting = 'Good Afternoon';
+      _greeting = 'Selamat Tengah Hari';
     } else {
-      _greeting = 'Good Evening';
+      _greeting = 'Selamat Petang';
     }
 
     _currentDate = DateFormat('EEEE, MMMM d, yyyy').format(now);
@@ -180,9 +180,11 @@ class _LandingPageState extends State<LandingPage> {
   Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     if (_isLoading) {
       return Scaffold(
+        backgroundColor: colorScheme.background,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -192,7 +194,7 @@ class _LandingPageState extends State<LandingPage> {
               Text(
                 'Loading songs...',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface.withOpacity(0.7),
+                  color: colorScheme.onBackground,
                 ),
               ),
             ],
@@ -202,10 +204,10 @@ class _LandingPageState extends State<LandingPage> {
     }
 
     return Scaffold(
-      backgroundColor: colorScheme.surface,
+      backgroundColor: colorScheme.background, // Use proper background color
       body: CustomScrollView(
         slivers: [
-          // App Bar
+          // App Bar with theme colors
           SliverAppBar(
             expandedHeight: 120,
             floating: true,
@@ -214,11 +216,14 @@ class _LandingPageState extends State<LandingPage> {
             foregroundColor: colorScheme.onPrimary,
             flexibleSpace: FlexibleSpaceBar(
               background: Container(
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                    colors: [
+                      colorScheme.primary,
+                      colorScheme.secondary,
+                    ],
                   ),
                 ),
                 child: Image.asset(
@@ -226,11 +231,14 @@ class _LandingPageState extends State<LandingPage> {
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                          colors: [
+                            colorScheme.primary,
+                            colorScheme.secondary,
+                          ],
                         ),
                       ),
                     );
@@ -325,14 +333,29 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Widget _buildGreetingCard() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          color: colorScheme.primary.withOpacity(0.2),
+          width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode
+                ? Colors.black.withOpacity(0.3)
+                : colorScheme.primary.withOpacity(0.08),
+            blurRadius: isDarkMode ? 10 : 20,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -342,20 +365,17 @@ class _LandingPageState extends State<LandingPage> {
               children: [
                 Text(
                   _greeting,
-                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                        fontWeight: FontWeight.w600,
-                        color: Theme.of(context).colorScheme.onSurface,
-                      ),
+                  style: theme.textTheme.headlineSmall?.copyWith(
+                    fontWeight: FontWeight.w600,
+                    color: colorScheme.onSurface,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
-                  'Welcome back to your music collection',
-                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.6),
-                      ),
+                  'Selamat Kembali ke Aplikasi Lagu Advent',
+                  style: theme.textTheme.bodyMedium?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                  ),
                 ),
               ],
             ),
@@ -364,12 +384,16 @@ class _LandingPageState extends State<LandingPage> {
             width: 48,
             height: 48,
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+              color: colorScheme.primary.withOpacity(0.1),
               borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: colorScheme.primary.withOpacity(0.3),
+                width: 1,
+              ),
             ),
             child: Icon(
               _getGreetingIcon(),
-              color: Theme.of(context).colorScheme.primary,
+              color: colorScheme.primary,
               size: 24,
             ),
           ),
@@ -383,6 +407,7 @@ class _LandingPageState extends State<LandingPage> {
 
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4.0),
@@ -390,20 +415,46 @@ class _LandingPageState extends State<LandingPage> {
         color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.outline.withOpacity(0.1),
+          color: colorScheme.primary.withOpacity(0.2),
           width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode
+                ? Colors.black.withOpacity(0.3)
+                : colorScheme.primary.withOpacity(0.1),
+            blurRadius: isDarkMode ? 15 : 25,
+            offset: const Offset(0, 8),
+            spreadRadius: 0,
+          ),
+        ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(24.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Simple header
+            // Header with theme colors
             Row(
               children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: colorScheme.primary.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(10),
+                    border: Border.all(
+                      color: colorScheme.primary.withOpacity(0.3),
+                    ),
+                  ),
+                  child: Icon(
+                    Icons.auto_awesome,
+                    color: colorScheme.primary,
+                    size: 18,
+                  ),
+                ),
+                const SizedBox(width: 12),
                 Text(
-                  'Today\'s Verse',
+                  'Lagu Hari Ini',
                   style: theme.textTheme.titleMedium?.copyWith(
                     fontWeight: FontWeight.w600,
                     color: colorScheme.onSurface,
@@ -412,16 +463,19 @@ class _LandingPageState extends State<LandingPage> {
                 const Spacer(),
                 Container(
                   padding:
-                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 6),
                   decoration: BoxDecoration(
                     color: colorScheme.primary.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: colorScheme.primary.withOpacity(0.3),
+                    ),
                   ),
                   child: Text(
                     DateFormat('MMM d').format(DateTime.now()),
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: colorScheme.primary,
-                      fontWeight: FontWeight.w500,
+                      fontWeight: FontWeight.w600,
                     ),
                   ),
                 ),
@@ -430,20 +484,34 @@ class _LandingPageState extends State<LandingPage> {
 
             const SizedBox(height: 20),
 
-            // Clean verse display
-            Text(
-              _verseOfTheDay!['lyrics']?.toString() ?? 'No lyrics available',
-              style: theme.textTheme.bodyLarge?.copyWith(
-                fontStyle: FontStyle.italic,
-                height: 1.6,
-                color: colorScheme.onSurface,
-                fontSize: 16,
+            // Verse content with better contrast
+            Container(
+              width: double.infinity,
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: isDarkMode
+                    ? colorScheme.surfaceVariant.withOpacity(0.3)
+                    : colorScheme.primary.withOpacity(0.05),
+                borderRadius: BorderRadius.circular(16),
+                border: Border.all(
+                  color: colorScheme.primary.withOpacity(0.2),
+                ),
+              ),
+              child: Text(
+                _verseOfTheDay!['lyrics']?.toString() ?? 'No lyrics available',
+                style: theme.textTheme.bodyLarge?.copyWith(
+                  fontStyle: FontStyle.italic,
+                  height: 1.6,
+                  color: colorScheme.onSurface,
+                  fontSize: 16,
+                ),
+                textAlign: TextAlign.center,
               ),
             ),
 
             const SizedBox(height: 16),
 
-            // Minimal attribution
+            // Attribution and action
             Row(
               children: [
                 Expanded(
@@ -451,33 +519,39 @@ class _LandingPageState extends State<LandingPage> {
                     _verseOfTheDay!['song_title']?.toString() ?? 'Unknown',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface.withOpacity(0.7),
+                      color: colorScheme.onSurface.withOpacity(0.8),
                     ),
                   ),
                 ),
-                TextButton(
-                  onPressed: () {
-                    final fullSong = _verseOfTheDay!['full_song'];
-                    final collection = _verseOfTheDay!['collection'];
-                    if (fullSong != null && collection != null) {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SongDetailPage(
-                            song: fullSong,
-                            collectionName: collection.toString(),
-                            onFavoriteChanged: () {},
-                          ),
-                        ),
-                      );
-                    }
-                  },
-                  style: TextButton.styleFrom(
-                    foregroundColor: colorScheme.primary,
-                    padding:
-                        const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(20),
+                    color: colorScheme.primary.withOpacity(0.1),
                   ),
-                  child: const Text('Read More'),
+                  child: TextButton(
+                    onPressed: () {
+                      final fullSong = _verseOfTheDay!['full_song'];
+                      final collection = _verseOfTheDay!['collection'];
+                      if (fullSong != null && collection != null) {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (context) => SongDetailPage(
+                              song: fullSong,
+                              collectionName: collection.toString(),
+                              onFavoriteChanged: () {},
+                            ),
+                          ),
+                        );
+                      }
+                    },
+                    style: TextButton.styleFrom(
+                      foregroundColor: colorScheme.primary,
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 16, vertical: 8),
+                    ),
+                    child: const Text('Read More'),
+                  ),
                 ),
               ],
             ),
@@ -491,15 +565,29 @@ class _LandingPageState extends State<LandingPage> {
     final totalSongs =
         _collectionCounts.values.fold<int>(0, (sum, count) => sum + count);
     final favoritesCount = _recentFavorites.length;
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
 
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: Theme.of(context).colorScheme.surface,
+        color: colorScheme.surface,
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+          color: colorScheme.primary.withOpacity(0.2),
+          width: 1,
         ),
+        boxShadow: [
+          BoxShadow(
+            color: isDarkMode
+                ? Colors.black.withOpacity(0.3)
+                : colorScheme.primary.withOpacity(0.08),
+            blurRadius: isDarkMode ? 10 : 20,
+            offset: const Offset(0, 4),
+            spreadRadius: 0,
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -508,21 +596,18 @@ class _LandingPageState extends State<LandingPage> {
               children: [
                 Text(
                   totalSongs.toString(),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.primary,
-                      ),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.primary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Songs',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.6),
-                        fontWeight: FontWeight.w500,
-                      ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -534,21 +619,18 @@ class _LandingPageState extends State<LandingPage> {
               children: [
                 Text(
                   _collectionCounts.length.toString(),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Theme.of(context).colorScheme.secondary,
-                      ),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: colorScheme.secondary,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Collections',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.6),
-                        fontWeight: FontWeight.w500,
-                      ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -560,21 +642,18 @@ class _LandingPageState extends State<LandingPage> {
               children: [
                 Text(
                   favoritesCount.toString(),
-                  style: Theme.of(context).textTheme.headlineMedium?.copyWith(
-                        fontWeight: FontWeight.bold,
-                        color: Colors.red,
-                      ),
+                  style: theme.textTheme.headlineMedium?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
                 ),
                 const SizedBox(height: 4),
                 Text(
                   'Favorites',
-                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onSurface
-                            .withOpacity(0.6),
-                        fontWeight: FontWeight.w500,
-                      ),
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                    fontWeight: FontWeight.w500,
+                  ),
                   textAlign: TextAlign.center,
                 ),
               ],
@@ -592,7 +671,7 @@ class _LandingPageState extends State<LandingPage> {
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onSurface,
+              color: Theme.of(context).colorScheme.onBackground,
             ),
       ),
     );
@@ -619,79 +698,81 @@ class _LandingPageState extends State<LandingPage> {
         final icon = _collectionIcons[collection] ?? Icons.music_note;
         final color = _collectionColors[collection] ?? colorScheme.primary;
 
-        return Card(
-          elevation: isDarkMode ? 8 : 2,
-          shadowColor: isDarkMode ? Colors.black.withOpacity(0.5) : null,
-          child: Container(
-            decoration: BoxDecoration(
-              borderRadius: BorderRadius.circular(12),
-              color: colorScheme.surface,
-              border: isDarkMode
-                  ? Border.all(
-                      color: colorScheme.outline.withOpacity(0.2),
-                      width: 1,
-                    )
-                  : null,
+        return Container(
+          decoration: BoxDecoration(
+            color: colorScheme.surface,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(
+              color: colorScheme.outline.withOpacity(0.2),
+              width: 1,
             ),
-            child: InkWell(
-              borderRadius: BorderRadius.circular(12),
-              onTap: () {
-                Navigator.push(
-                  context,
-                  MaterialPageRoute(
-                    builder: (context) => SongListPage(
-                      onThemeChanged: widget.onThemeChanged,
-                      initialCollection: collection,
+            boxShadow: [
+              BoxShadow(
+                color: isDarkMode
+                    ? Colors.black.withOpacity(0.2)
+                    : Colors.grey.withOpacity(0.1),
+                blurRadius: isDarkMode ? 8 : 4,
+                offset: const Offset(0, 2),
+                spreadRadius: 0,
+              ),
+            ],
+          ),
+          child: InkWell(
+            borderRadius: BorderRadius.circular(12),
+            onTap: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SongListPage(
+                    onThemeChanged: widget.onThemeChanged,
+                    initialCollection: collection,
+                  ),
+                ),
+              );
+            },
+            child: Padding(
+              padding: const EdgeInsets.all(8.0),
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                    width: 40,
+                    height: 40,
+                    decoration: BoxDecoration(
+                      color: color.withOpacity(0.15),
+                      borderRadius: BorderRadius.circular(20),
+                      border:
+                          Border.all(color: color.withOpacity(0.3), width: 1),
+                    ),
+                    child: Icon(icon, color: color, size: 22),
+                  ),
+                  Expanded(
+                    child: Column(
+                      mainAxisAlignment: MainAxisAlignment.center,
+                      children: [
+                        Text(
+                          collection,
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            fontSize: 11,
+                            color: colorScheme.onSurface,
+                          ),
+                          textAlign: TextAlign.center,
+                          maxLines: 3,
+                          overflow: TextOverflow.visible,
+                        ),
+                        const SizedBox(height: 4),
+                        Text(
+                          '$count songs',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            color: colorScheme.onSurface.withOpacity(0.7),
+                            fontSize: 9,
+                          ),
+                        ),
+                      ],
                     ),
                   ),
-                );
-              },
-              child: Padding(
-                padding: const EdgeInsets.all(8.0),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                  children: [
-                    Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        color: color.withOpacity(isDarkMode ? 0.2 : 0.1),
-                        borderRadius: BorderRadius.circular(20),
-                        border: isDarkMode
-                            ? Border.all(
-                                color: color.withOpacity(0.3), width: 1)
-                            : null,
-                      ),
-                      child: Icon(icon, color: color, size: 22),
-                    ),
-                    Expanded(
-                      child: Column(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(
-                            collection,
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              fontWeight: FontWeight.bold,
-                              fontSize: 11,
-                              color: colorScheme.onSurface,
-                            ),
-                            textAlign: TextAlign.center,
-                            maxLines: 3,
-                            overflow: TextOverflow.visible,
-                          ),
-                          const SizedBox(height: 4),
-                          Text(
-                            '$count songs',
-                            style: theme.textTheme.bodySmall?.copyWith(
-                              color: colorScheme.onSurface.withOpacity(0.7),
-                              fontSize: 9,
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
+                ],
               ),
             ),
           ),
@@ -701,6 +782,10 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Widget _buildRecentFavorites() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return SizedBox(
       height: 120,
       child: ListView.builder(
@@ -712,73 +797,81 @@ class _LandingPageState extends State<LandingPage> {
             width: 200,
             margin: EdgeInsets.only(
                 right: index < _recentFavorites.length - 1 ? 12 : 0),
-            child: Card(
-              child: InkWell(
-                borderRadius: BorderRadius.circular(12),
-                onTap: () {
-                  final collection = song['collection'];
-                  if (collection != null) {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(
-                        builder: (context) => SongDetailPage(
-                          song: song,
-                          collectionName: collection.toString(),
+            decoration: BoxDecoration(
+              color: colorScheme.surface,
+              borderRadius: BorderRadius.circular(12),
+              border: Border.all(
+                color: colorScheme.outline.withOpacity(0.2),
+              ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode
+                      ? Colors.black.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.1),
+                  blurRadius: isDarkMode ? 8 : 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
+            ),
+            child: InkWell(
+              borderRadius: BorderRadius.circular(12),
+              onTap: () {
+                final collection = song['collection'];
+                if (collection != null) {
+                  Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                      builder: (context) => SongDetailPage(
+                        song: song,
+                        collectionName: collection.toString(),
+                      ),
+                    ),
+                  );
+                }
+              },
+              child: Padding(
+                padding: const EdgeInsets.all(12.0),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      children: [
+                        Icon(
+                          Icons.favorite,
+                          color: Colors.red,
+                          size: 16,
                         ),
-                      ),
-                    );
-                  }
-                },
-                child: Padding(
-                  padding: const EdgeInsets.all(12.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Icon(
-                            Icons.favorite,
-                            color: Colors.red,
-                            size: 16,
+                        const SizedBox(width: 4),
+                        Text(
+                          '#${song['song_number']?.toString() ?? '0'}',
+                          style: theme.textTheme.bodySmall?.copyWith(
+                            fontWeight: FontWeight.bold,
+                            color: colorScheme.primary,
                           ),
-                          const SizedBox(width: 4),
-                          Text(
-                            '#${song['song_number']?.toString() ?? '0'}',
-                            style: Theme.of(context)
-                                .textTheme
-                                .bodySmall
-                                ?.copyWith(
-                                  fontWeight: FontWeight.bold,
-                                  color: Theme.of(context).colorScheme.primary,
-                                ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 8),
-                      Expanded(
-                        child: Text(
-                          song['song_title']?.toString() ?? 'Unknown Song',
-                          style:
-                              Theme.of(context).textTheme.titleSmall?.copyWith(
-                                    fontWeight: FontWeight.w600,
-                                  ),
-                          maxLines: 2,
-                          overflow: TextOverflow.ellipsis,
                         ),
-                      ),
-                      Text(
-                        song['collection']?.toString() ?? 'Unknown Collection',
-                        style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                              color: Theme.of(context)
-                                  .colorScheme
-                                  .onSurface
-                                  .withOpacity(0.6),
-                            ),
-                        maxLines: 1,
+                      ],
+                    ),
+                    const SizedBox(height: 8),
+                    Expanded(
+                      child: Text(
+                        song['song_title']?.toString() ?? 'Unknown Song',
+                        style: theme.textTheme.titleSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          color: colorScheme.onSurface,
+                        ),
+                        maxLines: 2,
                         overflow: TextOverflow.ellipsis,
                       ),
-                    ],
-                  ),
+                    ),
+                    Text(
+                      song['collection']?.toString() ?? 'Unknown Collection',
+                      style: theme.textTheme.bodySmall?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                      maxLines: 1,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -789,16 +882,29 @@ class _LandingPageState extends State<LandingPage> {
   }
 
   Widget _buildQuickActions() {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+    final isDarkMode = theme.brightness == Brightness.dark;
+
     return Row(
       children: [
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+                color: colorScheme.outline.withOpacity(0.2),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode
+                      ? Colors.black.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.1),
+                  blurRadius: isDarkMode ? 8 : 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
@@ -826,9 +932,10 @@ class _LandingPageState extends State<LandingPage> {
                     const SizedBox(height: 12),
                     Text(
                       'Favorites',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onSurface,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],
@@ -841,11 +948,20 @@ class _LandingPageState extends State<LandingPage> {
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              color: Theme.of(context).colorScheme.surface,
+              color: colorScheme.surface,
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Theme.of(context).colorScheme.outline.withOpacity(0.1),
+                color: colorScheme.outline.withOpacity(0.2),
               ),
+              boxShadow: [
+                BoxShadow(
+                  color: isDarkMode
+                      ? Colors.black.withOpacity(0.2)
+                      : Colors.grey.withOpacity(0.1),
+                  blurRadius: isDarkMode ? 8 : 4,
+                  offset: const Offset(0, 2),
+                ),
+              ],
             ),
             child: InkWell(
               borderRadius: BorderRadius.circular(16),
@@ -867,15 +983,16 @@ class _LandingPageState extends State<LandingPage> {
                   children: [
                     Icon(
                       Icons.search,
-                      color: Theme.of(context).colorScheme.primary,
+                      color: colorScheme.primary,
                       size: 28,
                     ),
                     const SizedBox(height: 12),
                     Text(
                       'Search',
-                      style: Theme.of(context).textTheme.titleSmall?.copyWith(
-                            fontWeight: FontWeight.w500,
-                          ),
+                      style: theme.textTheme.titleSmall?.copyWith(
+                        fontWeight: FontWeight.w500,
+                        color: colorScheme.onSurface,
+                      ),
                       textAlign: TextAlign.center,
                     ),
                   ],

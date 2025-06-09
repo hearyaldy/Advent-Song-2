@@ -529,14 +529,30 @@ class _SettingsPageState extends State<SettingsPage> {
               ),
               child: InkWell(
                 borderRadius: BorderRadius.circular(8),
-                onTap: () {
+                onTap: () async {
                   setState(() {
                     _selectedColorTheme = themeKey;
                   });
                   _onSettingChanged();
 
-                  // Notify app immediately for preview
+                  // Save immediately and notify app
+                  final prefs = await SharedPreferences.getInstance();
+                  await prefs.setString('colorTheme', themeKey);
+
+                  // Force app theme update
                   widget.onColorThemeChanged?.call(themeKey);
+
+                  // Show immediate feedback
+                  if (mounted) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text(
+                            'Theme changed to ${themeData['name']}! Colors will update throughout the app.'),
+                        duration: const Duration(seconds: 2),
+                        backgroundColor: themeData['primary'] as Color,
+                      ),
+                    );
+                  }
                 },
                 child: Padding(
                   padding:
