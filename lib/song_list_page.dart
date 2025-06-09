@@ -1,41 +1,80 @@
 // song_list_page.dart
 import 'dart:convert';
 import 'package:flutter/material.dart';
-import 'package:intl/intl.dart'; // Import for formatting the date
+import 'package:intl/intl.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'song_detail_page.dart';
-import 'settings_popup.dart';
+import 'settings_page.dart';
 import 'package:flutter/services.dart' show rootBundle;
 
 class SongListPage extends StatefulWidget {
-  const SongListPage({super.key});
+  final Function(bool)? onThemeChanged;
+  final String? initialCollection;
+  final bool showFavoritesOnly;
+  final bool openSearch;
+
+  const SongListPage({
+    super.key,
+    this.onThemeChanged,
+    this.initialCollection,
+    this.showFavoritesOnly = false,
+    this.openSearch = false,
+  });
 
   @override
   SongListPageState createState() => SongListPageState();
 }
 
-class SongListPageState extends State<SongListPage> {
+class SongListPageState extends State<SongListPage>
+    with WidgetsBindingObserver {
   int _selectedIndex = 0;
-  bool _isDarkMode = false;
   List<Map<String, dynamic>> _songs = [];
   List<Map<String, dynamic>> _filteredSongs = [];
   List<Map<String, dynamic>> _favorites = [];
   String _selectedFilter = 'All';
-  String selectedCollectionName = 'Lagu Pujian Masa Ini'; // Default collection name
+  String _selectedCollectionName = 'Lagu Pujian Masa Ini';
+  String _searchQuery = '';
 
-  List<Map<String, dynamic>> _lpmi = [];
-  List<Map<String, dynamic>> _srd = [];
-  List<Map<String, dynamic>> _iban = [];
-  List<Map<String, dynamic>> _pandak = [];
+  // Collections
+  final Map<String, List<Map<String, dynamic>>> _collections = {};
+  final List<String> _collectionNames = [
+    'Lagu Pujian Masa Ini',
+    'Syair Rindu Dendam',
+    'Lagu Iban',
+    'Lagu Pandak'
+  ];
+  final Map<String, String> _collectionFiles = {
+    'Lagu Pujian Masa Ini': 'lpmi.json',
+    'Syair Rindu Dendam': 'srd.json',
+    'Lagu Iban': 'iban.json',
+    'Lagu Pandak': 'pandak.json',
+  };
 
   String _currentDate = '';
+  bool _isLoading = true;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
     super.initState();
-    _loadSongs();
-    _loadFavorites();
+    WidgetsBinding.instance.addObserver(this);
+    _initializeApp();
+  }
+
+  @override
+  void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _initializeApp() async {
+    await _loadCollections();
+    await _loadFavorites();
     _getCurrentDate();
+    setState(() {
+      _isLoading = false;
+    });
   }
 
   void _getCurrentDate() {
@@ -46,30 +85,37 @@ class SongListPageState extends State<SongListPage> {
     });
   }
 
-  Future<void> _loadSongs() async {
-    final String lpmiData = await rootBundle.loadString('assets/lpmi.json');
-    final String srdData = await rootBundle.loadString('assets/srd.json');
-    final String ibanData = await rootBundle.loadString('assets/iban.json');
-    final String pandakData = await rootBundle.loadString('assets/pandak.json');
+  Future<void> _loadCollections() async {
+    try {
+      for (final entry in _collectionFiles.entries) {
+        final String data =
+            await rootBundle.loadString('assets/${entry.value}');
+        _collections[entry.key] =
+            List<Map<String, dynamic>>.from(json.decode(data));
+      }
 
-    _lpmi = List<Map<String, dynamic>>.from(json.decode(lpmiData));
-    _srd = List<Map<String, dynamic>>.from(json.decode(srdData));
-    _iban = List<Map<String, dynamic>>.from(json.decode(ibanData));
-    _pandak = List<Map<String, dynamic>>.from(json.decode(pandakData));
-
-    setState(() {
-      _songs = _lpmi;
-      _filteredSongs = _songs;
-    });
+      setState(() {
+        _songs = _collections[_selectedCollectionName] ?? [];
+        _filteredSongs = _songs;
+      });
+    } catch (e) {
+      debugPrint('Error loading collections: $e');
+    }
   }
 
   Future<void> _loadFavorites() async {
     final prefs = await SharedPreferences.getInstance();
     final favoriteSongs = prefs.getStringList('favorites') ?? [];
+
+    // Load favorites from all collections
+    List<Map<String, dynamic>> allFavorites = [];
+    for (final collection in _collections.values) {
+      allFavorites.addAll(collection
+          .where((song) => favoriteSongs.contains(song['song_number'])));
+    }
+
     setState(() {
-      _favorites = _songs
-          .where((song) => favoriteSongs.contains(song['song_number']))
-          .toList();
+      _favorites = allFavorites;
     });
   }
 
@@ -84,94 +130,176 @@ class SongListPageState extends State<SongListPage> {
     }
 
     await prefs.setStringList('favorites', favoriteSongs);
-    _loadFavorites();
+    await _loadFavorites();
+
+    // Show feedback
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(favoriteSongs.contains(song['song_number'])
+              ? 'Added to favorites'
+              : 'Removed from favorites'),
+          duration: const Duration(seconds: 1),
+        ),
+      );
+    }
   }
 
   void _filterSongs(String query) {
     setState(() {
-      _filteredSongs = _songs
-          .where((song) =>
-              song['song_title'].toLowerCase().contains(query.toLowerCase()) ||
-              song['song_number'].contains(query))
-          .toList();
+      _searchQuery = query;
+      if (query.isEmpty) {
+        _applyCurrentFilter();
+      } else {
+        _filteredSongs = _songs
+            .where((song) =>
+                song['song_title']
+                    .toLowerCase()
+                    .contains(query.toLowerCase()) ||
+                song['song_number'].toString().contains(query))
+            .toList();
+      }
     });
   }
 
   void _onCollectionChanged(String collection) {
     setState(() {
-      switch (collection) {
-        case 'Lagu Pujian Masa Ini':
-          _songs = _lpmi;
-          selectedCollectionName = 'Lagu Pujian Masa Ini';
-          break;
-        case 'Syair Rindu Dendam':
-          _songs = _srd;
-          selectedCollectionName = 'Syair Rindu Dendam';
-          break;
-        case 'Lagu Iban':
-          _songs = _iban;
-          selectedCollectionName = 'Lagu Iban';
-          break;
-        case 'Lagu Pandak':
-          _songs = _pandak;
-          selectedCollectionName = 'Lagu Pandak';
-          break;
-      }
+      _selectedCollectionName = collection;
+      _songs = _collections[collection] ?? [];
+      _searchController.clear();
+      _searchQuery = '';
+      _selectedFilter = 'All';
       _filteredSongs = _songs;
-      _filterSongs('');
     });
   }
 
-  void _onSortChanged(String sort) {
+  void _applyCurrentFilter() {
     setState(() {
-      if (sort == 'Alphabet') {
-        _filteredSongs.sort(
-            (a, b) => a['song_title'].toLowerCase().compareTo(b['song_title'].toLowerCase()));
-      } else if (sort == 'Number') {
-        _filteredSongs.sort((a, b) => a['song_number'].compareTo(b['song_number']));
+      switch (_selectedFilter) {
+        case 'All':
+          _filteredSongs = _songs;
+          break;
+        case 'Favorites':
+          _filteredSongs = _songs
+              .where((song) => _favorites
+                  .any((fav) => fav['song_number'] == song['song_number']))
+              .toList();
+          break;
+        case 'Alphabet':
+          _filteredSongs = List.from(_songs)
+            ..sort((a, b) => a['song_title']
+                .toLowerCase()
+                .compareTo(b['song_title'].toLowerCase()));
+          break;
+        case 'Number':
+          _filteredSongs = List.from(_songs)
+            ..sort((a, b) => a['song_number']
+                .toString()
+                .compareTo(b['song_number'].toString()));
+          break;
       }
     });
+  }
+
+  void _onFilterChanged(String filter) {
+    setState(() {
+      _selectedFilter = filter;
+    });
+    _applyCurrentFilter();
   }
 
   void _onItemTapped(int index) {
-    if (index == 1) {
-      showDialog(
-        context: context,
-        builder: (context) => SettingsPopup(
-          onSettingsChanged: (fontSize, fontFamily, textAlign) {
-            // Settings changes
-          },
-        ),
-      );
-    } else {
-      setState(() {
-        _selectedIndex = index;
-        if (index == 2) {
-          _toggleTheme();
-        }
-      });
+    setState(() {
+      _selectedIndex = index;
+    });
+
+    switch (index) {
+      case 0:
+        // Home - already here
+        break;
+      case 1:
+        // Navigate to dedicated settings page
+        Navigator.push(
+          context,
+          MaterialPageRoute(
+            builder: (context) => SettingsPage(
+              onThemeChanged: widget.onThemeChanged,
+            ),
+          ),
+        );
+        break;
+      case 2:
+        // Additional features (could be about, help, etc.)
+        _showAboutDialog();
+        break;
     }
   }
 
-  void _toggleTheme() {
-    setState(() {
-      _isDarkMode = !_isDarkMode;
-    });
+  void _showAboutDialog() {
+    showAboutDialog(
+      context: context,
+      applicationName: 'Lagu Advent',
+      applicationVersion: '1.0.0',
+      applicationIcon: const Icon(Icons.music_note, size: 48),
+      children: [
+        const Text('A collection of Advent songs for worship and praise.'),
+        const SizedBox(height: 16),
+        const Text('Features:'),
+        const Text('• Multiple song collections'),
+        const Text('• Search and favorites'),
+        const Text('• Customizable text display'),
+      ],
+    );
   }
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final colorScheme = theme.colorScheme;
+
+    if (_isLoading) {
+      return Scaffold(
+        backgroundColor: colorScheme.surface,
+        body: const Center(
+          child: CircularProgressIndicator(),
+        ),
+      );
+    }
+
     return Scaffold(
-      backgroundColor: _isDarkMode ? Colors.black : Colors.white,
+      backgroundColor: colorScheme.surface,
       body: Column(
         children: [
+          // Header with image
           Stack(
             children: [
-              Image.asset(
-                'assets/header_image.png',
+              Container(
                 width: double.infinity,
-                height: 120, // Adjusted header image size to 120px
-                fit: BoxFit.cover,
+                height: 120,
+                decoration: const BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topLeft,
+                    end: Alignment.bottomRight,
+                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                  ),
+                ),
+                child: Image.asset(
+                  'assets/header_image.png',
+                  width: double.infinity,
+                  height: 120,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Container(
+                      decoration: const BoxDecoration(
+                        gradient: LinearGradient(
+                          begin: Alignment.topLeft,
+                          end: Alignment.bottomRight,
+                          colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                        ),
+                      ),
+                    );
+                  },
+                ),
               ),
               Positioned(
                 bottom: 10,
@@ -199,135 +327,289 @@ class SongListPageState extends State<SongListPage> {
               ),
             ],
           ),
+
+          // Collection name
           Padding(
-            padding: const EdgeInsets.only(left: 16.0, top: 8.0, bottom: 8.0),
-            child: Align(
-              alignment: Alignment.centerLeft,
-              child: Text(
-                'Koleksi Lagu: $selectedCollectionName', // Display selected collection name
-                style: const TextStyle(
-                  fontSize: 16,
-                  fontWeight: FontWeight.bold,
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              children: [
+                Icon(Icons.library_music, color: colorScheme.primary),
+                const SizedBox(width: 8),
+                Expanded(
+                  child: Text(
+                    _selectedCollectionName,
+                    style: theme.textTheme.titleMedium?.copyWith(
+                      fontWeight: FontWeight.bold,
+                      color: colorScheme.onSurface,
+                    ),
+                  ),
                 ),
-              ),
-            ),
-          ),
-          Padding(
-            padding: const EdgeInsets.all(8.0),
-            child: TextField(
-              onChanged: _filterSongs,
-              decoration: InputDecoration(
-                hintText: 'Search by title or number...',
-                prefixIcon: const Icon(Icons.search),
-                border: OutlineInputBorder(
-                  borderRadius: BorderRadius.circular(8.0),
-                ),
-              ),
-            ),
-          ),
-          Container(
-            height: 40,
-            margin: const EdgeInsets.symmetric(vertical: 4.0),
-            padding: const EdgeInsets.symmetric(horizontal: 8.0),
-            decoration: BoxDecoration(
-              color: Colors.grey[200],
-              borderRadius: BorderRadius.circular(10),
-              boxShadow: [
-                BoxShadow(
-                  color: Colors.black.withOpacity(0.1),
-                  blurRadius: 5,
-                  offset: const Offset(0, 2),
+                Text(
+                  '${_songs.length} songs',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                  ),
                 ),
               ],
             ),
-            child: ListView(
-              scrollDirection: Axis.horizontal,
-              children: ['All', 'Favorites', 'Alphabet', 'Number']
-                  .map((filter) => Padding(
-                        padding: const EdgeInsets.symmetric(horizontal: 4.0),
-                        child: ChoiceChip(
-                          label: Text(filter),
-                          selected: _selectedFilter == filter,
-                          onSelected: (selected) {
-                            setState(() {
-                              _selectedFilter = filter;
-                              if (filter == 'All') {
-                                _filteredSongs = _songs;
-                              } else if (filter == 'Favorites') {
-                                _filteredSongs = _favorites;
-                              } else {
-                                _onSortChanged(filter);
-                              }
-                            });
-                          },
-                        ),
-                      ))
-                  .toList(),
+          ),
+
+          // Search bar with sort options
+          Padding(
+            padding:
+                const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+            child: Row(
+              children: [
+                // Search field
+                Expanded(
+                  child: TextField(
+                    controller: _searchController,
+                    onChanged: _filterSongs,
+                    decoration: InputDecoration(
+                      hintText: 'Search by title or number...',
+                      prefixIcon: const Icon(Icons.search),
+                      suffixIcon: _searchQuery.isNotEmpty
+                          ? IconButton(
+                              icon: const Icon(Icons.clear),
+                              onPressed: () {
+                                _searchController.clear();
+                                _filterSongs('');
+                              },
+                            )
+                          : null,
+                      border: OutlineInputBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      contentPadding:
+                          const EdgeInsets.symmetric(vertical: 12.0),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                // Sort button
+                PopupMenuButton<String>(
+                  icon: Container(
+                    padding: const EdgeInsets.all(12),
+                    decoration: BoxDecoration(
+                      color: colorScheme.primary.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12),
+                      border: Border.all(
+                        color: colorScheme.primary.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Icon(
+                      Icons.sort,
+                      color: colorScheme.primary,
+                    ),
+                  ),
+                  tooltip: 'Sort options',
+                  onSelected: (value) {
+                    _onFilterChanged(value);
+                  },
+                  itemBuilder: (context) => [
+                    PopupMenuItem(
+                      value: 'All',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.list,
+                            color: _selectedFilter == 'All'
+                                ? colorScheme.primary
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'All Songs',
+                            style: TextStyle(
+                              fontWeight: _selectedFilter == 'All'
+                                  ? FontWeight.bold
+                                  : null,
+                              color: _selectedFilter == 'All'
+                                  ? colorScheme.primary
+                                  : null,
+                            ),
+                          ),
+                          if (_selectedFilter == 'All') ...[
+                            const Spacer(),
+                            Icon(Icons.check, color: colorScheme.primary),
+                          ],
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'Favorites',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.favorite,
+                            color: _selectedFilter == 'Favorites'
+                                ? colorScheme.primary
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Favorites',
+                            style: TextStyle(
+                              fontWeight: _selectedFilter == 'Favorites'
+                                  ? FontWeight.bold
+                                  : null,
+                              color: _selectedFilter == 'Favorites'
+                                  ? colorScheme.primary
+                                  : null,
+                            ),
+                          ),
+                          if (_selectedFilter == 'Favorites') ...[
+                            const Spacer(),
+                            Icon(Icons.check, color: colorScheme.primary),
+                          ],
+                        ],
+                      ),
+                    ),
+                    const PopupMenuDivider(),
+                    PopupMenuItem(
+                      value: 'Alphabet',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.sort_by_alpha,
+                            color: _selectedFilter == 'Alphabet'
+                                ? colorScheme.primary
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Sort A-Z',
+                            style: TextStyle(
+                              fontWeight: _selectedFilter == 'Alphabet'
+                                  ? FontWeight.bold
+                                  : null,
+                              color: _selectedFilter == 'Alphabet'
+                                  ? colorScheme.primary
+                                  : null,
+                            ),
+                          ),
+                          if (_selectedFilter == 'Alphabet') ...[
+                            const Spacer(),
+                            Icon(Icons.check, color: colorScheme.primary),
+                          ],
+                        ],
+                      ),
+                    ),
+                    PopupMenuItem(
+                      value: 'Number',
+                      child: Row(
+                        children: [
+                          Icon(
+                            Icons.format_list_numbered,
+                            color: _selectedFilter == 'Number'
+                                ? colorScheme.primary
+                                : null,
+                          ),
+                          const SizedBox(width: 12),
+                          Text(
+                            'Sort by Number',
+                            style: TextStyle(
+                              fontWeight: _selectedFilter == 'Number'
+                                  ? FontWeight.bold
+                                  : null,
+                              color: _selectedFilter == 'Number'
+                                  ? colorScheme.primary
+                                  : null,
+                            ),
+                          ),
+                          if (_selectedFilter == 'Number') ...[
+                            const Spacer(),
+                            Icon(Icons.check, color: colorScheme.primary),
+                          ],
+                        ],
+                      ),
+                    ),
+                  ],
+                ),
+              ],
             ),
           ),
+
+          // Song list
           Expanded(
-            child: ListView.builder(
-              itemCount: _filteredSongs.length,
-              itemBuilder: (context, index) {
-                final song = _filteredSongs[index];
-                return Container(
-                  margin: const EdgeInsets.symmetric(vertical: 5.0, horizontal: 10.0),
-                  decoration: BoxDecoration(
-                    color: _isDarkMode ? Colors.grey[900] : Colors.white,
-                    borderRadius: BorderRadius.circular(8),
-                    boxShadow: [
-                      BoxShadow(
-                        color: Colors.black.withOpacity(0.1),
-                        blurRadius: 5,
-                        offset: const Offset(0, 3),
-                      ),
-                    ],
-                  ),
-                  child: ListTile(
-                    title: Text(
-                      '${song['song_number']}. ${song['song_title']}',
-                      style: TextStyle(
-                        color: _isDarkMode ? Colors.white : Colors.black,
-                      ),
-                    ),
-                    trailing: IconButton(
-                      icon: Icon(
-                        _favorites.contains(song) ? Icons.favorite : Icons.favorite_border,
-                      ),
-                      onPressed: () => _toggleFavorite(song),
-                    ),
-                    onTap: () {
-                      Navigator.push(
-                        context,
-                        MaterialPageRoute(
-                          builder: (context) => SongDetailPage(
-                            song: song,
-                            collectionName: selectedCollectionName, // Pass the selected collection name
+            child: _filteredSongs.isEmpty
+                ? _buildEmptyState()
+                : ListView.builder(
+                    padding: const EdgeInsets.symmetric(horizontal: 16.0),
+                    itemCount: _filteredSongs.length,
+                    itemBuilder: (context, index) {
+                      final song = _filteredSongs[index];
+                      final isFavorite = _favorites.any(
+                          (fav) => fav['song_number'] == song['song_number']);
+
+                      return Card(
+                        margin: const EdgeInsets.only(bottom: 8.0),
+                        child: ListTile(
+                          leading: CircleAvatar(
+                            backgroundColor: colorScheme.primary,
+                            child: Text(
+                              song['song_number'].toString(),
+                              style: TextStyle(
+                                color: colorScheme.onPrimary,
+                                fontWeight: FontWeight.bold,
+                              ),
+                            ),
                           ),
+                          title: Text(
+                            song['song_title'],
+                            style: theme.textTheme.titleMedium,
+                          ),
+                          trailing: IconButton(
+                            icon: Icon(
+                              isFavorite
+                                  ? Icons.favorite
+                                  : Icons.favorite_border,
+                              color: isFavorite ? Colors.red : null,
+                            ),
+                            onPressed: () => _toggleFavorite(song),
+                          ),
+                          onTap: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => SongDetailPage(
+                                  song: song,
+                                  collectionName: _selectedCollectionName,
+                                  onFavoriteChanged: () {
+                                    _loadFavorites(); // Refresh favorites when changed
+                                  },
+                                ),
+                              ),
+                            );
+                          },
                         ),
                       );
                     },
                   ),
-                );
-              },
-            ),
           ),
         ],
       ),
-      floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.blueAccent,
-        shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(20),
-        ),
+      floatingActionButton: FloatingActionButton.extended(
         onPressed: _showCollectionMenu,
-        child: const Icon(Icons.library_music),
+        tooltip: 'Switch Collection',
+        icon: const Icon(Icons.library_music),
+        label: Text(_getShortCollectionName()),
       ),
-      floatingActionButtonLocation: FloatingActionButtonLocation.endFloat,
       bottomNavigationBar: BottomNavigationBar(
         items: const [
-          BottomNavigationBarItem(icon: Icon(Icons.home), label: 'Home'),
-          BottomNavigationBarItem(icon: Icon(Icons.settings), label: 'Settings'),
-          BottomNavigationBarItem(icon: Icon(Icons.toggle_on), label: 'Toggle Theme'),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.home),
+            label: 'Home',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.settings),
+            label: 'Settings',
+          ),
+          BottomNavigationBarItem(
+            icon: Icon(Icons.info_outline),
+            label: 'About',
+          ),
         ],
         currentIndex: _selectedIndex,
         onTap: _onItemTapped,
@@ -335,21 +617,223 @@ class SongListPageState extends State<SongListPage> {
     );
   }
 
-  // Method to show the song collection menu
+  Widget _buildEmptyState() {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Icon(
+            _selectedFilter == 'Favorites'
+                ? Icons.favorite_border
+                : Icons.search_off,
+            size: 64,
+            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.3),
+          ),
+          const SizedBox(height: 16),
+          Text(
+            _selectedFilter == 'Favorites'
+                ? 'No favorite songs yet'
+                : _searchQuery.isNotEmpty
+                    ? 'No songs found for "$_searchQuery"'
+                    : 'No songs available',
+            style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                  color:
+                      Theme.of(context).colorScheme.onSurface.withOpacity(0.7),
+                ),
+          ),
+          if (_selectedFilter == 'Favorites') ...[
+            const SizedBox(height: 8),
+            Text(
+              'Tap the heart icon on songs to add them to favorites',
+              style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.5),
+                  ),
+              textAlign: TextAlign.center,
+            ),
+          ],
+        ],
+      ),
+    );
+  }
+
+  String _getShortCollectionName() {
+    switch (_selectedCollectionName) {
+      case 'Lagu Pujian Masa Ini':
+        return 'LPMI';
+      case 'Syair Rindu Dendam':
+        return 'SRD';
+      case 'Lagu Iban':
+        return 'Iban';
+      case 'Lagu Pandak':
+        return 'Pandak';
+      default:
+        return 'Songs';
+    }
+  }
+
   void _showCollectionMenu() {
     showModalBottomSheet(
       context: context,
-      builder: (context) => ListView(
-        shrinkWrap: true,
-        children: ['Lagu Pujian Masa Ini', 'Syair Rindu Dendam', 'Lagu Iban', 'Lagu Pandak']
-            .map((collection) => ListTile(
-                  title: Text(collection),
-                  onTap: () {
-                    Navigator.pop(context);
-                    _onCollectionChanged(collection);
+      isScrollControlled: true,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
+      ),
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.6,
+        minChildSize: 0.4,
+        maxChildSize: 0.8,
+        expand: false,
+        builder: (context, scrollController) => Container(
+          padding: const EdgeInsets.fromLTRB(20, 12, 20, 20),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              // Drag handle
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 16),
+                  decoration: BoxDecoration(
+                    color: Theme.of(context)
+                        .colorScheme
+                        .onSurface
+                        .withOpacity(0.3),
+                    borderRadius: BorderRadius.circular(2),
+                  ),
+                ),
+              ),
+
+              // Header
+              Row(
+                children: [
+                  Icon(
+                    Icons.library_music,
+                    color: Theme.of(context).colorScheme.primary,
+                    size: 24,
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Text(
+                      'Select Collection',
+                      style:
+                          Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                fontWeight: FontWeight.bold,
+                              ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Choose from available song collections',
+                style: Theme.of(context).textTheme.bodyMedium?.copyWith(
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.7),
+                    ),
+              ),
+              const SizedBox(height: 16),
+
+              // Collection options in scrollable list
+              Flexible(
+                child: ListView.builder(
+                  controller: scrollController,
+                  shrinkWrap: true,
+                  itemCount: _collectionNames.length,
+                  itemBuilder: (context, index) {
+                    final collection = _collectionNames[index];
+                    final isSelected = collection == _selectedCollectionName;
+                    final songCount = _collections[collection]?.length ?? 0;
+
+                    return Container(
+                      margin: const EdgeInsets.only(bottom: 8),
+                      decoration: BoxDecoration(
+                        color: isSelected
+                            ? Theme.of(context)
+                                .colorScheme
+                                .primary
+                                .withOpacity(0.1)
+                            : null,
+                        borderRadius: BorderRadius.circular(12),
+                        border: isSelected
+                            ? Border.all(
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.3))
+                            : null,
+                      ),
+                      child: ListTile(
+                        contentPadding: const EdgeInsets.symmetric(
+                            horizontal: 16, vertical: 4),
+                        leading: Container(
+                          width: 48,
+                          height: 48,
+                          decoration: BoxDecoration(
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : Theme.of(context).colorScheme.surfaceVariant,
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: Icon(
+                            Icons.music_note,
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.onPrimary
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurfaceVariant,
+                          ),
+                        ),
+                        title: Text(
+                          collection,
+                          style: TextStyle(
+                            fontWeight:
+                                isSelected ? FontWeight.bold : FontWeight.w500,
+                            color: isSelected
+                                ? Theme.of(context).colorScheme.primary
+                                : null,
+                          ),
+                        ),
+                        subtitle: Text(
+                          '$songCount songs',
+                          style: TextStyle(
+                            color: isSelected
+                                ? Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withOpacity(0.7)
+                                : Theme.of(context)
+                                    .colorScheme
+                                    .onSurface
+                                    .withOpacity(0.6),
+                          ),
+                        ),
+                        trailing: isSelected
+                            ? Icon(
+                                Icons.check_circle,
+                                color: Theme.of(context).colorScheme.primary,
+                              )
+                            : const Icon(Icons.arrow_forward_ios, size: 16),
+                        onTap: () {
+                          Navigator.pop(context);
+                          if (!isSelected) {
+                            _onCollectionChanged(collection);
+                          }
+                        },
+                      ),
+                    );
                   },
-                ))
-            .toList(),
+                ),
+              ),
+            ],
+          ),
+        ),
       ),
     );
   }
