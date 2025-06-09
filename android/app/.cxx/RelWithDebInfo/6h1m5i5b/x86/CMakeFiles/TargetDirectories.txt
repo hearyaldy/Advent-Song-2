@@ -1,0 +1,2 @@
+/Volumes/MACFILE/Flutter/AS/advent_song/android/app/.cxx/RelWithDebInfo/6h1m5i5b/x86/CMakeFiles/edit_cache.dir
+/Volumes/MACFILE/Flutter/AS/advent_song/android/app/.cxx/RelWithDebInfo/6h1m5i5b/x86/CMakeFiles/rebuild_cache.dir

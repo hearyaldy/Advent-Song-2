@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Users/hearyhealdysairin/Desktop/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/hearyhealdysairin/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Volumes/MACFILE/Flutter/AS/advent_song/android/app/.cxx/RelWithDebInfo/6h1m5i5b/x86_64",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/hearyhealdysairin/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Volumes/MACFILE/Flutter/AS/advent_song/android/app/.cxx/RelWithDebInfo/6h1m5i5b/x86_64",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
