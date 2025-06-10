@@ -295,7 +295,11 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Jaga, jaga mata kita anak orang (2x)\nUlang: Apai kitai di serga bisi nilik ka dunya,\nJaga jaga mata (pending, dilah, kaki, jari)\nkitai anak orang.\n\nJaga, jaga pending kita anak orang (2x)\nJaga, jaga dilah kita anak orang (2x)\nJaga, jaga kaki kita anak orang (2x)\nJaga, jaga jari kita anak orang (2x)"
+                "lyrics": "Jaga, jaga mata kita anak orang (2x)\nUlang: Apai kitai di serga bisi nilik ka dunya,\nJaga jaga mata (pending, dilah, kaki, jari)\nkitai anak orang."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Jaga, jaga pending kita anak orang (2x)\nJaga, jaga dilah kita anak orang (2x)\nJaga, jaga kaki kita anak orang (2x)\nJaga, jaga jari kita anak orang (2x)"
             }
         ]
     },
@@ -375,7 +379,15 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Pengrindu ku besai, pengrindu ku besai,\nPengrindu ku besai selalu,\nPengrindu ku besai, pengrindu ku besai,\nPengrindu ku besai selalu\n\nNyanyi baka burong, nyanyi baka burong,\nNyanyi baka burong, meredu,\nNyanyi baka burong, nyanyi baka burong,\nNyanyi baka burong, meredu.\n\nSelalu sembiang, selalu sembiang,\nSembiang baka Tuhan Jesus,\nSelalu sembiang, selalu sembiang,\nSembiang baka Tuhan Jesus."
+                "lyrics": "Pengrindu ku besai, pengrindu ku besai,\nPengrindu ku besai selalu,\nPengrindu ku besai, pengrindu ku besai,\nPengrindu ku besai selalu"
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Nyanyi baka burong, nyanyi baka burong,\nNyanyi baka burong, meredu,\nNyanyi baka burong, nyanyi baka burong,\nNyanyi baka burong, meredu."
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Selalu sembiang, selalu sembiang,\nSembiang baka Tuhan Jesus,\nSelalu sembiang, selalu sembiang,\nSembiang baka Tuhan Jesus."
             }
         ]
     },
