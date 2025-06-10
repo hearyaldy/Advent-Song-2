@@ -27,7 +27,7 @@
             },
             {
                 "verse_number": "4",
-                "lyrics": "Di pintu syurga yang suci\nMenyanyi beribu lidah;\nTuhan kita akan puji,\nSampai selam-lamanya."
+                "lyrics": "Di pintu syurga yang suci\nMenyanyi beribu lidah;\nTuhan kita akan puji,\nSampai selama-lamanya."
             }
         ]
     },
@@ -38,6 +38,10 @@
             {
                 "verse_number": "1",
                 "lyrics": "Tentramlah, tentramlah, dengar bisikNya;\nTentramlah dan trima segnap sabdaNya."
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Berjalan, perlahan, \nTuhan hadirlah \nBerjalan, perlahan, datang padaNya."
             },
             {
                 "verse_number": "2",
@@ -85,7 +89,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Letakkan susahmu di bawah kakiTuhan,\nKerna sungguh Ia berkasihan.\nHatimu terhibur, doamu ditrimaNya,\nSlamat hidupmu oleh kasihNya."
+                "lyrics": "Letakkan susahmu di bawah kaki Tuhan,\nKerna sungguh Ia berkasihan.\nHatimu terhibur, doamu ditrimaNya,\nSlamat hidupmu oleh kasihNya."
             },
             {
                 "verse_number": "3",
@@ -93,7 +97,7 @@
             },
             {
                 "verse_number": "4",
-                "lyrics": "Walau hati pun rasa takut kerna dosa,\nDitrimanyalah kerna kasihNya.\nDikurniakanNyalah Slamat serta sentosa,\nTetap setia sampai slamanya."
+                "lyrics": "Walau hati pun rasa takut kerna dosa,\nDitrimanyalah kerna kasihNya.\nDikurniakanNyalah slamat serta sentosa,\nTetap setia sampai slamanya."
             }
         ]
     },
@@ -103,7 +107,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Suci, suci, suci!\nAllah Maha Tinggi!\nPada siang malam\nAku hendak nyanyi:\nSuci, suci, suci!\nArrahim, Arrahmit!\nYang Maha Kasih\nDan Maha Kudrat!"
+                "lyrics": "Suci, suci, suci!\nAllah Maha Tinggi!\nPada siang malam\nAku hendak nyanyi:\nSuci, suci, suci!\nArrahim, Arrahman!\nYang Maha Kasih\nDan Maha Kudrat!"
             },
             {
                 "verse_number": "2",
@@ -139,15 +143,19 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Kami hampiri Hu, Ya Bapa Pembantu,\nTuhan jadi kubu, Kami seru. Bumi tempat dagang,\nTiada membri senang, Ya, Bapa hiburkan , kasahankan."
+                "lyrics": "Kami hampiri Hu, Ya Bapa Pembantu,\nTuhan jadi kubu, Kami seru. Bumi tempat dagang,\nTiada membri senang, Ya, Bapa hiburkan , kasihankan."
             },
             {
                 "verse_number": "Korus",
                 "lyrics": "Waktu ini, Bapa, kami datang,\nTiadalah berdaya, brikan senang."
             },
             {
+                "verse_number": "2",
+                "lyrics": "Dari musuh kami Dalam dunia ini, \nSlamatkanlah kami, Skalian ini. \nNyata kami lemah, Brikanlah anugrah, \nYa, Tuhan rahmani, Pada kami."
+            },
+            {
                 "verse_number": "3",
-                "lyrics": "Brikan kemurahan, Pada kami Tuhan,\nSupaya sangguplah Lawan dosa. Ya,\nTuhan pimpinlah Kami selamanya\nSampai dalam syurga Serta Bapa."
+                "lyrics": "Brikan kemurahan, Pada kami Tuhan,\nSupaya sangguplah Lawan dosa. \nYa,Tuhan pimpinlah Kami selamanya\nSampai dalam syurga Serta Bapa."
             }
         ]
     },
@@ -165,7 +173,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Brikan kami, ya Tuhan, Damai dan kesukaan;\nBrikanlah oleh RohMu Keslamatan yang penuh,\nKeslamatan yang penuh."
+                "lyrics": "Brikan kami, ya Tuhan, Damai dan kesukaan;\nBrikanlah oleh Rohmu Keslamatan yang penuh,\nKeslamatan yang penuh."
             },
             {
                 "verse_number": "4",
@@ -183,19 +191,19 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Ada tempat diam teduh, Dekat di hatiMu,\nTempat tiada dosa keluh, Dekat di hatiMu."
+                "lyrics": "Ada tempat diam teduh, Dekat di hati Hu,\nTempat tiada dosa keluh, Dekat di hati Hu."
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Oh, Yesus Juruselamat, Diutus olehMu,\nBerikanlah kami tempat, Dekat di hatiMu."
+                "lyrics": "Oh, Yesus Juruselamat, Diutus oleh Hu,\nBerikanlah kami tempat, Dekat di hati Hu."
             },
             {
                 "verse_number": "2",
-                "lyrics": "Ada tempat penghiburan, Dekat di hatiMu,\nTempat kita jumpa Tuhan, Dekat di hatiMu."
+                "lyrics": "Ada tempat penghiburan, Dekat di hati Hu,\nTempat kita jumpa Tuhan, Dekat di hati Hu."
             },
             {
                 "verse_number": "3",
-                "lyrics": "Ada tempat perhentian, Dekat di hatiMu,\nTempat penuh Perdamaian, Dekat di hatiMu."
+                "lyrics": "Ada tempat perhentian, Dekat di hati Hu,\nTempat penuh Perdamaian, Dekat di hatiHu."
             }
         ]
     },
@@ -390,8 +398,8 @@
                 "lyrics": "Ya Roh Suci curahkanlah Rahmat pada jiwaku.\nBrikanlah padaku kuasa, Isikanlah jiwaku."
             },
             {
-                "verse_number": "",
-                "lyrics": ""
+                "verse_number": "Korus",
+                "lyrics": "Isikan, Isikan \nJiwaku skarang Tuhan. \nIsikan dengan kudratMu \nJiwaku skarang Tuhan."
             },
             {
                 "verse_number": "2",
@@ -469,7 +477,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Kalau ombak sungai Jordan Jadikan ketakutan, \nTolong hamba, pimpin hamba Masuk negi Kanaan. \nPuji Allah, puji Allah, puji Allah Tiada berkeputusan."
+                "lyrics": "Kalau ombak sungai Jordan Jadikan ketakutan, \nTolong hamba, pimpin hamba Masuk negri Kanaan. \nPuji Allah, puji Allah, puji Allah Tiada berkeputusan."
             }
         ]
     },
@@ -489,17 +497,22 @@
     },
     {
         "song_number": "025",
-        "song_title": "YA TUHAN BERKATI KAMI",
+        "song_title": "PADA AKHIR KEBAKTIAN INI",
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Ya Tuhan berkati kami, Brikanlah kesukaan. \nIsikanlah hati kami Dengan rahmat, kasihan. \nSegarkanlah, segarkanlah Jiwa kami slamanya."
+                "lyrics": "Pada akhir kebaktian ini, \nBersama-sama kami menyanyi, \nDan memohon berkatMu, ya Yesus, \nSeblumnya kami pulang ke rumah!"
             },
             {
                 "verse_number": "2",
-                "lyrics": "Sgala syurga diucapkan Kerna InjilMu Tuhan. \nKuasa dan anugrah brikan Supaya teguh iman. \nSlamatkanlah, slamatkanlah Hidup kami slamanya."
+                "lyrics": "Brikanlah damaiMu pada kami, \nJagalah kami sepanjang hari, \nAgar mulut kami tak berdosa, \nYang tadi tlah puji nama Allah."
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Bri rahmatMu spanjang penghidupan, \nBri penghiburan dan kemenangan; \nBila habis peprangan di dunia, \nBrikan, ya Tuhan, perhentian syurga!"
             }
-        ]
+          
+        ]        
     },
     {
         "song_number": "026",
@@ -537,11 +550,11 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Pada hari yang suci Hatiku pun bergemar. \nNama tuhan kupuji, jiwaku jadi segar."
+                "lyrics": "Pada hari yang suci Hatiku pun bergemar. \nNama Tuhan kupuji, jiwaku jadi segar."
             },
             {
                 "verse_number": "4",
-                "lyrics": "Slamatkan hari suci Dengan rahmatNya tuhan \nBagi diriku ini, Slamatlah hari Tuhan!"
+                "lyrics": "Slamatkan hari suci Dengan rahmatNya Tuhan \nBagi diriku ini, Slamatlah hari Tuhan!"
             }
         ]
     },
@@ -577,11 +590,11 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Isikanlah kami Pada hari ini Dengan anugrahMu, \nPimpinlah umatMu. Nyatakan kemurhanMu, \nKudrat serta kasihanMu, Kudrat serta kasihanMu."
+                "lyrics": "Isikanlah kami Pada hari ini \nDengan anugrahMu, Pimpinlah umatMu. \nNyatakan kemurahanMu, \nKudrat serta kasihanMu, \nKudrat serta kasihanMu."
             },
             {
                 "verse_number": "3",
-                "lyrics": "Turunlah Roh Suci Pada kami ini, Nyatakan kuasaMu, \nCurahkan rahmatMu.Jiwaku rasa segarlah, \nKerna Sabat yang mulia, Kerna Sabat yang mulia."
+                "lyrics": "Turunlah Roh Suci Pada kami ini, \nNyatakan kuasaMu, \nCurahkan rahmatMu. \nJiwaku rasa segarlah, \nKerna Sabat yang mulia, \nKerna Sabat yang mulia."
             }
         ]
     },
@@ -796,52 +809,26 @@
         ]
     },
     {
-        "song_number": "038",
-        "song_title": "WAKTU KITA DALAM DOA",
-        "verses": [
-            {
-                "verse_number": "1",
-                "lyrics": "Waktu kita dalam doa Datang pada hadratNya \nBapa jemputkan saudara: Hatimu serahkanlah!"
-            },
-            {
-                "verse_number": "Korus",
-                "lyrics": "Datanglah, datanglah, Pada Yesus datanglah! \nDatanglah, datanglah, Pada Yesus datanglah!"
-            },
-            {
-                "verse_number": "2",
-                "lyrics": "Engkau lama dalam dosa, Tinggalkan itu skarang, \nTrima rahmat dan sentosa, Asal kau segra datang."
-            },
-            {
-                "verse_number": "3",
-                "lyrics": "Dunia ini tiada aman, Tetaplah penuh susah. \nHanya Yesus dapat brikan Slamat dan sejahtraNya."
-            },
-            {
-                "verse_number": "4",
-                "lyrics": "Datanglah skarang pada Tuhan, Hidupmu serahkanlah. \nSgala dosa dihapuskan, Jiwa terpliharalah."
-            }
-        ]
-    },
-    {
         "song_number": "039",
         "song_title": "INILAH WAKTU MENDOA",
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Inilah waktu mendoa, Sungguh sedaplah rasanya. \nDekat kepada Tuhanku, Melupakan dunia itu. \nJika datang kesusahan, Jenis-jenis pencubaan, \nBerbahagia rasanya Di waktu aku mendoa."
+                "lyrics": "Inilah waktu mendoa, \nSungguh sedaplah rasanya. \nDekat kepada Tuhanku, \nMelupakan dunia itu. \nJika datang kesusahan, \nJenis-jenis pencubaan, \nBerbahagia rasanya \nDi waktu aku mendoa."
             },
             {
                 "verse_number": "2",
-                "lyrics": "Inilah waktu mendoa, Menyampaikan \nPermohonan Kepada Allah Tuhanku Oleh \nYesus Penebusku. DisuruhNya kuserahkan \nKesusahan, Kelelahan; DihiburkanNyalah jiwa \nDi waktu aku mendoa."
+                "lyrics": "Inilah waktu mendoa, \nMenyampaikan Permohonan \nKepada Allah Tuhanku Oleh \nYesus Penebusku. \nDisuruhNya kuserahkan \nKesusahan, Kelelahan; \nDihiburkanNyalah jiwa \nDi waktu aku mendoa."
             },
             {
                 "verse_number": "3",
-                "lyrics": "Patutlah aku slalu pun Mendoa rajin dan tekun, \nSupaya aman sentosa Dapatlah aku pun rasa; \nDan bila kutinggalkanlah Dunia yang sakit dan lelah, \nBerserta Tuhan di syurga Aku tak lagi mendoa."
+                "lyrics": "Patutlah aku slalu pun \nMendoa rajin dan tekun, \nSupaya aman sentosa \nDapatlah aku pun rasa; \nDan bila kutinggalkanlah \nDunia yang sakit dan lelah, \nBerserta Tuhan di syurga \nAku tak lagi mendoa."
             }
         ]
     },
     {
         "song_number": "040",
-        "song_title": "INILAH WAKTU MENDOA",
+        "song_title": "INGATLAH MENDOA",
         "verses": [
             {
                 "verse_number": "1",
@@ -984,7 +971,7 @@
                 "lyrics": "Tiada kulayak ya Tuhan, \nHanya kuharap kasihan; \nKudengar skarang jemputan, \nYa Domba Allah, kudatang."
             },
             {
-                "verse_number": "",
+                "verse_number": "2",
                 "lyrics": "Tiadalah juga kudapat \nMenhilangkan satu cacat; \nDarah Mulah membri slamat, \nYa Domba Allah, kudatang."
             },
             {
@@ -1023,7 +1010,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Menjadi glap matahari Waktu Yesus mati \nDi Golguta kerna dosa, Kupuji sentosa."
+                "lyrics": "Menjadi glap matahari Waktu Yesus mati \nDi Golgota kerna dosa, Kupuji sentosa."
             },
             {
                 "verse_number": "4",
@@ -1049,7 +1036,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Perhantian Roh Alkudus dari syurga, \nKepada hati yang tulus Diberi oleh Yesus."
+                "lyrics": "Perhentian Roh Alkudus dari syurga, \nKepada hati yang tulus Diberi oleh Yesus."
             },
             {
                 "verse_number": "4",
@@ -1085,7 +1072,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Yesus mencurah darahNya dengan kelempahan; \nOrang berdosa olehNya boleh disucikan, \nBoleh disucikan boleh disucikan. \nOrang berdosa olehNya boleh disucikan."
+                "lyrics": "Yesus mencurah darahNya dengan kelimpahan; \nOrang berdosa olehNya boleh disucikan, \nBoleh disucikan boleh disucikan. \nOrang berdosa olehNya boleh disucikan."
             },
             {
                 "verse_number": "2",
@@ -1105,13 +1092,13 @@
             },
             {
                 "verse_number": "6",
-                "lyrics": "Di sana kulihat Tuhan, ku puji namaNya, \nBerserta dangan umatNya sentosa slamanya, \nSentosa slamanya, sentos slamanya, \nBerserta dengan umatNya sentosa slamanya."
+                "lyrics": "Di sana kulihat Tuhan, ku puji namaNya, \nBerserta dangan umatNya sentosa slamanya, \nSentosa slamanya, sentosa slamanya, \nBerserta dengan umatNya sentosa slamanya."
             }
         ]
     },
     {
         "song_number": "051",
-        "song_title": "SANGAT INDAH MENDOA",
+        "song_title": "KU DENGAR SUARAMU",
         "verses": [
             {
                 "verse_number": "1",
@@ -1141,15 +1128,15 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Kudengar suara Almaseh Tuhan mengatakan: \n“Hai orang yang penat, mari, Kubri perhentian .” Meski pun susah hatiku Kulari padaNya. \nLekas senanglah hatiku Oleh sentosaNya."
+                "lyrics": "Kudengar suara Almaseh Tuhan mengatakan:\n“Hai orang yang penat, mari, Kubri perhentian .”\nMeski pun susah hatiku Kulari padaNya.\nLekas senanglah hatiku Oleh sentosaNya."
             },
             {
                 "verse_number": "2",
-                "lyrics": "Kudengar suara Almaseh Memanggil padaku \n“Air alhayat Aku bri, Senangkan nyawamu. ” Kudatang padaNya segra Meminun airNya. \nTiada lagi kudahaga, Kuhidup olehNya."
+                "lyrics": "Kudengar suara Almaseh Memanggil padaku\n“Air alhayat Aku bri, Senangkan nyawamu. ” \nKudatang padaNya segra Meminum airNya.\nTiada lagi kudahaga, Kuhidup olehNya."
             },
             {
                 "verse_number": "3",
-                "lyrics": "Kudengar suara Almaseh \n“Pandanglah padaKu Dan tentu gemarlah hati \nSepanjang umurmu.” Sudah ditrangkan hatiku Oleh anugrahNya; \nKuturut printahNya baru Dapat sentosaNya."
+                "lyrics": "Kudengar suara Almaseh,“Pandanglah padaKu \nDan tentu gemarlah hati Sepanjang umurmu.” \nSudah ditrangkan hatiku Oleh anugrahNya;\nKuturut printahNya baru Dapat sentosaNya."
             }
         ]
     },
@@ -1159,7 +1146,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Hampir terpujuk trima Yesus, \nHampir percaya akan Dia. \nTetapi kataku: Jangan hampiriku. \nLagi waktu senang Aku datang."
+                "lyrics": "Hampir terpujuk trima Yesus,\nHampir percaya akan Dia.\nTetapi kataku: Jangan hampiriku.\nLagi waktu senang Aku datang."
             },
             {
                 "verse_number": "2",
@@ -1241,7 +1228,7 @@
             },
             {
                 "verse_number": "5",
-                "lyrics": "Kuharap selalu \nPadaTuhan. \nSucikan hambaMu, \nKasiahankan."
+                "lyrics": "Kuharap selalu \nPadaTuhan. \nSucikan hambaMu, \nKasihankan."
             }
         ]
     },
@@ -1251,11 +1238,11 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Percayalah kami, Ya Domba Kalvai Akan Tuhan. \nDengarlah doaku, Brikanlah rahmatMu, \nKupuji selalu Milik Tuhan."
+                "lyrics": "Percayalah kami, Ya Domba Kalvari Akan Tuhan. \nDengarlah doaku, Brikanlah rahmatMu, \nKupuji selalu Milik Tuhan."
             },
             {
                 "verse_number": "2",
-                "lyrics": "Biar anugrahMu Tetapkan hatiku Dan branikan. \nKernaku matilah Tuhan, Anak Allh; \nKukasih dan sembah Akan Tuhan."
+                "lyrics": "Biar anugrahMu Tetapkan hatiku Dan branikan. \nKernaku matilah Tuhan, Anak Allah; \nKukasih dan sembah Akan Tuhan."
             },
             {
                 "verse_number": "3",
@@ -1277,7 +1264,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Tuhan Yesus Pemimpinku Pada jalan yang lurus; \nDidengarkanNya doaku, Bila hatiku tulus. \nDalam negri sangat indah Dengan lagu yang merdu \nAku pujilah slamanya; Tuhanlah Pemimpinku. \nAku pujilah slamanya; Tuhanlah Pemimpinku."
+                "lyrics": "Tuhan Yesus Pemimpinku Pada jalan yang lurus; \nDidengarkanNya doaku, Bila hatiku tulus. \nDalam negri sangat indah Dengan lagu yang merdu \nAku pujilah slamanya; \"Tuhanlah Pemimpinku.\" \nAku pujilah slamanya; \"Tuhanlah Pemimpinku\"."
             }
         ]
     },
@@ -1299,7 +1286,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Walau duka dan susah \nDatang berserta dosa, \nGagah brani kurasa \nDengan Tuhan Yesus."
+                "lyrics": "Walau duka dan susah \nDatang beserta dosa, \nGagah brani kurasa \nDengan Tuhan Yesus."
             }
         ]
     },
@@ -1379,7 +1366,7 @@
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Dengan sungguh hatiku Aku harap, ya Tuhan, \nAda kuasa padaMu. Skarang tuhan slamatkan."
+                "lyrics": "Dengan sungguh hatiku Aku harap, ya Tuhan, \nAda kuasa padaMu. Skarang Tuhan slamatkan."
             },
             {
                 "verse_number": "2",
@@ -1399,22 +1386,22 @@
         "song_number": "064",
         "song_title": "JADILAH TUHAN KEHENDAKMU",
         "verses": [
-            {
-                "verse_number": "1",
-                "lyrics": "Jadilah, Tuhan, kehendakMu! \nEngkau Penjunan, Aku tanah liat di tanganMu. \nJadikan aku sesukaMu, aku nantikan sentuhanMu."
-            },
-            {
-                "verse_number": "2",
-                "lyrics": "Jadilah, Tuhan, kehendakMu! \nTiliklah aku dan ujilah. \nSucikan hati, pikiranku dan di depanMu, aku menyembah."
-            },
-            {
-                "verse_number": "3",
-                "lyrics": "Jadilah, Tuhan, kehendakMu! \nSegala kuasa di tanganMu; jamahlah aku, sembuhkanlah! \nTolong, ya Tuhan, aku yang lemah!"
-            },
-            {
-                "verse_number": "4",
-                "lyrics": "Jadilah, Tuhan, kehendakMu! \nBerilah RohMu kepadaku, agar terang Kristus pun nyata."
-            }
+        {
+            "verse_number": "1",
+            "lyrics": "Jadilah, Tuhan, kehendakMu! \nEngkau Penjunan, Aku geluh; \nJadikan aku SesukaMu, \nAku menunggu di kakiMu."
+        },
+        {
+            "verse_number": "2",
+            "lyrics": "Jadilah, Tuhan, kehendakMu! \nUjilah skarang Percayaku! \nAku menyembah Di kakiMu, \nBasuhkan aku Sperti salju!"
+        },
+        {
+            "verse_number": "3",
+            "lyrics": "Jadilah, Tuhan, kehendakMu! \nPenatlah aku, Tolong, ya Hu! \nKuasa sepenuh Di tanganMu, \nJamahlah aku Agar sembuh!"
+        },
+        {
+            "verse_number": "4",
+            "lyrics": "Jadilah, Tuhan, kehendakMu! \nBrikanlah aku Iman teguh! \nPenuhi aku Dengan rohmu, \nHiduplah Engkau Dalam aku!"
+        }
         ]
     },
     {
@@ -1423,23 +1410,23 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Kuserahkan hidupku, Ya, Tuhanku, padaMu. \nDan sepanjang umurku Aku jadi hambaMu."
+                "lyrics": "Kuserahkan hidupku, Ya, Tuhanku, padaMu. \nDan sepanjang umurku, Aku jadi hambaMu, \nAku jadi hambaMu."
             },
             {
                 "verse_number": "2",
-                "lyrics": "Biar kaki, tanganku Turut segala perintahMu. \nDengan ikhlas hatiku Kumasyhurkan kasihMu."
+                "lyrics": "Biar kaki, tanganku Turut segala perintahMu. \nDengan ikhlas hatiku Kumasyhurkan kasihMu, \nKumasyhurkan kasihMu."
             },
             {
                 "verse_number": "3",
-                "lyrics": "Mulutku penuhilah Dengan segala anugerah; \nBila aku bernyanyi, Hanya Tuhan kupuji."
+                "lyrics": "Mulutku penuhilah Dengan segala anugerah; \nBila aku bernyanyi, Hanya Tuhan kupuji, \nHanya Tuhan kupuji."
             },
             {
                 "verse_number": "4",
-                "lyrics": "Perintahkanlah hidupku Tinggal dalam hatiku, \nDan kehendak diriku Tiada lagi berlaku."
+                "lyrics": "Perintahkanlah hidupku Tinggal dalam hatiku, \nDan kehendak diriku Tiada lagi berlaku, \nTiada lagi berlaku."
             },
             {
                 "verse_number": "5",
-                "lyrics": "Kasih dalam hatiku Aku berikan padaMu; \nYa, Yesus, diriku Kuserahkan padaMu."
+                "lyrics": "Kasih dalam hatiku, Aku brikan padaMu; \nYa, Almaseh, diriku, Kuserahkan padaMu, \nKuserahkan padaMu."
             }
         ]
     },
@@ -1467,7 +1454,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Bri aku jalan sertaMu, Tuhan, sperti Henoch dulu, \nSerta tetapkan hatiku Dalam persatuan itu. \nMeski pun susah jalanku, Bri aku jalan sertaMu."
+                "lyrics": "Bri aku jalan sertaMu, Tuhan, sperti Henokh dulu, \nSerta tetapkan hatiku Dalam persatuan itu. \nMeski pun susah jalanku, Bri aku jalan sertaMu."
             },
             {
                 "verse_number": "2",
@@ -1525,7 +1512,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Yesus yang berkasihan Aku lari padaMu, \nSambil angin kras lawan, Dan ombak pun memalu. \nYa Yesus, pliharakan, Pada hambaMu hamper; Trima nyawaku akhir."
+                "lyrics": "Yesus yang berkasihan Aku lari padaMu, \nSambil angin kras lawan, Dan ombak pun memalu. \nYa Yesus, pliharakan, Pada hambaMu hampir; Trima nyawaku akhir."
             },
             {
                 "verse_number": "2",
@@ -1533,7 +1520,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Hanya Tuhan bagiku Pengharapan yang teguh. \nYang berkuasa selalu Membri slamat yang penuh. \nMaha suci namaMu, Aku nyata berdosa. \nDengarkanlah hamdaMu, Brikan slamat sentosa."
+                "lyrics": "Hanya Tuhan bagiku Pengharapan yang teguh. \nYang berkuasa selalu Membri slamat yang penuh. \nMaha suci namaMu, Aku nyata berdosa. \nDengarkanlah hambaMu, Brikan slamat sentosa."
             },
             {
                 "verse_number": "4",
@@ -1690,90 +1677,16 @@
         ]
     },
     {
-        "song_number": "074",
-        "song_title": "KUHENDAK JADI HAMBA TUHAN",
-        "verses": [
-            {
-                "verse_number": "1",
-                "lyrics": "Kuhendak jadi hamba Tuhan; Trimalah, trimalah; \nKuhendak jalan serta Tuhan, Mari tolonglah."
-            },
-            {
-                "verse_number": "Korus",
-                "lyrics": "Hambamu (Tuhan), Ya Tuhan (Tuhan) \nKuhendak jadi skarang. Hambamu (Tuhan), \nYa Tuhan (Tuhan) Trimalah aku skarang."
-            },
-            {
-                "verse_number": "2",
-                "lyrics": "Dunia ini tiada ertinya Bagiku, bagiku \nKutinggalkan kesukaannya Kerna Tuhanku."
-            },
-            {
-                "verse_number": "3",
-                "lyrics": "Bila Kuserahkan hidupku PadaMu, padaMu. \nSegarkan selalu hidupku, Pimpin hambaMu."
-            }
-        ]
-    },
-    {
-        "song_number": "075",
-        "song_title": "YA TUHAN, KUHENDAK MENJADI SUCI",
-        "verses": [
-            {
-                "verse_number": "1",
-                "lyrics": "Ya Tuhan, kuhendak menjadi suci, \nKupinta Tuhan tinggallah di hati \nHalaukan berhala dari hidupku, \nTolong sucikan aku sperti salju."
-            },
-            {
-                "verse_number": "Korus",
-                "lyrics": "Sperti salju, ya sperti salju, \nTolong sucikan aku sperti salju."
-            },
-            {
-                "verse_number": "2",
-                "lyrics": "Pandanglah dari arasMu di syurga \nSerta tolonglah aku, bri anugrah, \nSupaya kudapat serahkan diri \nPadaMu sehingga kujadi suci."
-            },
-            {
-                "verse_number": "3",
-                "lyrics": "Di hadapan salibMu aku sembah \nSerta berserah dengan rendah hati; \nKuharap tetap akan kuasa darah \nMembrikan kepadaku hati suci."
-            },
-            {
-                "verse_number": "4",
-                "lyrics": "Ya Tuhan jadikanlah hidup baru \nBagi hambaMu yang lemah begini. \nDengar serta trima permohonanku: \nBrikanlah kepadaku hati suci."
-            }
-        ]
-    },
-    {
-        "song_number": "076",
-        "song_title": "KUSERAHKAN PADA YESUS",
-        "verses": [
-            {
-                "verse_number": "1",
-                "lyrics": "Kuserahkan pada Yesus Badan, jiwa, hatiku; \nIalah yang aku sembah, Ikut slama hidupku."
-            },
-            {
-                "verse_number": "Korus",
-                "lyrics": "Kuserahkanlah, Kuserahkanlah \nPadaMu Tuhan, hidupku Kuserahkanlah."
-            },
-            {
-                "verse_number": "2",
-                "lyrics": "Kuserahkan pada Yesus Fikiran dan jalanku; \nAku sujud kepadaNya, Ialah pemimpinku."
-            },
-            {
-                "verse_number": "3",
-                "lyrics": "Kuserahkan pada Yesus Sgala susah, dosaku; \nDatang RohNya yang berkuasa Menghiburkan hatiku."
-            },
-            {
-                "verse_number": "4",
-                "lyrics": "Kuserahkan pada Yesus Diri slama hidupku; \nAku inilah dombaNya, Ialah Gembalaku."
-            }
-        ]
-    },
-    {
         "song_number": "077",
         "song_title": "BARANGSIAPA DENGAR",
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Barangsiapa dengar, khabar masyhurkan: \nSluruh dunia ini ada ampunan; \nOrang yang berdosa Yesus sayangkan, \nMari barangsiapa mau!"
+                "lyrics": "Barang siapa dengar, khabar masyhurkan: \nSluruh dunia ini ada ampunan; \nOrang yang berdosa Yesus sayangkan, \nMari barang siapa mau!"
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Barangsiapa mau, barangsiapa mau, \nMarilah masyhurkan sampai dunia tau; \nYesuslah berkuasa melepaskan kau. \nMari, barangsiapa mau!"
+                "lyrics": "Barang siapa mau, barangsiapa mau, \nMarilah masyhurkan sampai dunia tau; \nYesuslah berkuasa melepaskan kau. \nMari, barang siapa mau!"
             },
             {
                 "verse_number": "2",
@@ -1781,7 +1694,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Barangsiapa mau, teguh perjanjian; \nBarang Siapa mau, slamanya tahan, \nMari trima slamat diberikan Tuhan. \nMari barangsiapa mau!"
+                "lyrics": "Barang siapa mau, teguh perjanjian; \nBarang Siapa mau, slamanya tahan, \nMari trima slamat diberikan Tuhan. \nMari barang siapa mau!"
             }
         ]
     },
@@ -1921,7 +1834,7 @@
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Malaikat pun bernyayi\nMemasyhurkan hal ini.\nTrimalah penghiburan,\nPuji nama Tuhan."
+                "lyrics": "Malaikat pun bernyanyi\nMemasyhurkan hal ini.\nTrimalah penghiburan,\nPuji nama Tuhan."
             },
             {
                 "verse_number": "2",
@@ -1943,7 +1856,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Kubrikan bagimu NyawaKu, darahKu,\nSupaya dirimu Menjadi malikKu.\nHidupKu korban bagimu, Apakah korbanmu?\nHidupKu korban bagimu, Apakah korbanmu?"
+                "lyrics": "Kubrikan bagimu NyawaKu, darahKu,\nSupaya dirimu Menjadi milikKu.\nHidupKu korban bagimu, Apakah korbanmu?\nHidupKu korban bagimu, Apakah korbanmu?"
             },
             {
                 "verse_number": "2",
@@ -2009,7 +1922,7 @@
             },
             {
                 "verse_number": "4",
-                "lyrics": "Betapa eloknya kudengar segra\nBerbunyi nafiri Tuhan. Kutinggalkan dunia,\npersi ke syurga, Negri indah, Tuhan janjikan."
+                "lyrics": "Betapa eloknya kudengar segra\nBerbunyi nafiri Tuhan. Kutinggalkan dunia,\npergi ke syurga, Negri indah, Tuhan janjikan."
             }
         ]
     },
@@ -2151,11 +2064,11 @@
     },
     {
         "song_number": "094",
-        "song_title": "TUHAN JADI PEMINPINKU",
+        "song_title": "TUHAN JADI PEMIMPINKU",
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Tuhan jadi Peminpinku,\nSyukur kubrikan padaNya.\nDi mana aku berjalan,\nHidupku aman sertaNya."
+                "lyrics": "Tuhan jadi Pemimpinku,\nSyukur kubrikan padaNya.\nDi mana aku berjalan,\nHidupku aman sertaNya."
             },
             {
                 "verse_number": "Korus",
@@ -2171,7 +2084,7 @@
             },
             {
                 "verse_number": "4",
-                "lyrics": "Dan bila habis kerjaku,\nDan akupun sudah menang,\nTuhan jadi peminpinku,\nYang menghantarkan ke sebrang."
+                "lyrics": "Dan bila habis kerjaku,\nDan akupun sudah menang,\nTuhan jadi pemimpinku,\nYang menghantarkan ke sebrang."
             }
         ]
     },
@@ -2199,7 +2112,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Engaku tiada Kualpakan, Tiada pun Kutinggalkan.\nKupliharakan, slamatkan, Dirimu kulindungkan,\nJangan takut kesusahan, Hanya ikutlah Tuhan."
+                "lyrics": "Engaku tiada Kulupakan, Tiada pun Kutinggalkan.\nKupliharakan, slamatkan, Dirimu kulindungkan,\nJangan takut kesusahan, Hanya ikutlah Tuhan."
             },
             {
                 "verse_number": "2",
@@ -2265,7 +2178,7 @@
     },
     {
         "song_number": "099",
-        "song_title": "YA YESUS, YANG BERKASIAHAN",
+        "song_title": "YA YESUS, YANG BERKASIHAN",
         "verses": [
             {
                 "verse_number": "1",
@@ -2325,7 +2238,55 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Di bayang salib Yesus,\nKu dapat lindungan;\nAku rindukan dariNya\nSinar wajah Tuhan;\nAku mau tinggalkan dunia\nYang tak memauskan,\nBagiku salibnya Yesus\nJadi kemuliaan."
+                "lyrics": "Di bayang salib Yesus,\nKu dapat lindungan;\nAku rindukan dariNya\nSinar wajah Tuhan;\nAku mau tinggalkan dunia\nYang tak memuaskan,\nBagiku salibnya Yesus\nJadi kemuliaan."
+            }
+        ]
+    },
+    {
+        "song_number": "102",
+        "song_title": "IMAN ALMASIH YANG KEKAL",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Iman Almasih yang kekal, \nBiarlah musuhNya lawan; \nPenjara, api dan pedang \nTak boleh membinasakan. \nIman Almasih yang kekal \nTentu kami tak mau sangkal."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Tertangkap saleh dan rasul, \nTetapi bebas hatinya, \nDan jikalau dibunuh pun, \nSungguh mulia matinya, \nIman Almasih yang kekal \nTentu kami tak mau sangkal."
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Pada lawan dan musuh pun \nKami mau tunjuk kasihan: \nDan oleh hidup yang sopan \nIman itu mahu masyhurkan. \nIman Almasih yang kekal \nTentu kami tak mau sangkal."
+            }
+        ]
+    },
+    {
+        "song_number": "103",
+        "song_title": "AKU SESAT DARI TUHAN",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Aku sesat dari Tuhan, \nSkarang kupulang, \nLama kubuat kejahatan, \nSkarang kupulang."
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Kupulang ke rumah, tak kan menyimpang, \nYa Tuhanku, trimalah, skarang kupulang."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Aku sudah lama hilang, \nSkarang kupulang, \nAku bertobat, Ya Tuhan, \nSkarang kupulang."
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Aku tak mau sesat lagi, \nSkarang kupulang, \nCintaMu panggil kembali, \nSkarang kupulang."
+            },
+            {
+                "verse_number": "4",
+                "lyrics": "Oh, dengarlah seruanku, \nSkarang kupulang, \nEngkau tlah mati gantiku, \nSkarang kupulang."
+            },
+            {
+                "verse_number": "5",
+                "lyrics": "DarahMu slamatkan aku, \nSkarang kupulang, \nBasuhkan sgala dosaku, \nSkarang kupulang."
             }
         ]
     },
@@ -2339,7 +2300,7 @@
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Tiap jam . tiap jam,\nKu perlu padaMu, Tuhan;\nTiap jam, Tiap jam,\nYa Yesus, Pliharakan!"
+                "lyrics": "Tiap jam, tiap jam,\nKu perlu padaMu, Tuhan;\nTiap jam, Tiap jam,\nYa Yesus, Pliharakan!"
             },
             {
                 "verse_number": "2",
@@ -2369,7 +2330,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Jiwaku takut kerna dosa,\nYang menyembabkan luka parah;\nLindungi aku, ya Hu Allah,\nMengganti hidup kejahatan."
+                "lyrics": "Jiwaku takut kerna dosa,\nYang menyebabkan luka parah;\nLindungi aku, ya Hu Allah,\nMengganti hidup kejahatan."
             },
             {
                 "verse_number": "3",
@@ -2461,11 +2422,11 @@
     },
     {
         "song_number": "109",
-        "song_title": "SALIB DI BUKIT GOLGUTA",
+        "song_title": "SALIB DI BUKIT GOLGOTA",
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Ada satu salib di bukit Golguta,\nSuatu langgam siksa dan hina,\nPada salib itu tergantunglah Yesus,\nBagi aku yang tlah berdosa."
+                "lyrics": "Ada satu salib di bukit Golgota,\nSuatu lambang siksa dan hina,\nPada salib itu tergantunglah Yesus,\nBagi aku yang tlah berdosa."
             },
             {
                 "verse_number": "Korus",
@@ -2495,7 +2456,7 @@
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Tuhanku (TuhanKu) Batu Karangku,\nPelindung (Pelindung) Ynag maha kuasa,\nPeminpin (Peminpin) pada jalanku,\nPelindung dalam bahaya."
+                "lyrics": "Tuhanku (TuhanKu) Batu Karangku,\nPelindung (Pelindung) Yang maha kuasa,\nPeminpin (Peminpin) pada jalanku,\nPelindung dalam bahaya."
             },
             {
                 "verse_number": "2",
@@ -2525,7 +2486,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Kuberlindung di bawah sayapYesus,\nItulah yang kuharap slamanya.\nOmbak memalu dan hidup pun susah,\nJiwaku gemar oleh kuasaNya."
+                "lyrics": "Kuberlindung di bawah sayap Yesus,\nItulah yang kuharap slamanya.\nOmbak memalu dan hidup pun susah,\nJiwaku gemar oleh kuasaNya."
             },
             {
                 "verse_number": "3",
@@ -2547,7 +2508,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Ya Tuhan, mahakuasa,\nYang nertakhta di syurga,\nTengok kami yang tunggu\nDi hadapan mezbahMu,\nBri rahmatMu!"
+                "lyrics": "Ya Tuhan, mahakuasa,\nYang bertakhta di syurga,\nTengok kami yang tunggu\nDi hadapan mezbahMu,\nBri rahmatMu!"
             },
             {
                 "verse_number": "3",
@@ -2653,7 +2614,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Nama Yesus sperti prisai\nDi waktu pencubaan;\nBarangsiapa yang mamakai\nTentu dapat lindungan."
+                "lyrics": "Nama Yesus sperti prisai\nDi waktu pencubaan;\nBarangsiapa yang memakai\nTentu dapat lindungan."
             },
             {
                 "verse_number": "3",
@@ -2693,7 +2654,7 @@
     },
     {
         "song_number": "119",
-        "song_title": "YESUS SABAHAT YANG INDAH",
+        "song_title": "YESUS SAHAHAT YANG INDAH",
         "verses": [
             {
                 "verse_number": "1",
@@ -2701,7 +2662,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Yesus, Sahabat yang indah, Yang mati kerna aku;\nTiadalah kasih ynag sama Dengan kasihNya itu.\nHarta dan skalian kuasaku PadaNya kuerahkan.\nBadan, hati dan hidupku Menjadi milik Tuhan."
+                "lyrics": "Yesus, Sahabat yang indah, Yang mati kerna aku;\nTiadalah kasih yang sama Dengan kasihNya itu.\nHarta dan skalian kuasaku PadaNya kuserahkan.\nBadan, hati dan hidupku Menjadi milik Tuhan."
             },
             {
                 "verse_number": "3",
@@ -2827,7 +2788,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Raja kekal, pimpinlah,\nAlahkanlah dosa,\nKesucian brikanlah\nOleh rahmat Yesus;\nBukanlah oleh pedang,\nAtau senjata prang,\nTetapi oleh cinta\nKami akan menang."
+                "lyrics": "Raja kekal, pimpinlah,\nKalahkanlah dosa,\nKesucian brikanlah\nOleh rahmat Yesus;\nBukanlah oleh pedang,\nAtau senjata prang,\nTetapi oleh cinta\nKami akan menang."
             },
             {
                 "verse_number": "3",
@@ -2849,7 +2810,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Bri puji pada Yesus,\nDiampuni dosa,\nDan berkaNya membawa\nKita masuk syurga."
+                "lyrics": "Bri puji pada Yesus,\nDiampuni dosa,\nDan berkatNya membawa\nKita masuk syurga."
             },
             {
                 "verse_number": "3",
@@ -2862,6 +2823,28 @@
             {
                 "verse_number": "5",
                 "lyrics": "Bri puji pada Yesus,\nMeski jiwa lemah,\nBangkitlah dan bersaksi\nDan dapat kuasaNya."
+            }
+        ]
+    },
+    {
+        "song_number": "126",
+        "song_title": "HATI GEMBIRA, KERNA ELOKNYA",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Hati gembira kerna eloknya \nTinggal pada ribaan Tuhan; \nKurasa senang, berbahagia, \nTinggal pada ribaan Tuhan."
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Tinggal (pada ribaan), tinggal (pada ribaan), \nDalam tempat perlindungan, \nTinggal (pada ribaan), tinggal (pada ribaan), \nTinggal pada ribaan Tuhan."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Sangat indahNya, aman hatiku, \nTinggal pada ribaan Tuhan; \nTranglah selalu sgala jalanku, \nTinggal pada ribaan Tuhan."
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Tiada kutakut, tiada kubimbang, \nTinggal pada ribaan Tuhan; \nTiadalah penat, susah pun hilang, \nTinggal pada ribaan Tuhan."
             }
         ]
     },
@@ -2949,7 +2932,7 @@
             },
             {
                 "verse_number": "4",
-                "lyrics": "Terbangkanlah, hai angin: Yesus yang bri slamat!\nPada kaya dan miskin: Yesus yang bri slamat!\nDan sempurna slamtNya; Skalin orang yang sesat\nBoleh dapat rahmatNya: Yesus yang bri slamat!"
+                "lyrics": "Terbangkanlah, hai angin: Yesus yang bri slamat!\nPada kaya dan miskin: Yesus yang bri slamat!\nDan sempurna slamatNya; Skalin orang yang sesat\nBoleh dapat rahmatNya: Yesus yang bri slamat!"
             }
         ]
     },
@@ -3005,7 +2988,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Puji Yesus, Tuhan yang Maha Mulia,\nDengar syurga pun turut bernyanyi.\nJuruslamat sampai selama-laamnya,\nYesus, Tuhan, Raja, Iman, Nabi.\nIa datang dengan menang dan kuasa,\nTermuli slalu nama Yesus."
+                "lyrics": "Puji Yesus, Tuhan yang Maha Mulia,\nDengar syurga pun turut bernyanyi.\nJuruslamat sampai selama-lamanya,\nYesus, Tuhan, Raja, Iman, Nabi.\nIa datang dengan menang dan kuasa,\nTermulia slalu nama Yesus."
             }
         ]
     },
@@ -3079,7 +3062,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Kumesti Yesus sertaku\nBila ombak memalu;\nDiamankanNya jiwaku,\nAngin rebut pun lalu."
+                "lyrics": "Kumesti Yesus sertaku\nBila ombak memalu;\nDiamankanNya jiwaku,\nAngin ribut pun lalu."
             },
             {
                 "verse_number": "4",
@@ -3136,6 +3119,32 @@
         ]
     },
     {
+        "song_number": "138",
+        "song_title": "DI TEMPAT YANG LEBIH TINGGI",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Di tempat yang lebih tinggi \nAku rindu mau berdiri, \nSerta ku pinta padaMu; \nTuhan angkatlah jiwaku."
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Tuhan angkatlah jiwaku \nLebih dekat kepadaMu; \nBiarlah aku berdiri \nDi tempat yang lebih tinggi."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Lain orang juga bertahan \nDalam syak dan ketakutan \nTetapi tujuan aku \nKe tempat yang tinggi itu."
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Aku mau tinggalkan dosa \nDan kerja yang sia-sia; \nDengan tetap percayaku \nKe tempat yang tinggi kutuju."
+            },
+            {
+                "verse_number": "4",
+                "lyrics": "Aku mendaki gunungNya, \nDan lihat cahaya mulia. \nTuhan pimpinlah jiwaku, \nKe tempat yang tinggi itu."
+            }
+        ]
+    },
+    {
         "song_number": "139",
         "song_title": "PENGHARAPANKU HANYALAH",
         "verses": [
@@ -3153,7 +3162,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Kuingat slalu janjiNya.\nItulah penghiburanku.\nDikorbankanNya nywaNya,\nSupaya slamat hidupku."
+                "lyrics": "Kuingat slalu janjiNya.\nItulah penghiburanku.\nDikorbankanNya nyawaNya,\nSupaya slamat hidupku."
             },
             {
                 "verse_number": "4",
@@ -3223,11 +3232,11 @@
     },
     {
         "song_number": "142",
-        "song_title": "BETAPA SEJAHTTRA KURASA",
+        "song_title": "BETAPA SEJAHTRA KURASA",
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Betapa sejahtr kurasa Tuhan,\nBerlindung atasMu, ya Batu Zaman;\nJika dalam dosa, lemah dan susah,\nPadaMu kulari, jadi sentosa."
+                "lyrics": "Betapa sejahtra kurasa Tuhan,\nBerlindung atasMu, ya Batu Zaman;\nJika dalam dosa, lemah dan susah,\nPadaMu kulari, jadi sentosa."
             },
             {
                 "verse_number": "Korus",
@@ -3235,11 +3244,11 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Di waktu senang atau dukacita,\nDan bila pencubaan pun sangatlah;\nOmbak lautnmemalu, dan musuh gagah,\nPadaMu kulari, jadi sentosa."
+                "lyrics": "Di waktu senang atau dukacita,\nDan bila pencubaan pun sangatlah;\nOmbak laut nmemalu, dan musuh gagah,\nPadaMu kulari, jadi sentosa."
             },
             {
                 "verse_number": "3",
-                "lyrics": "Krapkali setru beserta tentranya\nMenbuba aku dengan tipu daya;\nKrapkali kurasa penat sangatlah,\nPadaMu kulari, jadi sentosa."
+                "lyrics": "Krapkali setru beserta tentranya\nMencuba aku dengan tipu daya;\nKrapkali kurasa penat sangatlah,\nPadaMu kulari, jadi sentosa."
             }
         ]
     },
@@ -3257,11 +3266,11 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Plihara diri mu dari yang jahat,\nTurut Firman Tuhan ynag Maha Kudrat;\nBrikanlah hatimu kepada Yang Esa,\nPandang pada Yesus, trima sentosa."
+                "lyrics": "Plihara diri mu dari yang jahat,\nTurut Firman Tuhan yang Maha Kudrat;\nBrikanlah hatimu kepada Yang Esa,\nPandang pada Yesus, trima sentosa."
             },
             {
                 "verse_number": "3",
-                "lyrics": "Mohkota alhayat dikurniakanNya\nKepada umatNya yang sudah menang;\nHaraplah selalu pada kasihNya,\nPandang pada Yesus, pegang janjiNya."
+                "lyrics": "Mahkota alhayat dikurniakanNya\nKepada umatNya yang sudah menang;\nHaraplah selalu pada kasihNya,\nPandang pada Yesus, pegang janjiNya."
             }
         ]
     },
@@ -3287,7 +3296,7 @@
             },
             {
                 "verse_number": "4",
-                "lyrics": "Jangan bimbinglah, perteguhkan iman,\nPanglima prangmu ada di sisimu\nMembrikan pimpinan dan penghiburan.\nBerdiri gagah menentang musuhmu."
+                "lyrics": "Jangan bimbanglah, perteguhkan iman,\nPanglima prangmu ada di sisimu\nMembrikan pimpinan dan penghiburan.\nBerdiri gagah menentang musuhmu."
             }
         ]
     },
@@ -3341,7 +3350,7 @@
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Kami doakan dengan rendah hati,\nBaptiskanlah kami dengan Roh Suci.\n(Ayat 4)Kami sembah Eagkau, ya Domba Allah,\nKami puji Engkau, Slama-lamanya."
+                "lyrics": "Kami doakan dengan rendah hati,\nBaptiskanlah kami dengan Roh Suci.\n(Ayat 4)Kami sembah Engkau, ya Domba Allah,\nKami puji Engkau, Slama-lamanya."
             },
             {
                 "verse_number": "2",
@@ -3359,27 +3368,27 @@
     },
     {
         "song_number": "148",
-        "song_title": "BERKAT BERLEMPAHAN KUBERIKAN",
+        "song_title": "BERKAT BERLIMPAHAN KUBERIKAN",
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "“Berkat berlempah Kubrikan,”\nItulah janji Tuhan.\nJiwa sungguh disegarkan.\nHati pun dikuduskan."
+                "lyrics": "“Berkat berlimpah Kubrikan,”\nItulah janji Tuhan.\nJiwa sungguh disegarkan.\nHati pun dikuduskan."
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Berkat berlempah\nDiberikan Yesus Tuhan.\nMarilah kita mendoa:\nPada kami curahkan!"
+                "lyrics": "Berkat berlimpah\nDiberikan Yesus Tuhan.\nMarilah kita mendoa:\nPada kami curahkan!"
             },
             {
                 "verse_number": "2",
-                "lyrics": "“Berkat berlempah Kubrikan,”\nBangunlah, hai umatNya.\nDi gunung lembah masyhurkan:\nBerkat dicurahkanNya!"
+                "lyrics": "“Berkat berlimpah Kubrikan,”\nBangunlah, hai umatNya.\nDi gunung lembah masyhurkan:\nBerkat dicurahkanNya!"
             },
             {
                 "verse_number": "3",
-                "lyrics": "“Berkat berlempah Kubrikan,”\nYa, Tuhan curahkanlah \nPada kami sidang Tuhan,\nHujan berkat, anugrah!"
+                "lyrics": "“Berkat berlimpah Kubrikan,”\nYa, Tuhan curahkanlah \nPada kami sidang Tuhan,\nHujan berkat, anugrah!"
             },
             {
                 "verse_number": "4",
-                "lyrics": "“Berkat berlempah Kubrikan,”\nSkarang curahkan, Tuhan,\nDi waktu kami berhimpun,\nDoa kami dengarkan!"
+                "lyrics": "“Berkat berlimpah Kubrikan,”\nSkarang curahkan, Tuhan,\nDi waktu kami berhimpun,\nDoa kami dengarkan!"
             }
         ]
     },
@@ -3445,7 +3454,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Sangat besar sengsaraNya Yesus Juruslamat\nMencari satu dombaNya yang hilang dan sesat,\nDidengar suara dombaNya Letih, hamper putus nyawa,\nLetih, hamper putus nyawa."
+                "lyrics": "Sangat besar sengsaraNya Yesus Juruslamat\nMencari satu dombaNya yang hilang dan sesat,\nDidengar suara dombaNya Letih, hampir putus nyawa,\nLetih, hamper putus nyawa."
             },
             {
                 "verse_number": "4",
@@ -3463,7 +3472,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Kusuka memasyhurkan Crita TuhanYesus\nYang sangat berkasihan, Mati ganti kita.\nCrita yang amat indah Dan tentulah benar.\nYang trima pun senanglah Dan jiwanya gemar."
+                "lyrics": "Kusuka memasyhurkan Crita Tuhan Yesus\nYang sangat berkasihan, Mati ganti kita.\nCrita yang amat indah Dan tentulah benar.\nYang trima pun senanglah Dan jiwanya gemar."
             },
             {
                 "verse_number": "Korus",
@@ -3493,7 +3502,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Embun syurga pun mendiris, Bibit yang tlah tertanam,\nIndahlah buahnya nanti, ang Tuhan kurniakan."
+                "lyrics": "Embun syurga pun mendiris, Bibit yang tlah tertanam,\nIndahlah buahnya nanti, yang Tuhan kurniakan."
             },
             {
                 "verse_number": "3",
@@ -3533,11 +3542,11 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Di lorong, kampung pun kami kerja,\nDan ikut jejakMu, TuhanYesus.\nOrang hina-dina Kami himpunkanlah,\nDan beserta Tuhan Kami kerja."
+                "lyrics": "Di lorong, kampung pun kami kerja,\nDan ikut jejakMu, Tuhan Yesus.\nOrang hina-dina Kami himpunkanlah,\nDan beserta Tuhan Kami kerja."
             },
             {
                 "verse_number": "3",
-                "lyrics": "Tiada rasa penat, kami kerja,\nKerna Tuhan dulu pun segarlah.\nKesusahan kami, Pengbihuran kami,\nBesertaMu Tuhan Kami kerja."
+                "lyrics": "Tiada rasa penat, kami kerja,\nKerna Tuhan dulu pun segarlah.\nKesusahan kami, Penghihuran kami,\nBesertaMu Tuhan Kami kerja."
             },
             {
                 "verse_number": "4",
@@ -3559,7 +3568,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Orang yang menabur pada sgala masa\nBaik di waktu hujan, atau pu panas.\nHanya diharapkannya musim menuai,\nDan bersukaria membawa berkas."
+                "lyrics": "Orang yang menabur pada sgala masa\nBaik di waktu hujan, ataupun panas.\nHanya diharapkannya musim menuai,\nDan bersukaria membawa berkas."
             },
             {
                 "verse_number": "3",
@@ -3573,11 +3582,11 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Pandang jauh , dekat pun skarang,\nLihat gandum kuninglah;\nSperti mas nampaklah lading\nAtas gunung dan lembah."
+                "lyrics": "Pandang jauh , dekat pun skarang,\nLihat gandum kuninglah;\nSperti mas nampaklah ladang\nAtas gunung dan lembah."
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Tuhan yang empunya lading,\nDengarkanlah hambaMu.\nSuruhkanlah banyak orang\nMenuai di ladangMu."
+                "lyrics": "Tuhan yang empunya ladang,\nDengarkanlah hambaMu.\nSuruhkanlah banyak orang\nMenuai di ladangMu."
             },
             {
                 "verse_number": "2",
@@ -3603,7 +3612,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Pergilah ke kampong sertalorong;\nCarilah gandum di tengah lalang,\nYang di tepi jalan pun kumpulkan\nDan satu pun janganlah tinggalkan."
+                "lyrics": "Pergilah ke kampong serta lorong;\nCarilah gandum di tengah lalang,\nYang di tepi jalan pun kumpulkan\nDan satu pun janganlah tinggalkan."
             },
             {
                 "verse_number": "4",
@@ -3747,7 +3756,7 @@
             },
             {
                 "verse_number": "2",
-                "lyrics": "Glap gulita kerna dosa,\nOmbak sangat memalu;\nOrang yang di dalam susah,\nMencai menaramu."
+                "lyrics": "Glap gulita kerna dosa,\nOmbak sangat memalu;\nOrang yang di dalam susah,\nMencari menaramu."
             },
             {
                 "verse_number": "3",
@@ -3761,7 +3770,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Di pantai sebrang lautan\nDi sana lading permai;\nKudengarlah panggilan,\nDan segra aku pergi."
+                "lyrics": "Di pantai sebrang lautan\nDi sana ladang permai;\nKudengarlah panggilan,\nDan segra aku pergi."
             },
             {
                 "verse_number": "Korus",
@@ -3773,7 +3782,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Di sebrang kulihatlah\nTangan yang memanggilakn;\nKupergi ke sanalah,\nKe tempat kurindukan."
+                "lyrics": "Di sebrang kulihatlah\nTangan yang memanggilkan;\nKupergi ke sanalah,\nKe tempat kurindukan."
             },
             {
                 "verse_number": "4",
@@ -3787,15 +3796,15 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Mau kau trima rahmat Tuhan,\nBri berlempahan;\nLihat kerjaNya yang hairan,\nBri berlempahan.\nBuka pintu hatimu,\nBuka juga tanganmu;\nIkutlah Sabda Tuhan,\nBri berlempahan."
+                "lyrics": "Mau kau trima rahmat Tuhan,\nBri berlimpahan;\nLihat kerjaNya yang hairan,\nBri berlimpahan.\nBuka pintu hatimu,\nBuka juga tanganmu;\nIkutlah Sabda Tuhan,\nBri berlimpahan."
             },
             {
                 "verse_number": "2",
-                "lyrics": "Bersukaria slamanya,\nBri berlempahan;\nJiwa menjadi segarlah,\nBri berlempahan;\nBri apa padamu,\nIndahlah bagi Tuhan,\nSgala persembahanmu,\nBri berlempahan."
+                "lyrics": "Bersukaria slamanya,\nBri berlimpahan;\nJiwa menjadi segarlah,\nBri berlimpahan;\nBri apa padamu,\nIndahlah bagi Tuhan,\nSgala persembahanmu,\nBri berlimpahan."
             },
             {
                 "verse_number": "3",
-                "lyrics": "Brikan memasyhurkan Tuhan,\nBri berlempahan;\nBrikan serta trang pancarkan,\nBri berlempahan,\nMari kau trima p’hala\nPada waktu datangNya,\nIkutlah Sabda Tuhan,\nBri berlempahan."
+                "lyrics": "Brikan memasyhurkan Tuhan,\nBri berlimpahan;\nBrikan serta trang pancarkan,\nBri berlimpahan,\nMari kau trima p’hala\nPada waktu datangNya,\nIkutlah Sabda Tuhan,\nBri berlimpahan."
             }
         ]
     },
@@ -3845,7 +3854,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Mari orang saleh dengan sukacita,\nMarilah, marilah ke Baitlahem!\nMari melihat Raja skalian Raja,\nMari menyembah Dia,\nMari menyembah Dia,\nMari menyembah Dia, Almaseh!"
+                "lyrics": "Mari orang saleh dengan sukacita,\nMarilah, marilah ke Betlehem!\nMari melihat Raja skalian Raja,\nMari menyembah Dia,\nMari menyembah Dia,\nMari menyembah Dia, Almaseh!"
             },
             {
                 "verse_number": "2",
@@ -3863,7 +3872,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Dengar malaikat puji\nDengan suara yang merdu,\nDibri slamat di bumi\nOleh Raja yang baru.\nBangsa skalian, bersuka,\nNyanyi dan gembiralah!\nYesus, Anak Arrahim,\nJadiNya di Baitlahem."
+                "lyrics": "Dengar malaikat puji\nDengan suara yang merdu,\nDibri slamat di bumi\nOleh Raja yang baru.\nBangsa skalian, bersuka,\nNyanyi dan gembiralah!\nYesus, Anak Arrahim,\nJadiNya di Betlehem."
             },
             {
                 "verse_number": "2",
@@ -3889,7 +3898,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Lenyaplah duri dan duka,\nTiada lagi dosa,\nAmat lempah berkat Yesus\nSlamat dibrikanNya,\nSlamat dibrikanNya,\nSlamat, slamat dibrikanNya."
+                "lyrics": "Lenyaplah duri dan duka,\nTiada lagi dosa,\nAmat limpah berkat Yesus\nSlamat dibrikanNya,\nSlamat dibrikanNya,\nSlamat, slamat dibrikanNya."
             },
             {
                 "verse_number": "4",
@@ -3941,7 +3950,7 @@
             },
             {
                 "verse_number": "4",
-                "lyrics": "Setan penghulu keglapan Yang mencuba Yesus pun.\nTiada hentikam peprangan Sampai habis masa pun.\nSangatlah skarang marahnya Kerna singkat masanya.\nYesus sungguh segra datang, Tentulah Tuhan menang."
+                "lyrics": "Setan penghulu keglapan Yang mencuba Yesus pun.\nTiada hentikan peprangan Sampai habis masa pun.\nSangatlah skarang marahnya Kerna singkat masanya.\nYesus sungguh segra datang, Tentulah Tuhan menang."
             },
             {
                 "verse_number": "5",
@@ -4099,11 +4108,11 @@
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Yesus datang megumpulkan gandum,\nTapi rumput klak dibakarNya.\nDi manakah kita dikumpulkan \nPada hari pehukuman?"
+                "lyrics": "Yesus datang megumpulkan gandum,\nTapi rumput klak dibakarNya.\nDi manakah kita dikumpulkan \nPada hari penghukuman?"
             },
             {
                 "verse_number": "2",
-                "lyrics": "Dapat klak kita dengar suaraNya:\n“Slamat hamba yang setia?”\nAtau khutiar dan takutlah pula\nKerna dihalaukanNyalah?"
+                "lyrics": "Dapat klak kita dengar suaraNya:\n“Slamat hamba yang setia?”\nAtau khuatir dan takutlah pula\nKerna dihalaukanNyalah?"
             },
             {
                 "verse_number": "3",
@@ -4237,7 +4246,7 @@
             },
             {
                 "verse_number": "4",
-                "lyrics": "Mari jikaku, temtramlah;\nKehendak Tuhan jadikan;\nKuikutlah Firman Yesus,\nKurasa jadi sentosa,\nHingga tibalah di syurga."
+                "lyrics": "Mari jikaku, tentramlah;\nKehendak Tuhan jadikan;\nKuikutlah Firman Yesus,\nKurasa jadi sentosa,\nHingga tibalah di syurga."
             }
         ]
     },
@@ -4247,7 +4256,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Mari bernyanyi serta bersukaria,\nTak lama lagi, kita pulang;\nMalam lenyaplah, maka siang datanglah,\nTak lama lagi, kita pulnag."
+                "lyrics": "Mari bernyanyi serta bersukaria,\nTak lama lagi, kita pulang;\nMalam lenyaplah, maka siang datanglah,\nTak lama lagi, kita pulang."
             },
             {
                 "verse_number": "Korus",
@@ -4377,7 +4386,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Kita akan nerkumpulkaah?\nDi tepi sungai itu?\nAirnya yang mengalirlah\nDaripada aras Hu?"
+                "lyrics": "Kita akan berkumpulkaah?\nDi tepi sungai itu?\nAirnya yang mengalirlah\nDaripada aras Hu?"
             },
             {
                 "verse_number": "Korus",
@@ -4429,7 +4438,7 @@
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Tiada lagi air mata\n(Tiada lagi air mata)\nMati, sakit dan fana;\n(Mati, sakit dan fana)\nPerhitungan taun tiada,\n(Perhitungan taun tiada, tiada,)\nMalam tak di sana\n(Malam tak di sana)"
+                "lyrics": "Tiada lagi air mata\n(Tiada lagi air mata)\nMati, sakit dan fana;\n(Mati, sakit dan fana)\nPerhitungan tahun tiada,\n(Perhitungan taun tiada, tiada,)\nMalam tak di sana\n(Malam tak di sana)"
             },
             {
                 "verse_number": "2",
@@ -4507,7 +4516,7 @@
             },
             {
                 "verse_number": "Korus",
-                "lyrics": "Kulihatlah muka Tuhna,\nMuka Tuhan, muka Tuhan;\nJikalau kulihat muka Tuhan,\nBaru sempurna kemuliaan."
+                "lyrics": "Kulihatlah muka Tuhan,\nMuka Tuhan, muka Tuhan;\nJikalau kulihat muka Tuhan,\nBaru sempurna kemuliaan."
             },
             {
                 "verse_number": "2",
@@ -4566,6 +4575,10 @@
             {
                 "verse_number": "1",
                 "lyrics": "Tiada brapa lama\nKuhidup di dunia,\nLalu aku mesti tidur,\nBerhenti di kubur."
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Sucikan jiwaku \nAkan hari itu. \nOleh darahMu, Tuhanku,\nHapuskan dosaku."
             },
             {
                 "verse_number": "2",
@@ -4627,7 +4640,7 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Tuhan tetaplah besertamu;\nDilindunganNya dirimu,\nDib'rikanNya rezekimu,\nHingga kita nanti bertemu.\n\nKorus:\nBertemu, bertemu,\nHingga nanti bertemu,\nBertemu, bertemu,\nTuhan tetaplah besertamu."
+                "lyrics": "Tuhan tetaplah besertamu;\nDilindunganNya dirimu,\nDib'rikanNya rezekimu,\nHingga kita nanti bertemu."
             },
             {
                 "verse_number": "Korus",
@@ -4639,7 +4652,7 @@
             },
             {
                 "verse_number": "3",
-                "lyrics": "Tuhan tetaplah besertamu,\nGlap gulita pun klilingmu,\nAngin rebut pun dekatmu,\nHingga kita nanti bertemu."
+                "lyrics": "Tuhan tetaplah besertamu,\nGlap gulita pun klilingmu,\nAngin ribut pun dekatmu,\nHingga kita nanti bertemu."
             },
             {
                 "verse_number": "4",
@@ -4666,6 +4679,284 @@
             {
                 "verse_number": "4",
                 "lyrics": "Dan bila tibalah perceraian kita,\nTetap pengharapan kita\nLagi akan jumpa."
+            }
+        ]
+    },
+    {
+        "song_number": "204",
+        "song_title": "BAHASA CINTA",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Andaikan aku lakukan yang hulur mulia \nJika tanpa kasih cinta hampa tak berguna"
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Ajarilah kami bahasa cintaMu \nAgar kami dekat padamu yang Tuhanku \nAjarilah kami bahasa cintaMu \nAgar kami dekat padaMu"
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Andaikan aku fahami bahasa semua \nHanyalah bahsa cinta kunci tiap hari"
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Cinta itu lemah lembut sabar sederhana \nCinta itu murah hati rela menderita."
+            }
+        ]
+    },
+    {
+        "song_number": "205",
+        "song_title": "MENDIDIH HATIKU",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Mendidih dihatiku (3x) \nAku slalu nyanyikan (3x) \nHilangkan susahku \nKu tak dapat mengerti maksud Tuhan \nTak dapat ku dengar \nMendidih (3x) dihatiku"
+            }
+        ]
+    },
+    {
+        "song_number": "206",
+        "song_title": "DALAM NAMA YESUS",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Dalam nama Yesus (2x), Ada kemenangan \nDalam nama Yesus (2x), Iblis dikalahkan \nDalam nama Tuhan Yesus \nSiapa dapat melawan \nDalam nama Tuhan Yesus \nIblis dikalahkan"
+            }
+        ]
+    },
+    {
+        "song_number": "207",
+        "song_title": "DENGAR DIA PANGGIL NAMA SAYA",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Dengar dia panggil nama saya \nDengar dia panggil namaMu \nDengar dia panggil nama saya \nJuga dia panggil namaMu"
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "O giranglah (O girang) (2x) \nYesus amat cinta pada saya, O giranglah"
+            }
+        ]
+    },
+    {
+        "song_number": "208",
+        "song_title": "TUHAN YESUS SETIA",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Tuhan Yesus setia \nDia sahabat kita \nDalam sgala susahku \nSelalu menghiburku \nDia mengerti bahasa \nTitisan air mata \nWaktu badai mengamuk \nDan gelombang menyerang \nTuhan Yesus setia"
+            }
+        ]
+    },
+    {
+        "song_number": "209",
+        "song_title": "ANAK MONYET",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Anak monyet diatas pokok \nAnak cacing di dalam tanah \nAnak burung di dalam sangkar \nAnak Tuhan di dalam gereja"
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Panjang muka namanya kuda \nPanjang hidung namanya gajah \nPanjang tangan itu pencuri \nPanjang sabar itu anak Tuhan"
+            }
+        ]
+    },
+    {
+        "song_number": "210",
+        "song_title": "HARI INI HARI TUHAN",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Hari ini (2x) harinya Tuhan (2x) \nMari kita (2x) bersukaria (2x) \nHari ini harinya Tuhan \nMari kita bersukaria \nHari ini (2x) harinya Tuhan"
+            }
+        ]
+    },
+    {
+        "song_number": "211",
+        "song_title": "TAK TERSEMBUNYI, KUASA ALLAH",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Tak tersembunyi kuasa Allah \nKalau lain ditolong, saya juga \nTangannya terbuka menunggulah \nTak tersembunyi kuasa Allah"
+            }
+        ]
+    },
+    {
+        "song_number": "212",
+        "song_title": "KU TAK DAPAT JALAN SENDIRI",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Bila ku jalan di lembah gera \nTerasa asinglah jalanku \nTuhanku perlu pertolonganmu \nSebabku tak dapat jalan sendiri"
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Ku tak dapat jalan sendiri \nTuhan tolonglah daku \nBiarlah sinarmu menerangiku \nKu tak dapat berjalan sendiri"
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Tiada orang yang menolong daku \nBeban meniti hidupku \nJaranlah Tuhan dekat padaku \nKu tak dapat berjalan sendiri"
+            }
+        ]
+    },
+    {
+        "song_number": "213",
+        "song_title": "DIBELAKANG LANGIT BIRU",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Ku berjalan maju seperti musafir \nLewat padang pasir penuh kesusahan \nJalannya naik turun penuh bahaya dan maut \nNamun aku takkan mundur"
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Blakang langit biru ada mahkota tu \nBlakang langit biru sana kurindu \nKu lihat wajahnya Yesus pelepasku \nBlakang langit biru sana"
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Jalan dengan iman ke negri nan suci \nDengan meninggalkan kesenangan dunia \nKerna sungguhku tau sana lebih mulia \nSerta damai buat selamanya."
+            }
+        ]
+    },
+    {
+        "song_number": "214",
+        "song_title": "DISEBRANG SANA",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Ku merindu pada harta yang tungguku disana \nDisebrang sana tempat yang indah \nKu tau sana tak ada susah atau air mata \nDi sebrang sana tempat yang indah"
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Disebrang sana airmata klak lenyap \nDi sebrang sana damai kekal \nTak ada susah di sebrang sana \nSebab Yesus sertaku selama-lamanya"
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Disebrang sungai Jordan tiba digerbang mutiara \nDi sebrang sana tempat yang indah \nNegri indah mana kekasih menunggu disana \nDi sebrang sana tempat yang indah"
+            }
+        ]
+    },
+    {
+        "song_number": "215",
+        "song_title": "ENGKAU SELALU SETIA",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Bawalah aku Tuhan \nKekalan yang benar \nAgar hidupku ini dekat dengan Mu \nTuhan Allahku takkan kulupakan \nSegala kebaikanMu"
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Seringkali aku Tuhan \nBuat kesalahan \nNamun Engkau selalu setia bersamaku \nApa pun juga besar dosaku \nKau datang bebaskan aku"
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Trima kasih Tuhan Oh Haleluya \nKu bersorak memuji Mu \nTrima kasih Tuhan Oh haleluya \nTerpujilah namaMu slamanya"
+            }
+        ]
+    },
+    {
+        "song_number": "216",
+        "song_title": "KU MENANG",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Ku menang, ku menang bersama Yesus Tuhan \nKu menang, ku menang didalam peperangan \nKu menang, ku menang atas segala setan \nHaleluia, haleluia, ku menang 2x"
+            }
+        ]
+    },
+    {
+        "song_number": "217",
+        "song_title": "KURASAKAN KASIHMU TUHAN",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Kurasakan kasihMu Tuhan (2) \nKurasakan kasih kuasa Roh Kudus \nKu rasakan kehadiranMu"
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Curahkanlah kuasaMu Tuhan \nMujizat terjadi di tempat tinggi \nCurahkanlah KuasaMu Tuhan \nMujizat terjadi sekarang ini."
+            }
+        ]
+    },
+    {
+        "song_number": "218",
+        "song_title": "TIADA SAHABAT SETIA",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Tiada sahabat setia selain Mu Yesus \nTiada kasih setia selain kasihMu \nYesus, Yesus kau mengasihiku \nKau angkat ku dari kegelapan"
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Bimbinglah aku Tuhan (2x) \nBimbinglah sesuai kehendakMu \nBentuklah aku Tuhan (2x) \nBentuklah sesuai rencanaMu"
+            }
+        ]
+    },
+    {
+        "song_number": "219",
+        "song_title": "SANGAT BESAR ANUGRAHNYA",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Sangat besar anugrahNya, Yang bri aku selamat \nDulu hilang skarang pulang, Buta skarang lihat"
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Dulu hati penuh takut, Jiwa menuju maut \nS'bab anugrah kini slamat, hingga ku percaya"
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Dalam bahaya dan jerat, Yang t'lah kualami \nS'bab anugrah ku terlepas, Dia hantarku pulang"
+            },
+            {
+                "verse_number": "4",
+                "lyrics": "Meskipun t'lah seribu tahun, berada di surga \nNamun rasa baru sehari, Ku puji namaNya"
+            }
+        ]
+    },
+    {
+        "song_number": "220",
+        "song_title": "JALAN SERTA YESUS",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Jalan serta Yesus, Jalan sertaNya setiap hari \nJalan serta serta Yesus, serta Yesus slamanya"
+            }
+        ]
+    },
+    {
+        "song_number": "221",
+        "song_title": "YESUS KU PERLU ENGKAU",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Bagai mawar indah dari Sharon \nBegitu kasih Yesus dalam hariku \nBagai embun segar dari Harmon \nBegitu dalam Yesus dalam hidupku"
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Yesus Tuhan penghiburku \nCurahkan kurapan Roh Kudus Mu \nBersamaMu ku sentosa \nYesusku perlu engkau"
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Bagai sungai besarnya di lembah \nBegitu berkat Tuhan Yesus padaku \nBagai cakrawala yang membiru \nBegitu sukacita dalam hidupku"
+            }
+        ]
+    },
+    {
+        "song_number": "222",
+        "song_title": "DIPINTU HATIMU",
+        "verses": [
+            {
+                "verse_number": "1",
+                "lyrics": "Di pintu hatimu Tuhan memanggil, \nSuaraNya lembut merdu \nDengan sabar Dia menunggu di sana \nApakah jawapanMu"
+            },
+            {
+                "verse_number": "Korus",
+                "lyrics": "Lama kian Dia menantikan kau \nDan masih tetap menunggu \nMenantikan dikau membuka hati \nOh Bapa sangat rindu"
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Hai kawan apakah kerinduanmu \nInginkah hidup kekal \nSerahkanlah hidupmu kepada Yesus \nTakkan engkau menyesal"
             }
         ]
     }

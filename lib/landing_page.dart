@@ -184,7 +184,7 @@ class _LandingPageState extends State<LandingPage> {
 
     if (_isLoading) {
       return Scaffold(
-        backgroundColor: colorScheme.background,
+        backgroundColor: colorScheme.surface,
         body: Center(
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
@@ -194,7 +194,7 @@ class _LandingPageState extends State<LandingPage> {
               Text(
                 'Loading songs...',
                 style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onBackground,
+                  color: colorScheme.onSurface,
                 ),
               ),
             ],
@@ -204,7 +204,7 @@ class _LandingPageState extends State<LandingPage> {
     }
 
     return Scaffold(
-      backgroundColor: colorScheme.background, // Use proper background color
+      backgroundColor: colorScheme.surface, // Use proper background color
       body: CustomScrollView(
         slivers: [
           // App Bar with theme colors
@@ -490,7 +490,7 @@ class _LandingPageState extends State<LandingPage> {
               padding: const EdgeInsets.all(20),
               decoration: BoxDecoration(
                 color: isDarkMode
-                    ? colorScheme.surfaceVariant.withOpacity(0.3)
+                    ? colorScheme.surfaceContainerHighest.withOpacity(0.3)
                     : colorScheme.primary.withOpacity(0.05),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
@@ -671,7 +671,7 @@ class _LandingPageState extends State<LandingPage> {
         title,
         style: Theme.of(context).textTheme.titleLarge?.copyWith(
               fontWeight: FontWeight.w600,
-              color: Theme.of(context).colorScheme.onBackground,
+              color: Theme.of(context).colorScheme.onSurface,
             ),
       ),
     );

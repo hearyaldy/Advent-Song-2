@@ -102,11 +102,9 @@ class _MyAppState extends State<MyApp> {
         secondary: secondary,
         surface: const Color(0xFF1E293B),
         onSurface: const Color(0xFFE2E8F0),
-        surfaceVariant: const Color(0xFF334155),
+        surfaceContainerHighest: const Color(0xFF334155),
         onSurfaceVariant: const Color(0xFFCBD5E1),
         outline: const Color(0xFF64748B),
-        background: const Color(0xFF0F172A),
-        onBackground: const Color(0xFFE2E8F0),
       );
     } else {
       return ColorScheme.light(
@@ -114,11 +112,9 @@ class _MyAppState extends State<MyApp> {
         secondary: secondary,
         surface: const Color(0xFFFFFFFF),
         onSurface: const Color(0xFF1E293B),
-        surfaceVariant: const Color(0xFFF8FAFC),
+        surfaceContainerHighest: const Color(0xFFF8FAFC),
         onSurfaceVariant: const Color(0xFF475569),
         outline: const Color(0xFFCBD5E1),
-        background: const Color(0xFFFAFAFA),
-        onBackground: const Color(0xFF1E293B),
       );
     }
   }
@@ -141,7 +137,7 @@ class _MyAppState extends State<MyApp> {
 
     return MaterialApp(
       key: ValueKey(
-          '${_selectedColorTheme}_${_isDarkMode}'), // Force rebuild on theme change
+          '${_selectedColorTheme}_$_isDarkMode'), // Force rebuild on theme change
       navigatorKey: _navigatorKey,
       title: 'Song Lyric App',
       theme: ThemeData(
