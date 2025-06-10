@@ -1,0 +1,20 @@
+{
+  "buildFiles": [
+    "/Volumes/HHS Storage/Flutter/flutter/packages/flutter_tools/gradle/src/main/groovy/CMakeLists.txt"
+  ],
+  "cleanCommandsComponents": [
+    [
+      "/Users/heary/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+      "-C",
+      "/Volumes/Seagate Hub/Flutter Apps/Advent-Song-2/android/app/.cxx/Debug/6e365j13/armeabi-v7a",
+      "clean"
+    ]
+  ],
+  "buildTargetsCommandComponents": [
+    "/Users/heary/Library/Android/sdk/cmake/3.22.1/bin/ninja",
+    "-C",
+    "/Volumes/Seagate Hub/Flutter Apps/Advent-Song-2/android/app/.cxx/Debug/6e365j13/armeabi-v7a",
+    "{LIST_OF_TARGETS_TO_BUILD}"
+  ],
+  "libraries": {}
+}
