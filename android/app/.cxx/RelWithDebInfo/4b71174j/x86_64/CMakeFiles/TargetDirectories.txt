@@ -1,0 +1,2 @@
+/Volumes/Seagate Hub/Flutter Apps/Advent-Song-2/android/app/.cxx/RelWithDebInfo/4b71174j/x86_64/CMakeFiles/edit_cache.dir
+/Volumes/Seagate Hub/Flutter Apps/Advent-Song-2/android/app/.cxx/RelWithDebInfo/4b71174j/x86_64/CMakeFiles/rebuild_cache.dir
