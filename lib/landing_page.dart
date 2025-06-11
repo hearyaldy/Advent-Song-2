@@ -1,4 +1,4 @@
-// landing_page.dart - ENHANCED WITH GRADIENTS AND LIST FAVORITES
+// landing_page.dart - ENHANCED WITH GRADIENTS AND FIXED DEPRECATION WARNINGS
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -35,6 +35,8 @@ class _LandingPageState extends State<LandingPage> {
     'Syair Rindu Dendam': 'srd.json',
     'Lagu Iban': 'iban.json',
     'Lagu Pandak': 'pandak.json',
+    'Khutbah': 'khutbah.json', // NEW: Future expansion
+    'Media': 'media.json', // NEW: Future expansion
   };
 
   final Map<String, IconData> _collectionIcons = {
@@ -42,6 +44,8 @@ class _LandingPageState extends State<LandingPage> {
     'Syair Rindu Dendam': Icons.favorite,
     'Lagu Iban': Icons.language,
     'Lagu Pandak': Icons.music_note,
+    'Khutbah': Icons.record_voice_over, // NEW: Sermon/speech icon
+    'Media': Icons.video_library, // NEW: Media library icon
   };
 
   final Map<String, Color> _collectionColors = {
@@ -49,6 +53,8 @@ class _LandingPageState extends State<LandingPage> {
     'Syair Rindu Dendam': Color(0xFFDC2626),
     'Lagu Iban': Color(0xFF059669),
     'Lagu Pandak': Color(0xFFD97706),
+    'Khutbah': Color(0xFF7C2D12), // NEW: Brown/sermon color
+    'Media': Color(0xFF4338CA), // NEW: Indigo/media color
   };
 
   @override
@@ -257,7 +263,7 @@ class _LandingPageState extends State<LandingPage> {
                         end: Alignment.bottomCenter,
                         colors: [
                           Colors.transparent,
-                          Colors.black.withOpacity(0.2),
+                          Colors.black.withValues(alpha: 0.2),
                         ],
                       ),
                     ),
@@ -281,7 +287,7 @@ class _LandingPageState extends State<LandingPage> {
                               Shadow(
                                 offset: Offset(0, 1),
                                 blurRadius: 3,
-                                color: Colors.black.withOpacity(0.7),
+                                color: Colors.black.withValues(alpha: 0.7),
                               ),
                             ],
                           ),
@@ -296,7 +302,7 @@ class _LandingPageState extends State<LandingPage> {
                               Shadow(
                                 offset: Offset(0, 1),
                                 blurRadius: 3,
-                                color: Colors.black.withOpacity(0.7),
+                                color: Colors.black.withValues(alpha: 0.7),
                               ),
                             ],
                           ),
@@ -382,30 +388,30 @@ class _LandingPageState extends State<LandingPage> {
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        // ENHANCED: Gradient background
+        // ENHANCED: Gradient background - FIXED withOpacity deprecation
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
           colors: isDarkMode
               ? [
                   colorScheme.surfaceContainerHighest,
-                  colorScheme.surfaceContainerHighest.withOpacity(0.8),
+                  colorScheme.surfaceContainerHighest.withValues(alpha: 0.8),
                 ]
               : [
                   colorScheme.surface,
-                  colorScheme.primary.withOpacity(0.05),
+                  colorScheme.primary.withValues(alpha: 0.05),
                 ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
             color: isDarkMode
-                ? Colors.black.withOpacity(0.3)
-                : colorScheme.primary.withOpacity(0.15),
+                ? Colors.black.withValues(alpha: 0.3)
+                : colorScheme.primary.withValues(alpha: 0.15),
             blurRadius: isDarkMode ? 15 : 25,
             offset: const Offset(0, 8),
             spreadRadius: 0,
@@ -422,6 +428,7 @@ class _LandingPageState extends State<LandingPage> {
                   _greeting,
                   style: theme.textTheme.headlineSmall?.copyWith(
                     fontWeight: FontWeight.w600,
+                    fontSize: 28, // INCREASED: More prominent greeting
                     color: colorScheme.onSurface,
                   ),
                 ),
@@ -429,7 +436,7 @@ class _LandingPageState extends State<LandingPage> {
                 Text(
                   'Selamat Kembali ke Aplikasi Lagu Advent',
                   style: theme.textTheme.bodyMedium?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
                   ),
                 ),
               ],
@@ -443,13 +450,13 @@ class _LandingPageState extends State<LandingPage> {
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
                 colors: [
-                  colorScheme.primary.withOpacity(0.2),
-                  colorScheme.secondary.withOpacity(0.1),
+                  colorScheme.primary.withValues(alpha: 0.2),
+                  colorScheme.secondary.withValues(alpha: 0.1),
                 ],
               ),
               borderRadius: BorderRadius.circular(12),
               border: Border.all(
-                color: colorScheme.primary.withOpacity(0.3),
+                color: colorScheme.primary.withValues(alpha: 0.3),
                 width: 1,
               ),
             ),
@@ -474,7 +481,7 @@ class _LandingPageState extends State<LandingPage> {
     return Container(
       margin: const EdgeInsets.symmetric(horizontal: 4.0),
       decoration: BoxDecoration(
-        // ENHANCED: Gradient background
+        // ENHANCED: Gradient background - FIXED withOpacity deprecation
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -485,19 +492,19 @@ class _LandingPageState extends State<LandingPage> {
                 ]
               : [
                   colorScheme.surface,
-                  colorScheme.secondary.withOpacity(0.08),
+                  colorScheme.secondary.withValues(alpha: 0.08),
                 ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.secondary.withOpacity(0.2),
+          color: colorScheme.secondary.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
             color: isDarkMode
-                ? Colors.black.withOpacity(0.4)
-                : colorScheme.secondary.withOpacity(0.2),
+                ? Colors.black.withValues(alpha: 0.4)
+                : colorScheme.secondary.withValues(alpha: 0.2),
             blurRadius: isDarkMode ? 20 : 30,
             offset: const Offset(0, 12),
             spreadRadius: 0,
@@ -517,13 +524,13 @@ class _LandingPageState extends State<LandingPage> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        colorScheme.secondary.withOpacity(0.2),
-                        colorScheme.primary.withOpacity(0.1),
+                        colorScheme.secondary.withValues(alpha: 0.2),
+                        colorScheme.primary.withValues(alpha: 0.1),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: colorScheme.secondary.withOpacity(0.3),
+                      color: colorScheme.secondary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Icon(
@@ -547,13 +554,13 @@ class _LandingPageState extends State<LandingPage> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        colorScheme.secondary.withOpacity(0.15),
-                        colorScheme.primary.withOpacity(0.1),
+                        colorScheme.secondary.withValues(alpha: 0.15),
+                        colorScheme.primary.withValues(alpha: 0.1),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: colorScheme.secondary.withOpacity(0.3),
+                      color: colorScheme.secondary.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
@@ -579,17 +586,19 @@ class _LandingPageState extends State<LandingPage> {
                   end: Alignment.bottomCenter,
                   colors: isDarkMode
                       ? [
-                          colorScheme.surfaceContainerHighest.withOpacity(0.5),
-                          colorScheme.surfaceContainerHighest.withOpacity(0.2),
+                          colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.5),
+                          colorScheme.surfaceContainerHighest
+                              .withValues(alpha: 0.2),
                         ]
                       : [
-                          colorScheme.secondary.withOpacity(0.08),
-                          colorScheme.primary.withOpacity(0.05),
+                          colorScheme.secondary.withValues(alpha: 0.08),
+                          colorScheme.primary.withValues(alpha: 0.05),
                         ],
                 ),
                 borderRadius: BorderRadius.circular(16),
                 border: Border.all(
-                  color: colorScheme.secondary.withOpacity(0.2),
+                  color: colorScheme.secondary.withValues(alpha: 0.2),
                 ),
               ),
               child: Text(
@@ -614,7 +623,7 @@ class _LandingPageState extends State<LandingPage> {
                     _verseOfTheDay!['song_title']?.toString() ?? 'Unknown',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       fontWeight: FontWeight.w500,
-                      color: colorScheme.onSurface.withOpacity(0.8),
+                      color: colorScheme.onSurface.withValues(alpha: 0.8),
                     ),
                   ),
                 ),
@@ -622,8 +631,8 @@ class _LandingPageState extends State<LandingPage> {
                   decoration: BoxDecoration(
                     gradient: LinearGradient(
                       colors: [
-                        colorScheme.secondary.withOpacity(0.15),
-                        colorScheme.primary.withOpacity(0.1),
+                        colorScheme.secondary.withValues(alpha: 0.15),
+                        colorScheme.primary.withValues(alpha: 0.1),
                       ],
                     ),
                     borderRadius: BorderRadius.circular(20),
@@ -672,7 +681,7 @@ class _LandingPageState extends State<LandingPage> {
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        // ENHANCED: Gradient background
+        // ENHANCED: Gradient background - FIXED withOpacity deprecation
         gradient: LinearGradient(
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
@@ -683,19 +692,19 @@ class _LandingPageState extends State<LandingPage> {
                 ]
               : [
                   colorScheme.surface,
-                  colorScheme.primary.withOpacity(0.03),
+                  colorScheme.primary.withValues(alpha: 0.03),
                 ],
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: colorScheme.primary.withOpacity(0.2),
+          color: colorScheme.primary.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
             color: isDarkMode
-                ? Colors.black.withOpacity(0.3)
-                : colorScheme.primary.withOpacity(0.15),
+                ? Colors.black.withValues(alpha: 0.3)
+                : colorScheme.primary.withValues(alpha: 0.15),
             blurRadius: isDarkMode ? 15 : 25,
             offset: const Offset(0, 8),
             spreadRadius: 0,
@@ -718,7 +727,7 @@ class _LandingPageState extends State<LandingPage> {
                 Text(
                   'Songs',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w500,
                   ),
                   textAlign: TextAlign.center,
@@ -741,7 +750,7 @@ class _LandingPageState extends State<LandingPage> {
                 Text(
                   'Collections',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w500,
                   ),
                   textAlign: TextAlign.center,
@@ -764,7 +773,7 @@ class _LandingPageState extends State<LandingPage> {
                 Text(
                   'Favorites',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
+                    color: colorScheme.onSurface.withValues(alpha: 0.7),
                     fontWeight: FontWeight.w500,
                   ),
                   textAlign: TextAlign.center,
@@ -814,7 +823,7 @@ class _LandingPageState extends State<LandingPage> {
 
         return Container(
           decoration: BoxDecoration(
-            // ENHANCED: Gradient background for collection cards
+            // ENHANCED: Gradient background for collection cards - FIXED withOpacity deprecation
             gradient: LinearGradient(
               begin: Alignment.topLeft,
               end: Alignment.bottomRight,
@@ -825,19 +834,19 @@ class _LandingPageState extends State<LandingPage> {
                     ]
                   : [
                       colorScheme.surface,
-                      color.withOpacity(0.05),
+                      color.withValues(alpha: 0.05),
                     ],
             ),
             borderRadius: BorderRadius.circular(12),
             border: Border.all(
-              color: color.withOpacity(0.3),
+              color: color.withValues(alpha: 0.3),
               width: 1,
             ),
             boxShadow: [
               BoxShadow(
                 color: isDarkMode
-                    ? Colors.black.withOpacity(0.3)
-                    : color.withOpacity(0.2),
+                    ? Colors.black.withValues(alpha: 0.3)
+                    : color.withValues(alpha: 0.2),
                 blurRadius: isDarkMode ? 10 : 15,
                 offset: const Offset(0, 6),
                 spreadRadius: 0,
@@ -858,7 +867,8 @@ class _LandingPageState extends State<LandingPage> {
               );
             },
             child: Padding(
-              padding: const EdgeInsets.all(8.0),
+              padding: const EdgeInsets.fromLTRB(
+                  8.0, 16.0, 8.0, 8.0), // INCREASED: More top padding
               child: Column(
                 mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                 children: [
@@ -870,13 +880,13 @@ class _LandingPageState extends State<LandingPage> {
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
                         colors: [
-                          color.withOpacity(0.2),
-                          color.withOpacity(0.1),
+                          color.withValues(alpha: 0.2),
+                          color.withValues(alpha: 0.1),
                         ],
                       ),
                       borderRadius: BorderRadius.circular(20),
-                      border:
-                          Border.all(color: color.withOpacity(0.4), width: 1),
+                      border: Border.all(
+                          color: color.withValues(alpha: 0.4), width: 1),
                     ),
                     child: Icon(icon, color: color, size: 22),
                   ),
@@ -899,7 +909,7 @@ class _LandingPageState extends State<LandingPage> {
                         Text(
                           '$count songs',
                           style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
+                            color: colorScheme.onSurface.withValues(alpha: 0.7),
                             fontSize: 9,
                           ),
                         ),
@@ -915,7 +925,7 @@ class _LandingPageState extends State<LandingPage> {
     );
   }
 
-  // UPDATED: Recent Favorites as List Style
+  // UPDATED: Recent Favorites as List Style - FIXED withOpacity deprecation
   Widget _buildRecentFavoritesList() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -923,7 +933,7 @@ class _LandingPageState extends State<LandingPage> {
 
     return Container(
       decoration: BoxDecoration(
-        // ENHANCED: Gradient background for favorites list
+        // ENHANCED: Gradient background for favorites list - FIXED withOpacity deprecation
         gradient: LinearGradient(
           begin: Alignment.topCenter,
           end: Alignment.bottomCenter,
@@ -934,19 +944,19 @@ class _LandingPageState extends State<LandingPage> {
                 ]
               : [
                   colorScheme.surface,
-                  Colors.red.withOpacity(0.02),
+                  Colors.red.withValues(alpha: 0.02),
                 ],
         ),
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: Colors.red.withOpacity(0.2),
+          color: Colors.red.withValues(alpha: 0.2),
           width: 1,
         ),
         boxShadow: [
           BoxShadow(
             color: isDarkMode
-                ? Colors.black.withOpacity(0.3)
-                : Colors.red.withOpacity(0.1),
+                ? Colors.black.withValues(alpha: 0.3)
+                : Colors.red.withValues(alpha: 0.1),
             blurRadius: isDarkMode ? 10 : 20,
             offset: const Offset(0, 6),
             spreadRadius: 0,
@@ -961,8 +971,8 @@ class _LandingPageState extends State<LandingPage> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.red.withOpacity(0.1),
-                  Colors.red.withOpacity(0.05),
+                  Colors.red.withValues(alpha: 0.1),
+                  Colors.red.withValues(alpha: 0.05),
                 ],
               ),
               borderRadius: const BorderRadius.only(
@@ -990,10 +1000,10 @@ class _LandingPageState extends State<LandingPage> {
                   padding:
                       const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                   decoration: BoxDecoration(
-                    color: Colors.red.withOpacity(0.1),
+                    color: Colors.red.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(10),
                     border: Border.all(
-                      color: Colors.red.withOpacity(0.3),
+                      color: Colors.red.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Text(
@@ -1014,14 +1024,14 @@ class _LandingPageState extends State<LandingPage> {
             itemCount: _recentFavorites.length,
             separatorBuilder: (context, index) => Divider(
               height: 1,
-              color: colorScheme.outline.withOpacity(0.1),
+              color: colorScheme.outline.withValues(alpha: 0.1),
             ),
             itemBuilder: (context, index) {
               final song = _recentFavorites[index];
               return ListTile(
                 leading: CircleAvatar(
                   radius: 20,
-                  backgroundColor: Colors.red.withOpacity(0.1),
+                  backgroundColor: Colors.red.withValues(alpha: 0.1),
                   child: Text(
                     '${song['song_number']?.toString() ?? '0'}',
                     style: TextStyle(
@@ -1043,7 +1053,7 @@ class _LandingPageState extends State<LandingPage> {
                 subtitle: Text(
                   song['collection']?.toString() ?? 'Unknown Collection',
                   style: theme.textTheme.bodySmall?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.6),
+                    color: colorScheme.onSurface.withValues(alpha: 0.6),
                   ),
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
@@ -1077,8 +1087,8 @@ class _LandingPageState extends State<LandingPage> {
             decoration: BoxDecoration(
               gradient: LinearGradient(
                 colors: [
-                  Colors.red.withOpacity(0.05),
-                  Colors.red.withOpacity(0.1),
+                  Colors.red.withValues(alpha: 0.05),
+                  Colors.red.withValues(alpha: 0.1),
                 ],
               ),
               borderRadius: const BorderRadius.only(
@@ -1119,7 +1129,7 @@ class _LandingPageState extends State<LandingPage> {
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              // ENHANCED: Gradient background for quick actions
+              // ENHANCED: Gradient background for quick actions - FIXED withOpacity deprecation
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -1130,18 +1140,18 @@ class _LandingPageState extends State<LandingPage> {
                       ]
                     : [
                         colorScheme.surface,
-                        Colors.red.withOpacity(0.03),
+                        Colors.red.withValues(alpha: 0.03),
                       ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: Colors.red.withOpacity(0.2),
+                color: Colors.red.withValues(alpha: 0.2),
               ),
               boxShadow: [
                 BoxShadow(
                   color: isDarkMode
-                      ? Colors.black.withOpacity(0.2)
-                      : Colors.red.withOpacity(0.1),
+                      ? Colors.black.withValues(alpha: 0.2)
+                      : Colors.red.withValues(alpha: 0.1),
                   blurRadius: isDarkMode ? 8 : 15,
                   offset: const Offset(0, 4),
                 ),
@@ -1188,7 +1198,7 @@ class _LandingPageState extends State<LandingPage> {
         Expanded(
           child: Container(
             decoration: BoxDecoration(
-              // ENHANCED: Gradient background for quick actions
+              // ENHANCED: Gradient background for quick actions - FIXED withOpacity deprecation
               gradient: LinearGradient(
                 begin: Alignment.topLeft,
                 end: Alignment.bottomRight,
@@ -1199,18 +1209,18 @@ class _LandingPageState extends State<LandingPage> {
                       ]
                     : [
                         colorScheme.surface,
-                        colorScheme.primary.withOpacity(0.03),
+                        colorScheme.primary.withValues(alpha: 0.03),
                       ],
               ),
               borderRadius: BorderRadius.circular(16),
               border: Border.all(
-                color: colorScheme.primary.withOpacity(0.2),
+                color: colorScheme.primary.withValues(alpha: 0.2),
               ),
               boxShadow: [
                 BoxShadow(
                   color: isDarkMode
-                      ? Colors.black.withOpacity(0.2)
-                      : colorScheme.primary.withOpacity(0.1),
+                      ? Colors.black.withValues(alpha: 0.2)
+                      : colorScheme.primary.withValues(alpha: 0.1),
                   blurRadius: isDarkMode ? 8 : 15,
                   offset: const Offset(0, 4),
                 ),
