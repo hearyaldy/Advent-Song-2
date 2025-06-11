@@ -1,4 +1,4 @@
-// song_list_page.dart
+// song_list_page.dart - UPDATED TO USE THEME NOTIFIER
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
@@ -6,19 +6,18 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'song_detail_page.dart';
 import 'settings_page.dart';
 import 'landing_page.dart';
+import 'theme_notifier.dart'; // Import theme notifier
 import 'package:flutter/services.dart' show rootBundle;
 
 class SongListPage extends StatefulWidget {
-  final Function(bool)? onThemeChanged;
-  final Function(String)? onColorThemeChanged;
+  final ThemeNotifier themeNotifier; // Use theme notifier instead of callbacks
   final String? initialCollection;
   final bool showFavoritesOnly;
   final bool openSearch;
 
   const SongListPage({
     super.key,
-    this.onThemeChanged,
-    this.onColorThemeChanged,
+    required this.themeNotifier,
     this.initialCollection,
     this.showFavoritesOnly = false,
     this.openSearch = false,
@@ -244,8 +243,7 @@ class SongListPageState extends State<SongListPage>
           context,
           MaterialPageRoute(
             builder: (context) => LandingPage(
-              onThemeChanged: widget.onThemeChanged,
-              onColorThemeChanged: widget.onColorThemeChanged,
+              themeNotifier: widget.themeNotifier, // Pass theme notifier
             ),
           ),
           (route) => false, // Remove all previous routes
@@ -257,8 +255,7 @@ class SongListPageState extends State<SongListPage>
           context,
           MaterialPageRoute(
             builder: (context) => SettingsPage(
-              onThemeChanged: widget.onThemeChanged,
-              onColorThemeChanged: widget.onColorThemeChanged,
+              themeNotifier: widget.themeNotifier, // Pass theme notifier
             ),
           ),
         );
@@ -311,11 +308,11 @@ class SongListPageState extends State<SongListPage>
               Container(
                 width: double.infinity,
                 height: 120,
-                decoration: const BoxDecoration(
+                decoration: BoxDecoration(
                   gradient: LinearGradient(
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
-                    colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                    colors: [colorScheme.primary, colorScheme.secondary],
                   ),
                 ),
                 child: Image.asset(
@@ -325,11 +322,11 @@ class SongListPageState extends State<SongListPage>
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
                     return Container(
-                      decoration: const BoxDecoration(
+                      decoration: BoxDecoration(
                         gradient: LinearGradient(
                           begin: Alignment.topLeft,
                           end: Alignment.bottomRight,
-                          colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                          colors: [colorScheme.primary, colorScheme.secondary],
                         ),
                       ),
                     );
@@ -348,6 +345,13 @@ class SongListPageState extends State<SongListPage>
                         color: Colors.white,
                         fontSize: 24,
                         fontWeight: FontWeight.bold,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(0, 1),
+                            blurRadius: 3,
+                            color: Colors.black54,
+                          ),
+                        ],
                       ),
                     ),
                     Text(
@@ -355,6 +359,13 @@ class SongListPageState extends State<SongListPage>
                       style: const TextStyle(
                         color: Colors.white70,
                         fontSize: 14,
+                        shadows: [
+                          Shadow(
+                            offset: Offset(0, 1),
+                            blurRadius: 3,
+                            color: Colors.black54,
+                          ),
+                        ],
                       ),
                     ),
                   ],

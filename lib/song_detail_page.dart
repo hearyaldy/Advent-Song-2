@@ -1,20 +1,23 @@
-// song_detail_page.dart
+// song_detail_page.dart - UPDATED (minimal changes, no theme callbacks needed)
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:logger/logger.dart';
 import 'settings_page.dart';
+import 'theme_notifier.dart'; // Import for potential future use
 
 class SongDetailPage extends StatefulWidget {
   final Map<String, dynamic> song;
   final String collectionName;
   final VoidCallback? onFavoriteChanged;
+  final ThemeNotifier? themeNotifier; // Optional for consistency
 
   const SongDetailPage({
     super.key,
     required this.song,
     required this.collectionName,
     this.onFavoriteChanged,
+    this.themeNotifier, // Optional since this page doesn't change themes
   });
 
   @override
@@ -80,7 +83,8 @@ class SongDetailPageState extends State<SongDetailPage> {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(
-              _isFavorite ? 'Added to favorites' : 'Removed from favorites'),
+            _isFavorite ? 'Added to favorites' : 'Removed from favorites',
+          ),
           duration: const Duration(seconds: 1),
         ),
       );
@@ -169,11 +173,11 @@ ${widget.song['verses'].map((verse) => "${verse['verse_number']}\n${verse['lyric
                 fit: StackFit.expand,
                 children: [
                   Container(
-                    decoration: const BoxDecoration(
+                    decoration: BoxDecoration(
                       gradient: LinearGradient(
                         begin: Alignment.topLeft,
                         end: Alignment.bottomRight,
-                        colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                        colors: [colorScheme.primary, colorScheme.secondary],
                       ),
                     ),
                     child: Image.asset(
@@ -181,11 +185,14 @@ ${widget.song['verses'].map((verse) => "${verse['verse_number']}\n${verse['lyric
                       fit: BoxFit.cover,
                       errorBuilder: (context, error, stackTrace) {
                         return Container(
-                          decoration: const BoxDecoration(
+                          decoration: BoxDecoration(
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [Color(0xFF6366F1), Color(0xFF8B5CF6)],
+                              colors: [
+                                colorScheme.primary,
+                                colorScheme.secondary,
+                              ],
                             ),
                           ),
                         );
@@ -213,7 +220,9 @@ ${widget.song['verses'].map((verse) => "${verse['verse_number']}\n${verse['lyric
                       children: [
                         Container(
                           padding: const EdgeInsets.symmetric(
-                              horizontal: 8, vertical: 4),
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
                           decoration: BoxDecoration(
                             color: Colors.black.withOpacity(0.3),
                             borderRadius: BorderRadius.circular(4),
@@ -253,8 +262,9 @@ ${widget.song['verses'].map((verse) => "${verse['verse_number']}\n${verse['lyric
             ),
             actions: [
               IconButton(
-                icon:
-                    Icon(_isFavorite ? Icons.favorite : Icons.favorite_border),
+                icon: Icon(
+                  _isFavorite ? Icons.favorite : Icons.favorite_border,
+                ),
                 onPressed: _toggleFavorite,
                 tooltip:
                     _isFavorite ? 'Remove from favorites' : 'Add to favorites',
@@ -269,13 +279,21 @@ ${widget.song['verses'].map((verse) => "${verse['verse_number']}\n${verse['lyric
                       _copyToClipboard();
                       break;
                     case 'settings':
+                      // Navigate to settings with theme notifier if available
                       Navigator.push(
                         context,
                         MaterialPageRoute(
-                          builder: (context) => const SettingsPage(),
+                          builder: (context) => widget.themeNotifier != null
+                              ? SettingsPage(
+                                  themeNotifier: widget.themeNotifier!,
+                                )
+                              : SettingsPage(
+                                  themeNotifier: ThemeNotifier()..initialize(),
+                                ),
                         ),
-                      ).then((_) =>
-                          _loadSettings()); // Reload settings when returning
+                      ).then(
+                        (_) => _loadSettings(),
+                      ); // Reload settings when returning
                       break;
                   }
                 },
@@ -311,55 +329,53 @@ ${widget.song['verses'].map((verse) => "${verse['verse_number']}\n${verse['lyric
 
           // Song verses
           SliverPadding(
-            padding:
-                const EdgeInsets.symmetric(horizontal: 32.0, vertical: 16.0),
+            padding: const EdgeInsets.symmetric(
+              horizontal: 32.0,
+              vertical: 16.0,
+            ),
             sliver: SliverList(
-              delegate: SliverChildBuilderDelegate(
-                (context, index) {
-                  final verse = widget.song['verses'][index];
-                  final isKorus =
-                      verse['verse_number'].toLowerCase() == 'korus';
+              delegate: SliverChildBuilderDelegate((context, index) {
+                final verse = widget.song['verses'][index];
+                final isKorus = verse['verse_number'].toLowerCase() == 'korus';
 
-                  return Padding(
-                    padding: const EdgeInsets.only(bottom: 32.0),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        // Verse number/title
-                        Text(
-                          verse['verse_number'],
-                          style: TextStyle(
-                            fontSize: _fontSize + 6,
-                            fontFamily: _fontFamily,
-                            fontStyle:
-                                isKorus ? FontStyle.italic : FontStyle.normal,
-                            fontWeight: FontWeight.bold,
-                            color: isKorus
-                                ? colorScheme.secondary
-                                : colorScheme.primary,
-                          ),
+                return Padding(
+                  padding: const EdgeInsets.only(bottom: 32.0),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      // Verse number/title
+                      Text(
+                        verse['verse_number'],
+                        style: TextStyle(
+                          fontSize: _fontSize + 6,
+                          fontFamily: _fontFamily,
+                          fontStyle:
+                              isKorus ? FontStyle.italic : FontStyle.normal,
+                          fontWeight: FontWeight.bold,
+                          color: isKorus
+                              ? colorScheme.secondary
+                              : colorScheme.primary,
                         ),
-                        const SizedBox(height: 12),
-                        // Verse lyrics
-                        SelectableText(
-                          verse['lyrics'],
-                          style: TextStyle(
-                            fontSize: _fontSize,
-                            fontFamily: _fontFamily,
-                            fontStyle:
-                                isKorus ? FontStyle.italic : FontStyle.normal,
-                            color: colorScheme.onSurface,
-                            height: 1.8,
-                            letterSpacing: 0.3,
-                          ),
-                          textAlign: _textAlign,
+                      ),
+                      const SizedBox(height: 12),
+                      // Verse lyrics
+                      SelectableText(
+                        verse['lyrics'],
+                        style: TextStyle(
+                          fontSize: _fontSize,
+                          fontFamily: _fontFamily,
+                          fontStyle:
+                              isKorus ? FontStyle.italic : FontStyle.normal,
+                          color: colorScheme.onSurface,
+                          height: 1.8,
+                          letterSpacing: 0.3,
                         ),
-                      ],
-                    ),
-                  );
-                },
-                childCount: widget.song['verses'].length,
-              ),
+                        textAlign: _textAlign,
+                      ),
+                    ],
+                  ),
+                );
+              }, childCount: widget.song['verses'].length),
             ),
           ),
         ],
@@ -375,9 +391,7 @@ ${widget.song['verses'].map((verse) => "${verse['verse_number']}\n${verse['lyric
         decoration: BoxDecoration(
           color: colorScheme.surface,
           border: Border(
-            top: BorderSide(
-              color: colorScheme.outline.withOpacity(0.2),
-            ),
+            top: BorderSide(color: colorScheme.outline.withOpacity(0.2)),
           ),
         ),
         child: SafeArea(
@@ -387,7 +401,8 @@ ${widget.song['verses'].map((verse) => "${verse['verse_number']}\n${verse['lyric
                 child: FilledButton.icon(
                   onPressed: _toggleFavorite,
                   icon: Icon(
-                      _isFavorite ? Icons.favorite : Icons.favorite_border),
+                    _isFavorite ? Icons.favorite : Icons.favorite_border,
+                  ),
                   label: Text(_isFavorite ? 'Favorited' : 'Add to Favorites'),
                   style: FilledButton.styleFrom(
                     backgroundColor:

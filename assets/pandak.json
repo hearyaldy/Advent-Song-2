@@ -467,7 +467,15 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Aku gaga slalu, aku gaga slalu,\nLaban Jesus bisi, nyadi kaban aku,\nTuhan Jesus muai semua dosa aku,\nNya alai aku gaga slalu.\n\nAku nyanyi slalu, aku nyanyi slalu,\nLaban Jesus bisi tama ba ati ku,\nTuhan Jesus muai semua dosa aku,\nNya alai aku nyanyi slalu.\n\nAku smayang slalu, aku smayang slalu,\nLaban Jesus bisi nyaga aku diatu,\nAku enda irau ka semua antu,\nNya alai aku smayang slalu."
+                "lyrics": "Aku gaga slalu, aku gaga slalu,\nLaban Jesus bisi, nyadi kaban aku,\nTuhan Jesus muai semua dosa aku,\nNya alai aku gaga slalu."
+            },
+             {
+                "verse_number": "2",
+                "lyrics": "Aku nyanyi slalu, aku nyanyi slalu,\nLaban Jesus bisi tama ba ati ku,\nTuhan Jesus muai semua dosa aku,\nNya alai aku nyanyi slalu."
+            },
+             {
+                "verse_number": "3",
+                "lyrics": "Aku smayang slalu, aku smayang slalu,\nLaban Jesus bisi nyaga aku diatu,\nAku enda irau ka semua antu,\nNya alai aku smayang slalu."
             }
         ]
     },
@@ -537,7 +545,11 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Sembiang meh pagi hari,\nSembiang meh tengah hari,\nSembiang meh lemai hari,\nNgasoh ati nuan nyamai.\n\nEngka Jesus datai pagi,\nEngka datai tengah hari,\nEngka datai lemai hari,\nAnang nu-an nda sedia."
+                "lyrics": "Sembiang meh pagi hari,\nSembiang meh tengah hari,\nSembiang meh lemai hari,\nNgasoh ati nuan nyamai."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Engka Jesus datai pagi,\nEngka datai tengah hari,\nEngka datai lemai hari,\nAnang nu-an nda sedia."
             }
         ]
     },
@@ -627,7 +639,15 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Semua meruan, di rumah Apai,\nDi rumah Apai, di rumah Apai,\nSemua meruan, di rumah Apai,\nSlalu be-ga-ga.\n\nJesus meh jalai ka rumah Apai\nKe rumah Apai, ka rumah Apai,\nJesus meh jalai ka rumah Apai,\nSlalu be-ga-ga.\n\nAram nggau aku, ka rumah Apai,\nKa rumah Apai, ka rumah Apai,\nAram nggau aku, ka rumah Apai,\nSlalu be-ga-ga."
+                "lyrics": "Semua meruan, di rumah Apai,\nDi rumah Apai, di rumah Apai,\nSemua meruan, di rumah Apai,\nSlalu be-ga-ga."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Jesus meh jalai ka rumah Apai\nKe rumah Apai, ka rumah Apai,\nJesus meh jalai ka rumah Apai,\nSlalu be-ga-ga."
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Aram nggau aku, ka rumah Apai,\nKa rumah Apai, ka rumah Apai,\nAram nggau aku, ka rumah Apai,\nSlalu be-ga-ga."
             }
         ]
     },
@@ -637,7 +657,11 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Pechaya meh Tuhan Jesus parai,\nPechaya meh Iya parai ka semua,\nPechaya meh Iya nebus ka nuan,\nPechaya ka Tuhan.\n\nPechaya meh Tuhan ngangau nuan,\nPechaya meh Iya nemu ati nuan,\nPechaya meh Iya sayau ka nuan,\nPechaya ka Tuhan."
+                "lyrics": "Pechaya meh Tuhan Jesus parai,\nPechaya meh Iya parai ka semua,\nPechaya meh Iya nebus ka nuan,\nPechaya ka Tuhan."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Pechaya meh Tuhan ngangau nuan,\nPechaya meh Iya nemu ati nuan,\nPechaya meh Iya sayau ka nuan,\nPechaya ka Tuhan."
             }
         ]
     },
@@ -687,7 +711,15 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Aram nitih ka serga, aram nitih ka serga,\nAram nitih ka serga nggau aku,\nAram nitih ka serga, aram nitih ka serga,\nNitih ka serga, nggau aku.\n\nKitai ka menyanyi din, kitai ka menyanyi din,\nKitai ka menyanyi din di serga,\nKitai ka menanyi din, Kitai ka menyanyi din,\nKitai menyanyi di serga.\n\nKitai ka sembiang din, kitai ka sembiang din,\nKitai ka sembiang din, di serga,\nKitai ka sembiang din, kitai ka sembiang din,\nKitai sembiang di serga."
+                "lyrics": "Aram nitih ka serga, aram nitih ka serga,\nAram nitih ka serga nggau aku,\nAram nitih ka serga, aram nitih ka serga,\nNitih ka serga, nggau aku."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Kitai ka menyanyi din, kitai ka menyanyi din,\nKitai ka menyanyi din di serga,\nKitai ka menanyi din, Kitai ka menyanyi din,\nKitai menyanyi di serga."
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Kitai ka sembiang din, kitai ka sembiang din,\nKitai ka sembiang din, di serga,\nKitai ka sembiang din, kitai ka sembiang din,\nKitai sembiang di serga."
             }
         ]
     },
@@ -697,7 +729,19 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "Nti Jesus bisi ba bilik, pemadu gaga,\nPemadu gaga, pemadu gaga,\nNti Jesus bisi ba bilik, pemadu gaga,\nPemadu gaga.\n\nNti Jesus bisi nggau apai, pemadu gaga,\nPemadu gaga, pemadu gaga,\nNti Jesus bisi nggau apai, pemadu gaga,\nPemadu gaga.\n\nNti Jesus bisi nggau indai, pemadu gaga,\nPemadu gaga, pemadu gaga,\nNti Jesus bisi nggau indai, pemadu gaga,\nPemadu gaga.\n\nNti Jesus bisi nggau anak, pemadu gaga,\nPemadu gaga, pemadu gaga,\nNti Jesus bisi nggau anak, pemadu gaga,\nPemadu gaga."
+                "lyrics": "Nti Jesus bisi ba bilik, pemadu gaga,\nPemadu gaga, pemadu gaga,\nNti Jesus bisi ba bilik, pemadu gaga,\nPemadu gaga."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Nti Jesus bisi nggau apai, pemadu gaga,\nPemadu gaga, pemadu gaga,\nNti Jesus bisi nggau apai, pemadu gaga,\nPemadu gaga."
+            },
+            {
+                "verse_number": "3",
+                "lyrics": "Nti Jesus bisi nggau indai, pemadu gaga,\nPemadu gaga, pemadu gaga,\nNti Jesus bisi nggau indai, pemadu gaga,\nPemadu gaga."
+            },
+            {
+                "verse_number": "4",
+                "lyrics": "Nti Jesus bisi nggau anak, pemadu gaga,\nPemadu gaga, pemadu gaga,\nNti Jesus bisi nggau anak, pemadu gaga,\nPemadu gaga."
             }
         ]
     },
@@ -707,7 +751,11 @@
         "verses": [
             {
                 "verse_number": "1",
-                "lyrics": "O Jesus, O Jesus, Nuan badas amat,\nAri semua bintang di langit\nNuan badas ndang badas,\nAri semua bungai dunya tu,\nBesai rega ari mas.\n\nKu ka nitih Iya ninting hari,\nKu ka nitih Iya brari-ari\nJako Roh Kudus aku nitih,\nKu ka nitih Iya sa-umur ku."
+                "lyrics": "O Jesus, O Jesus, Nuan badas amat,\nAri semua bintang di langit\nNuan badas ndang badas,\nAri semua bungai dunya tu,\nBesai rega ari mas."
+            },
+            {
+                "verse_number": "2",
+                "lyrics": "Ku ka nitih Iya ninting hari,\nKu ka nitih Iya brari-ari\nJako Roh Kudus aku nitih,\nKu ka nitih Iya sa-umur ku."
             }
         ]
     },
@@ -719,6 +767,7 @@
                 "verse_number": "1",
                 "lyrics": "Tuhan badas, (3x)Ia badas ka ku.\nNyaut sembiang, (3x)Nyaut sembiang aku.\nNemu aku,  (3x)Nemu nama aku.\nIa ka datai, (3x)Ia ka datai baru."
             }
+            
         ]
     }
 ]
