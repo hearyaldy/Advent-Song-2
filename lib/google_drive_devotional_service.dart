@@ -6,7 +6,7 @@ import 'package:intl/intl.dart';
 
 class GoogleDriveDevotionalService {
   // CORRECTED Google Sheets URL - using CSV export format
-  static const String sheetId = '1E6GVXX3dHpGsohUg5e7qC9jZwRhMvNdmelHQMQBSWZ8'; // Fixed typo
+  static const String sheetId = '1E6GVXX3dHpGsohUg5e7qC9jZwRhMvNdmelHQMQ8SWZ8'; // Corrected sheet ID
   static const String csvUrl =
       'https://docs.google.com/spreadsheets/d/$sheetId/export?format=csv&gid=0';
 
@@ -96,7 +96,7 @@ class GoogleDriveDevotionalService {
       throw Exception('No data found in CSV');
     }
 
-    // Get a random devotional or cycle through them
+    // Get a devotional based on day of year (cycles through all devotionals)
     final today = DateTime.now();
     final dayOfYear = today.difference(DateTime(today.year, 1, 1)).inDays;
     final selectedIndex = dayOfYear % dataLines.length;
