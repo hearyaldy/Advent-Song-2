@@ -15,6 +15,10 @@ dependencies:
   shared_preferences: ^2.0.15
   intl: ^0.20.2 # For date formatting in your app.
   logger: ^2.5.0 # For logging purposes.
+  http: ^1.1.0
+  xml: ^6.3.0  # For RSS parsing
+  share_plus: ^7.2.1  # For sharing functionality
+  connectivity_plus: ^5.0.0  # For network status
 
 dev_dependencies:
   flutter_test:

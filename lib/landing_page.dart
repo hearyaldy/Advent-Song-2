@@ -1,4 +1,4 @@
-// landing_page.dart - ENHANCED WITH GRADIENTS AND FIXED DEPRECATION WARNINGS
+// landing_page.dart - COMPLETE UPDATED VERSION WITH KHUTBAH INTEGRATION
 import 'dart:convert';
 import 'dart:math';
 import 'package:flutter/material.dart';
@@ -9,6 +9,7 @@ import 'song_list_page.dart';
 import 'song_detail_page.dart';
 import 'settings_page.dart';
 import 'theme_notifier.dart';
+import 'khutbah_page.dart'; // NEW: Import for Khutbah page
 
 class LandingPage extends StatefulWidget {
   final ThemeNotifier themeNotifier;
@@ -142,30 +143,35 @@ class _LandingPageState extends State<LandingPage> {
       final allVerses = <Map<String, dynamic>>[];
 
       for (final entry in _collectionFiles.entries) {
-        final String data =
-            await rootBundle.loadString('assets/${entry.value}');
-        final List<dynamic> songs = json.decode(data);
+        try {
+          final String data =
+              await rootBundle.loadString('assets/${entry.value}');
+          final List<dynamic> songs = json.decode(data);
 
-        for (var songData in songs) {
-          if (songData is Map<String, dynamic>) {
-            final song = Map<String, dynamic>.from(songData);
-            if (song['verses'] != null &&
-                song['verses'] is List &&
-                (song['verses'] as List).isNotEmpty) {
-              final verses = song['verses'] as List;
-              final randomVerse = verses[Random().nextInt(verses.length)];
-              if (randomVerse is Map<String, dynamic>) {
-                allVerses.add({
-                  'song_title': song['song_title'] ?? 'Unknown Song',
-                  'song_number': song['song_number'] ?? '0',
-                  'collection': entry.key,
-                  'verse_number': randomVerse['verse_number'] ?? 'Verse 1',
-                  'lyrics': randomVerse['lyrics'] ?? '',
-                  'full_song': song,
-                });
+          for (var songData in songs) {
+            if (songData is Map<String, dynamic>) {
+              final song = Map<String, dynamic>.from(songData);
+              if (song['verses'] != null &&
+                  song['verses'] is List &&
+                  (song['verses'] as List).isNotEmpty) {
+                final verses = song['verses'] as List;
+                final randomVerse = verses[Random().nextInt(verses.length)];
+                if (randomVerse is Map<String, dynamic>) {
+                  allVerses.add({
+                    'song_title': song['song_title'] ?? 'Unknown Song',
+                    'song_number': song['song_number'] ?? '0',
+                    'collection': entry.key,
+                    'verse_number': randomVerse['verse_number'] ?? 'Verse 1',
+                    'lyrics': randomVerse['lyrics'] ?? '',
+                    'full_song': song,
+                  });
+                }
               }
             }
           }
+        } catch (e) {
+          // Skip files that don't exist (like khutbah.json, media.json)
+          continue;
         }
       }
 
@@ -181,67 +187,83 @@ class _LandingPageState extends State<LandingPage> {
     }
   }
 
+  // NEW: Helper method to get collection descriptions
+  String _getCollectionDescription(String collection, int count) {
+    switch (collection) {
+      case 'Khutbah':
+        return 'Daily devotionals';
+      case 'Media':
+        return 'Coming soon';
+      default:
+        return '$count songs';
+    }
+  }
+
+  // NEW: Method to show coming soon dialog
+  void _showComingSoon(String feature) {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text('Coming Soon'),
+        content: Text(
+            '$feature feature is under development and will be available in a future update.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: Text('OK'),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final colorScheme = theme.colorScheme;
-    final isDarkMode = theme.brightness == Brightness.dark;
+    return AnimatedBuilder(
+      animation: widget.themeNotifier,
+      builder: (context, child) {
+        final theme = Theme.of(context);
+        final colorScheme = theme.colorScheme;
+        final isDarkMode = theme.brightness == Brightness.dark;
 
-    if (_isLoading) {
-      return Scaffold(
-        backgroundColor: colorScheme.surface,
-        body: Center(
-          child: Column(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              CircularProgressIndicator(color: colorScheme.primary),
-              const SizedBox(height: 16),
-              Text(
-                'Loading songs...',
-                style: theme.textTheme.bodyLarge?.copyWith(
-                  color: colorScheme.onSurface,
-                ),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-
-    return Scaffold(
-      backgroundColor: colorScheme.surface,
-      body: CustomScrollView(
-        slivers: [
-          // App Bar with custom title positioning
-          SliverAppBar(
-            expandedHeight: 120,
-            floating: true,
-            pinned: true,
-            backgroundColor: colorScheme.primary,
-            foregroundColor: Colors.white,
-            flexibleSpace: FlexibleSpaceBar(
-              background: Stack(
-                fit: StackFit.expand,
+        if (_isLoading) {
+          return Scaffold(
+            backgroundColor: colorScheme.surface,
+            body: Center(
+              child: Column(
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Background gradient
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [
-                          colorScheme.primary,
-                          colorScheme.secondary,
-                        ],
-                      ),
+                  CircularProgressIndicator(color: colorScheme.primary),
+                  const SizedBox(height: 16),
+                  Text(
+                    'Loading songs...',
+                    style: theme.textTheme.bodyLarge?.copyWith(
+                      color: colorScheme.onSurface,
                     ),
                   ),
-                  // Optional background image
-                  Image.asset(
-                    'assets/header_image.png',
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
+                ],
+              ),
+            ),
+          );
+        }
+
+        return Scaffold(
+          backgroundColor: colorScheme.surface,
+          body: CustomScrollView(
+            slivers: [
+              // App Bar with custom title positioning
+              SliverAppBar(
+                expandedHeight: 120,
+                floating: true,
+                pinned: true,
+                backgroundColor: colorScheme.primary,
+                foregroundColor: Colors.white,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      // Background gradient
+                      Container(
                         decoration: BoxDecoration(
                           gradient: LinearGradient(
                             begin: Alignment.topLeft,
@@ -252,131 +274,150 @@ class _LandingPageState extends State<LandingPage> {
                             ],
                           ),
                         ),
+                      ),
+                      // Optional background image
+                      Image.asset(
+                        'assets/header_image.png',
+                        fit: BoxFit.cover,
+                        errorBuilder: (context, error, stackTrace) {
+                          return Container(
+                            decoration: BoxDecoration(
+                              gradient: LinearGradient(
+                                begin: Alignment.topLeft,
+                                end: Alignment.bottomRight,
+                                colors: [
+                                  colorScheme.primary,
+                                  colorScheme.secondary,
+                                ],
+                              ),
+                            ),
+                          );
+                        },
+                      ),
+                      // Overlay for better text contrast
+                      Container(
+                        decoration: BoxDecoration(
+                          gradient: LinearGradient(
+                            begin: Alignment.topCenter,
+                            end: Alignment.bottomCenter,
+                            colors: [
+                              Colors.transparent,
+                              Colors.black.withValues(alpha: 0.2),
+                            ],
+                          ),
+                        ),
+                      ),
+                      // CUSTOM POSITIONED TITLE AND DATE
+                      Positioned(
+                        bottom: 16,
+                        left: 16,
+                        right: 80, // Leave space for settings icon
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            Text(
+                              'Lagu Advent',
+                              style: TextStyle(
+                                fontSize: 20,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                    offset: Offset(0, 1),
+                                    blurRadius: 3,
+                                    color: Colors.black.withValues(alpha: 0.7),
+                                  ),
+                                ],
+                              ),
+                            ),
+                            SizedBox(height: 2),
+                            Text(
+                              _currentDate,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.white,
+                                shadows: [
+                                  Shadow(
+                                    offset: Offset(0, 1),
+                                    blurRadius: 3,
+                                    color: Colors.black.withValues(alpha: 0.7),
+                                  ),
+                                ],
+                              ),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    icon: Icon(
+                      Icons.settings,
+                      color: Colors.white,
+                    ),
+                    onPressed: () {
+                      Navigator.push(
+                        context,
+                        MaterialPageRoute(
+                          builder: (context) => SettingsPage(
+                            themeNotifier: widget.themeNotifier,
+                          ),
+                        ),
                       );
                     },
                   ),
-                  // Overlay for better text contrast
-                  Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topCenter,
-                        end: Alignment.bottomCenter,
-                        colors: [
-                          Colors.transparent,
-                          Colors.black.withValues(alpha: 0.2),
-                        ],
-                      ),
-                    ),
-                  ),
-                  // CUSTOM POSITIONED TITLE AND DATE
-                  Positioned(
-                    bottom: 16,
-                    left: 16,
-                    right: 80, // Leave space for settings icon
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        Text(
-                          'Lagu Advent',
-                          style: TextStyle(
-                            fontSize: 20,
-                            fontWeight: FontWeight.bold,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                offset: Offset(0, 1),
-                                blurRadius: 3,
-                                color: Colors.black.withValues(alpha: 0.7),
-                              ),
-                            ],
-                          ),
-                        ),
-                        SizedBox(height: 2),
-                        Text(
-                          _currentDate,
-                          style: TextStyle(
-                            fontSize: 12,
-                            color: Colors.white,
-                            shadows: [
-                              Shadow(
-                                offset: Offset(0, 1),
-                                blurRadius: 3,
-                                color: Colors.black.withValues(alpha: 0.7),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
                 ],
               ),
-            ),
-            actions: [
-              IconButton(
-                icon: Icon(
-                  Icons.settings,
-                  color: Colors.white,
+
+              // Content
+              SliverPadding(
+                padding: const EdgeInsets.all(20.0),
+                sliver: SliverList(
+                  delegate: SliverChildListDelegate([
+                    // Greeting
+                    _buildGreetingCard(),
+                    const SizedBox(height: 24),
+
+                    // Verse of the Day
+                    if (_verseOfTheDay != null) ...[
+                      _buildVerseOfTheDayCard(),
+                      const SizedBox(height: 24),
+                    ],
+
+                    // Quick Stats
+                    _buildStatsCard(),
+                    const SizedBox(height: 32),
+
+                    // Collections
+                    _buildSectionHeader('Collections'),
+                    const SizedBox(height: 16),
+                    _buildCollectionsGrid(),
+                    const SizedBox(height: 32),
+
+                    // Recent Favorites - NOW AS LIST
+                    if (_recentFavorites.isNotEmpty) ...[
+                      _buildSectionHeader('Recent Favorites'),
+                      const SizedBox(height: 16),
+                      _buildRecentFavoritesList(), // Changed to list style
+                      const SizedBox(height: 32),
+                    ],
+
+                    // Quick Actions
+                    _buildSectionHeader('Quick Actions'),
+                    const SizedBox(height: 16),
+                    _buildQuickActions(),
+
+                    const SizedBox(height: 40), // Bottom padding
+                  ]),
                 ),
-                onPressed: () {
-                  Navigator.push(
-                    context,
-                    MaterialPageRoute(
-                      builder: (context) => SettingsPage(
-                        themeNotifier: widget.themeNotifier,
-                      ),
-                    ),
-                  );
-                },
               ),
             ],
           ),
-
-          // Content
-          SliverPadding(
-            padding: const EdgeInsets.all(20.0),
-            sliver: SliverList(
-              delegate: SliverChildListDelegate([
-                // Greeting
-                _buildGreetingCard(),
-                const SizedBox(height: 24),
-
-                // Verse of the Day
-                if (_verseOfTheDay != null) ...[
-                  _buildVerseOfTheDayCard(),
-                  const SizedBox(height: 24),
-                ],
-
-                // Quick Stats
-                _buildStatsCard(),
-                const SizedBox(height: 32),
-
-                // Collections
-                _buildSectionHeader('Collections'),
-                const SizedBox(height: 16),
-                _buildCollectionsGrid(),
-                const SizedBox(height: 32),
-
-                // Recent Favorites - NOW AS LIST
-                if (_recentFavorites.isNotEmpty) ...[
-                  _buildSectionHeader('Recent Favorites'),
-                  const SizedBox(height: 16),
-                  _buildRecentFavoritesList(), // Changed to list style
-                  const SizedBox(height: 32),
-                ],
-
-                // Quick Actions
-                _buildSectionHeader('Quick Actions'),
-                const SizedBox(height: 16),
-                _buildQuickActions(),
-
-                const SizedBox(height: 40), // Bottom padding
-              ]),
-            ),
-          ),
-        ],
-      ),
+        );
+      },
     );
   }
 
@@ -800,6 +841,7 @@ class _LandingPageState extends State<LandingPage> {
     );
   }
 
+  // UPDATED: Collections Grid with Khutbah navigation
   Widget _buildCollectionsGrid() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
@@ -856,15 +898,32 @@ class _LandingPageState extends State<LandingPage> {
           child: InkWell(
             borderRadius: BorderRadius.circular(12),
             onTap: () {
-              Navigator.push(
-                context,
-                MaterialPageRoute(
-                  builder: (context) => SongListPage(
-                    themeNotifier: widget.themeNotifier,
-                    initialCollection: collection,
+              // UPDATED: Handle different collection types
+              if (collection == 'Khutbah') {
+                // Navigate to Khutbah (Devotional) page
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => KhutbahPage(
+                      themeNotifier: widget.themeNotifier,
+                    ),
                   ),
-                ),
-              );
+                );
+              } else if (collection == 'Media') {
+                // Future: Navigate to Media page
+                _showComingSoon('Media Library');
+              } else {
+                // Navigate to regular song list
+                Navigator.push(
+                  context,
+                  MaterialPageRoute(
+                    builder: (context) => SongListPage(
+                      themeNotifier: widget.themeNotifier,
+                      initialCollection: collection,
+                    ),
+                  ),
+                );
+              }
             },
             child: Padding(
               padding: const EdgeInsets.fromLTRB(
@@ -907,7 +966,7 @@ class _LandingPageState extends State<LandingPage> {
                         ),
                         const SizedBox(height: 4),
                         Text(
-                          '$count songs',
+                          _getCollectionDescription(collection, count),
                           style: theme.textTheme.bodySmall?.copyWith(
                             color: colorScheme.onSurface.withValues(alpha: 0.7),
                             fontSize: 9,
