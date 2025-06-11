@@ -1,6 +1,5 @@
 // google_drive_devotional_service.dart
 import 'dart:convert';
-import 'dart:math';
 import 'package:http/http.dart' as http;
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
@@ -60,7 +59,7 @@ class GoogleDriveDevotionalService {
       ).timeout(const Duration(seconds: 15));
 
       print('📊 Response status: ${response.statusCode}');
-      print('📝 Response preview: ${response.body.substring(0, math.min(200, response.body.length))}');
+      print('📝 Response preview: ${response.body.substring(0, response.body.length > 200 ? 200 : response.body.length)}');
 
       if (response.statusCode == 200) {
         final csvContent = response.body;
