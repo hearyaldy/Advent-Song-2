@@ -1092,7 +1092,7 @@ class _LandingPageState extends State<LandingPage> {
                   radius: 20,
                   backgroundColor: Colors.red.withValues(alpha: 0.1),
                   child: Text(
-                    '${song['song_number']?.toString() ?? '0'}',
+                    song['song_number']?.toString() ?? '0',
                     style: TextStyle(
                       color: Colors.red,
                       fontWeight: FontWeight.bold,

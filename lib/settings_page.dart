@@ -552,8 +552,9 @@ class _SettingsPageState extends State<SettingsPage> {
               child: InkWell(
                 borderRadius: BorderRadius.circular(8),
                 onTap: () async {
-                  if (themeKey == widget.themeNotifier.selectedColorTheme)
+                  if (themeKey == widget.themeNotifier.selectedColorTheme) {
                     return; // No change needed
+                  }
 
                   // Show immediate feedback
                   ScaffoldMessenger.of(context).showSnackBar(
