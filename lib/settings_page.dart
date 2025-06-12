@@ -1,10 +1,12 @@
-// settings_page.dart - FINAL VERSION USING THEME NOTIFIER
+// settings_page.dart - WITH ADMIN PANEL INTEGRATION
 import 'package:flutter/material.dart';
+import 'package:flutter/foundation.dart'; // ADD THIS for kDebugMode
 import 'package:shared_preferences/shared_preferences.dart';
-import 'theme_notifier.dart'; // Import theme notifier
+import 'theme_notifier.dart';
+import 'admin_page.dart'; // ADD THIS import
 
 class SettingsPage extends StatefulWidget {
-  final ThemeNotifier themeNotifier; // Use theme notifier instead of callbacks
+  final ThemeNotifier themeNotifier;
 
   const SettingsPage({
     super.key,
@@ -21,6 +23,7 @@ class _SettingsPageState extends State<SettingsPage> {
   TextAlign _textAlign = TextAlign.left;
   bool _isLoading = true;
   bool _hasUnsavedChanges = false;
+  bool _isDeveloperMode = false; // ADD THIS for developer mode toggle
 
   // Available color themes (matching theme notifier)
   final Map<String, Map<String, dynamic>> _colorThemes = {
@@ -78,6 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _fontSize = prefs.getDouble('fontSize') ?? 16.0;
       _fontFamily = prefs.getString('fontFamily') ?? 'Roboto';
       _textAlign = TextAlign.values[prefs.getInt('textAlign') ?? 0];
+      _isDeveloperMode = prefs.getBool('developer_mode') ?? false; // ADD THIS
       _isLoading = false;
     });
   }
@@ -87,6 +91,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setDouble('fontSize', _fontSize);
     await prefs.setString('fontFamily', _fontFamily);
     await prefs.setInt('textAlign', _textAlign.index);
+    await prefs.setBool('developer_mode', _isDeveloperMode); // ADD THIS
 
     setState(() {
       _hasUnsavedChanges = false;
@@ -107,11 +112,13 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.remove('fontSize');
     await prefs.remove('fontFamily');
     await prefs.remove('textAlign');
+    await prefs.remove('developer_mode'); // ADD THIS
 
     setState(() {
       _fontSize = 16.0;
       _fontFamily = 'Roboto';
       _textAlign = TextAlign.left;
+      _isDeveloperMode = false; // ADD THIS
       _hasUnsavedChanges = true;
     });
 
@@ -227,7 +234,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
         body: AnimatedBuilder(
-          animation: widget.themeNotifier, // Listen to theme changes
+          animation: widget.themeNotifier,
           builder: (context, child) {
             return ListView(
               padding: const EdgeInsets.all(16.0),
@@ -255,6 +262,21 @@ class _SettingsPageState extends State<SettingsPage> {
                     _buildDarkModeSwitch(),
                     const Divider(),
                     _buildColorThemeSelector(),
+                  ],
+                ),
+
+                const SizedBox(height: 16),
+
+                // ADMIN & DEVELOPER SECTION - ADD THIS
+                _buildSectionCard(
+                  title: 'Advanced',
+                  icon: Icons.settings_applications,
+                  children: [
+                    _buildDeveloperModeSwitch(),
+                    if (kDebugMode || _isDeveloperMode) ...[
+                      const Divider(),
+                      _buildAdminPanelTile(),
+                    ],
                   ],
                 ),
 
@@ -292,6 +314,132 @@ class _SettingsPageState extends State<SettingsPage> {
       ),
     );
   }
+
+  // ADD THIS METHOD - Developer Mode Switch
+  Widget _buildDeveloperModeSwitch() {
+    return SwitchListTile(
+      secondary: Icon(
+        _isDeveloperMode ? Icons.developer_mode : Icons.developer_board,
+        color: _isDeveloperMode
+            ? Theme.of(context).colorScheme.primary
+            : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+      ),
+      title: const Text('Developer Mode'),
+      subtitle: Text(_isDeveloperMode
+          ? 'Advanced features enabled'
+          : 'Enable advanced features'),
+      value: _isDeveloperMode,
+      onChanged: (value) {
+        setState(() {
+          _isDeveloperMode = value;
+        });
+        _onSettingChanged();
+
+        // Show feedback
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value
+                ? '🔧 Developer mode enabled'
+                : '🔒 Developer mode disabled'),
+            duration: const Duration(seconds: 2),
+          ),
+        );
+      },
+    );
+  }
+
+  // ADD THIS METHOD - Admin Panel Tile
+  Widget _buildAdminPanelTile() {
+    final colorScheme = Theme.of(context).colorScheme;
+
+    return Container(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(
+          color: colorScheme.primary.withOpacity(0.3),
+          width: 1,
+        ),
+        gradient: LinearGradient(
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+          colors: [
+            colorScheme.primary.withOpacity(0.05),
+            colorScheme.secondary.withOpacity(0.02),
+          ],
+        ),
+      ),
+      child: ListTile(
+        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+        leading: Container(
+          padding: const EdgeInsets.all(8),
+          decoration: BoxDecoration(
+            color: colorScheme.primary.withOpacity(0.1),
+            borderRadius: BorderRadius.circular(8),
+            border: Border.all(
+              color: colorScheme.primary.withOpacity(0.3),
+            ),
+          ),
+          child: Icon(
+            Icons.admin_panel_settings,
+            color: colorScheme.primary,
+            size: 24,
+          ),
+        ),
+        title: Text(
+          'Admin Panel',
+          style: TextStyle(
+            fontWeight: FontWeight.w600,
+            color: colorScheme.onSurface,
+          ),
+        ),
+        subtitle: Text(
+          'Manage devotional content',
+          style: TextStyle(
+            color: colorScheme.onSurface.withOpacity(0.7),
+          ),
+        ),
+        trailing: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(
+                  color: Colors.orange.withOpacity(0.3),
+                ),
+              ),
+              child: Text(
+                'ADMIN',
+                style: TextStyle(
+                  fontSize: 10,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.orange,
+                ),
+              ),
+            ),
+            const SizedBox(width: 8),
+            Icon(
+              Icons.arrow_forward_ios,
+              size: 16,
+              color: colorScheme.onSurface.withOpacity(0.5),
+            ),
+          ],
+        ),
+        onTap: () {
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => const AdminPage(),
+            ),
+          );
+        },
+      ),
+    );
+  }
+
+  // ... REST OF YOUR EXISTING METHODS REMAIN THE SAME ...
 
   Widget _buildSectionCard({
     required String title,
@@ -487,7 +635,6 @@ class _SettingsPageState extends State<SettingsPage> {
           : 'Light theme enabled'),
       value: widget.themeNotifier.isDarkMode,
       onChanged: (value) async {
-        // Show immediate feedback
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(value
@@ -497,10 +644,8 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         );
 
-        // Update theme using notifier - THIS WILL FORCE COMPLETE REBUILD
         await widget.themeNotifier.updateTheme(value);
 
-        // Success feedback
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(
@@ -553,10 +698,9 @@ class _SettingsPageState extends State<SettingsPage> {
                 borderRadius: BorderRadius.circular(8),
                 onTap: () async {
                   if (themeKey == widget.themeNotifier.selectedColorTheme) {
-                    return; // No change needed
+                    return;
                   }
 
-                  // Show immediate feedback
                   ScaffoldMessenger.of(context).showSnackBar(
                     SnackBar(
                       content: Text('Applying ${themeData['name']}...'),
@@ -565,10 +709,8 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                   );
 
-                  // Update theme using notifier - THIS WILL FORCE COMPLETE REBUILD
                   await widget.themeNotifier.updateColorTheme(themeKey);
 
-                  // Success feedback
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       SnackBar(
@@ -584,7 +726,6 @@ class _SettingsPageState extends State<SettingsPage> {
                       const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
                   child: Row(
                     children: [
-                      // Color preview circles
                       Container(
                         width: 16,
                         height: 16,
@@ -603,7 +744,6 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                       ),
                       const SizedBox(width: 8),
-                      // Theme name
                       Expanded(
                         child: Text(
                           themeData['name'].toString(),
@@ -809,6 +949,7 @@ class _SettingsPageState extends State<SettingsPage> {
             Text('• Text Alignment: Controls how text is aligned on screen'),
             Text('• Dark Mode: Switches between light and dark themes'),
             Text('• Color Theme: Choose your preferred color scheme'),
+            Text('• Developer Mode: Enables advanced features'),
             SizedBox(height: 12),
             Text(
                 'All settings are automatically saved and will persist between app launches. Theme changes apply immediately throughout the app.'),
