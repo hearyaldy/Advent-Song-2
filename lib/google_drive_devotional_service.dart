@@ -170,7 +170,7 @@ class GoogleDriveDevotionalService {
         'reference':
             closestValues.length > 5 ? _cleanText(closestValues[5]) : '',
         'date': DateFormat('yyyy-MM-dd').format(today),
-        'source': 'Google Sheets (${daysAgo} days ago)',
+        'source': 'Google Sheets ($daysAgo days ago)',
         'author': closestValues.length > 6
             ? _cleanText(closestValues[6])
             : 'Devotional',
