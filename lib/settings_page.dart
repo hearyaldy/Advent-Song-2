@@ -1,9 +1,9 @@
-// settings_page.dart - WITH ADMIN PANEL INTEGRATION
+// settings_page.dart - UPDATED WITH NEW ADMIN FLOW
 import 'package:flutter/material.dart';
-import 'package:flutter/foundation.dart'; // ADD THIS for kDebugMode
+import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme_notifier.dart';
-import 'admin_page.dart'; // ADD THIS import
+import 'admin_login_page.dart'; // UPDATED: Changed from admin_page.dart
 
 class SettingsPage extends StatefulWidget {
   final ThemeNotifier themeNotifier;
@@ -23,7 +23,7 @@ class _SettingsPageState extends State<SettingsPage> {
   TextAlign _textAlign = TextAlign.left;
   bool _isLoading = true;
   bool _hasUnsavedChanges = false;
-  bool _isDeveloperMode = false; // ADD THIS for developer mode toggle
+  bool _isDeveloperMode = false;
 
   // Available color themes (matching theme notifier)
   final Map<String, Map<String, dynamic>> _colorThemes = {
@@ -81,7 +81,7 @@ class _SettingsPageState extends State<SettingsPage> {
       _fontSize = prefs.getDouble('fontSize') ?? 16.0;
       _fontFamily = prefs.getString('fontFamily') ?? 'Roboto';
       _textAlign = TextAlign.values[prefs.getInt('textAlign') ?? 0];
-      _isDeveloperMode = prefs.getBool('developer_mode') ?? false; // ADD THIS
+      _isDeveloperMode = prefs.getBool('developer_mode') ?? false;
       _isLoading = false;
     });
   }
@@ -91,7 +91,7 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.setDouble('fontSize', _fontSize);
     await prefs.setString('fontFamily', _fontFamily);
     await prefs.setInt('textAlign', _textAlign.index);
-    await prefs.setBool('developer_mode', _isDeveloperMode); // ADD THIS
+    await prefs.setBool('developer_mode', _isDeveloperMode);
 
     setState(() {
       _hasUnsavedChanges = false;
@@ -112,13 +112,13 @@ class _SettingsPageState extends State<SettingsPage> {
     await prefs.remove('fontSize');
     await prefs.remove('fontFamily');
     await prefs.remove('textAlign');
-    await prefs.remove('developer_mode'); // ADD THIS
+    await prefs.remove('developer_mode');
 
     setState(() {
       _fontSize = 16.0;
       _fontFamily = 'Roboto';
       _textAlign = TextAlign.left;
-      _isDeveloperMode = false; // ADD THIS
+      _isDeveloperMode = false;
       _hasUnsavedChanges = true;
     });
 
@@ -267,7 +267,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
                 const SizedBox(height: 16),
 
-                // ADMIN & DEVELOPER SECTION - ADD THIS
+                // ADMIN & DEVELOPER SECTION
                 _buildSectionCard(
                   title: 'Advanced',
                   icon: Icons.settings_applications,
@@ -315,7 +315,6 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // ADD THIS METHOD - Developer Mode Switch
   Widget _buildDeveloperModeSwitch() {
     return SwitchListTile(
       secondary: Icon(
@@ -335,7 +334,6 @@ class _SettingsPageState extends State<SettingsPage> {
         });
         _onSettingChanged();
 
-        // Show feedback
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(value
@@ -348,7 +346,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // ADD THIS METHOD - Admin Panel Tile
+  // UPDATED: Admin Panel Tile - Now navigates to AdminLoginPage
   Widget _buildAdminPanelTile() {
     final colorScheme = Theme.of(context).colorScheme;
 
@@ -393,7 +391,7 @@ class _SettingsPageState extends State<SettingsPage> {
           ),
         ),
         subtitle: Text(
-          'Manage devotional content',
+          'Manage devotional content and settings',
           style: TextStyle(
             color: colorScheme.onSurface.withOpacity(0.7),
           ),
@@ -428,10 +426,11 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
         onTap: () {
+          // UPDATED: Navigate to AdminLoginPage instead of AdminPage
           Navigator.push(
             context,
             MaterialPageRoute(
-              builder: (context) => AdminPage(),
+              builder: (context) => const AdminLoginPage(),
             ),
           );
         },
@@ -439,8 +438,7 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // ... REST OF YOUR EXISTING METHODS REMAIN THE SAME ...
-
+  // ... (Keep all other existing methods unchanged: _buildSectionCard, _buildFontSizeSlider, etc.)
   Widget _buildSectionCard({
     required String title,
     required IconData icon,

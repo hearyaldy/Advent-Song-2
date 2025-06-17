@@ -1,8 +1,10 @@
-// Fixed Admin Dashboard - Complete and error-free
+// admin_dashboard.dart - UPDATED WITH PROPER SESSION MANAGEMENT AND NAVIGATION
 import 'package:flutter/material.dart';
 import 'admin_service.dart';
-import 'admin_page.dart';
-// import 'devotional_management_page.dart'; // Uncomment when you add the devotional page
+import 'admin_password_management_page.dart'; // NEW: Dedicated password management page
+import 'devotional_management_page.dart';
+import 'theme_notifier.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 class AdminDashboard extends StatefulWidget {
   const AdminDashboard({super.key});
@@ -13,33 +15,139 @@ class AdminDashboard extends StatefulWidget {
 
 class _AdminDashboardState extends State<AdminDashboard> {
   AdminLevel? _adminLevel;
+  String _currentUser = '';
   bool _isLoading = true;
+  bool _isConnected = false;
 
   @override
   void initState() {
     super.initState();
-    _loadAdminLevel();
+    _loadAdminSession();
+    _testConnection();
   }
 
-  Future<void> _loadAdminLevel() async {
-    // You might want to store the admin level after login
-    // For now, we'll assume master level access
+  // UPDATED: Load admin session from SharedPreferences
+  Future<void> _loadAdminSession() async {
+    final prefs = await SharedPreferences.getInstance();
+    final adminLevelString = prefs.getString('admin_level');
+    final currentUser = prefs.getString('current_user') ?? 'Admin';
+    final isAuth = prefs.getBool('admin_authenticated') ?? false;
+    final authTime = prefs.getInt('admin_auth_time') ?? 0;
+    final now = DateTime.now().millisecondsSinceEpoch;
+
+    // Check if session is still valid (2 hours)
+    if (!isAuth || (now - authTime) >= (2 * 60 * 60 * 1000)) {
+      // Session expired, redirect to login
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/admin-login');
+      }
+      return;
+    }
+
     setState(() {
-      _adminLevel = AdminLevel.master;
+      if (adminLevelString == 'master') {
+        _adminLevel = AdminLevel.master;
+      } else if (adminLevelString == 'content') {
+        _adminLevel = AdminLevel.content;
+      }
+      _currentUser = currentUser;
       _isLoading = false;
     });
   }
 
-  @override
-  Widget build(BuildContext context) {
-    if (_isLoading) {
-      return const Scaffold(
-        body: Center(child: CircularProgressIndicator()),
+  // ADDED: Test connection to Google Sheets
+  Future<void> _testConnection() async {
+    try {
+      final result = await AdminService.testConnection();
+      setState(() {
+        _isConnected = result.isSuccess;
+      });
+    } catch (e) {
+      setState(() {
+        _isConnected = false;
+      });
+    }
+  }
+
+  // ADDED: Logout functionality
+  Future<void> _logout() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Logout'),
+        content: const Text('Are you sure you want to logout?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Logout'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('admin_authenticated');
+      await prefs.remove('admin_auth_time');
+      await prefs.remove('admin_level');
+      await prefs.remove('current_user');
+
+      if (mounted) {
+        Navigator.of(context).pushReplacementNamed('/settings');
+      }
+    }
+  }
+
+  // ADDED: Refresh connection status
+  Future<void> _refreshConnection() async {
+    setState(() {
+      _isLoading = true;
+    });
+
+    await _testConnection();
+
+    setState(() {
+      _isLoading = false;
+    });
+
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_isConnected
+              ? '✅ Connection successful!'
+              : '❌ Connection failed'),
+          backgroundColor: _isConnected ? Colors.green : Colors.red,
+        ),
       );
     }
+  }
 
+  @override
+  Widget build(BuildContext context) {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
+
+    if (_isLoading) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(color: colorScheme.primary),
+              const SizedBox(height: 16),
+              Text(
+                'Loading admin dashboard...',
+                style: theme.textTheme.bodyLarge,
+              ),
+            ],
+          ),
+        ),
+      );
+    }
 
     return Scaffold(
       appBar: AppBar(
@@ -47,27 +155,71 @@ class _AdminDashboardState extends State<AdminDashboard> {
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         elevation: 0,
+        automaticallyImplyLeading: false, // Remove back button
         actions: [
-          Padding(
-            padding: const EdgeInsets.only(right: 16),
-            child: Center(
-              child: Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                decoration: BoxDecoration(
-                  color: Colors.white.withOpacity(0.2),
-                  borderRadius: BorderRadius.circular(16),
+          // Connection status indicator
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _isConnected
+                  ? Colors.green.withOpacity(0.2)
+                  : Colors.red.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Row(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(
+                  _isConnected ? Icons.cloud_done : Icons.cloud_off,
+                  color: _isConnected ? Colors.green : Colors.red,
+                  size: 16,
                 ),
-                child: Text(
-                  _adminLevel?.displayName ?? 'Admin',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
+                const SizedBox(width: 4),
+                Text(
+                  _isConnected ? 'Connected' : 'Offline',
+                  style: TextStyle(
+                    fontSize: 10,
+                    color: _isConnected ? Colors.green : Colors.red,
+                    fontWeight: FontWeight.bold,
                   ),
                 ),
+              ],
+            ),
+          ),
+
+          // Admin level indicator
+          Container(
+            margin: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+            decoration: BoxDecoration(
+              color: _adminLevel == AdminLevel.master
+                  ? Colors.red.withOpacity(0.2)
+                  : Colors.blue.withOpacity(0.2),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: Text(
+              _adminLevel == AdminLevel.master ? '👑 Master' : '✏️ Content',
+              style: const TextStyle(
+                fontSize: 10,
+                color: Colors.white,
+                fontWeight: FontWeight.bold,
               ),
             ),
+          ),
+
+          // Refresh connection
+          IconButton(
+            icon: const Icon(Icons.refresh),
+            onPressed: _refreshConnection,
+            tooltip: 'Refresh Connection',
+          ),
+
+          // Logout
+          IconButton(
+            icon: const Icon(Icons.logout),
+            onPressed: _logout,
+            tooltip: 'Logout',
           ),
         ],
       ),
@@ -167,11 +319,12 @@ class _AdminDashboardState extends State<AdminDashboard> {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     Text(
-                      'Welcome Back!',
+                      'Welcome, $_currentUser!',
                       style: theme.textTheme.headlineSmall?.copyWith(
                         color: colorScheme.onPrimary,
                         fontWeight: FontWeight.bold,
                       ),
+                      overflow: TextOverflow.ellipsis,
                     ),
                     const SizedBox(height: 4),
                     Text(
@@ -187,7 +340,9 @@ class _AdminDashboardState extends State<AdminDashboard> {
           ),
           const SizedBox(height: 16),
           Text(
-            'Manage your Lagu Advent app with full administrative control. Access password management, devotional content, and system settings.',
+            _adminLevel == AdminLevel.master
+                ? 'You have full administrative control over the Lagu Advent app. Manage passwords, content, and system settings.'
+                : 'You can contribute devotional content to the Lagu Advent app. Your contributions will be available to all users.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onPrimary.withOpacity(0.9),
               height: 1.5,
@@ -200,80 +355,154 @@ class _AdminDashboardState extends State<AdminDashboard> {
 
   List<Widget> _buildAdminFunctions() {
     final functions = <AdminFunction>[
-      AdminFunction(
-        title: 'Password Management',
-        description: 'Update admin passwords and credentials',
-        icon: Icons.security,
-        color: Colors.red,
-        onTap: () {
-          Navigator.push(
-            context,
-            MaterialPageRoute(builder: (context) => const AdminPage()),
-          );
-        },
-        enabled: _adminLevel?.canManagePasswords ?? false,
-      ),
+      // Password Management (Master Admin Only)
+      if (_adminLevel == AdminLevel.master)
+        AdminFunction(
+          title: 'Password Management',
+          description: 'Update admin passwords globally',
+          icon: Icons.security,
+          color: Colors.red,
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => const AdminPasswordManagementPage(),
+              ),
+            );
+          },
+          enabled: true,
+        ),
+
+      // Devotional Content Management (All Admins)
       AdminFunction(
         title: 'Devotional Content',
         description: 'Manage daily devotional content',
         icon: Icons.book,
         color: Colors.blue,
         onTap: () {
-          // TODO: Uncomment when DevotionalManagementPage is added
-          _showComingSoonDialog('Devotional Content Management');
-
-          // Navigator.push(
-          //   context,
-          //   MaterialPageRoute(builder: (context) => const DevotionalManagementPage()),
-          // );
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (context) => DevotionalManagementPage(
+                themeNotifier: ThemeNotifier(),
+              ),
+            ),
+          );
         },
-        enabled: _adminLevel?.canManageContent ?? false,
+        enabled: _isConnected,
       ),
+
+      // Quick Add Devotional (All Admins)
+      AdminFunction(
+        title: 'Quick Add Devotional',
+        description: 'Add today\'s devotional quickly',
+        icon: Icons.add_circle,
+        color: Colors.green,
+        onTap: () {
+          _showQuickAddDevotionalDialog();
+        },
+        enabled: _isConnected,
+      ),
+
+      // Song Collections (Future Feature)
       AdminFunction(
         title: 'Song Collections',
-        description: 'Manage song libraries and collections',
+        description: 'Manage song libraries',
         icon: Icons.library_music,
-        color: Colors.green,
+        color: Colors.purple,
         onTap: () {
           _showComingSoonDialog('Song Collection Management');
         },
-        enabled: true,
+        enabled: false,
       ),
+
+      // User Analytics (Master Admin Only)
+      if (_adminLevel == AdminLevel.master)
+        AdminFunction(
+          title: 'User Analytics',
+          description: 'View app usage statistics',
+          icon: Icons.analytics,
+          color: Colors.orange,
+          onTap: () {
+            _showComingSoonDialog('User Analytics');
+          },
+          enabled: false,
+        ),
+
+      // System Settings (Master Admin Only)
+      if (_adminLevel == AdminLevel.master)
+        AdminFunction(
+          title: 'System Settings',
+          description: 'Configure app settings',
+          icon: Icons.settings,
+          color: Colors.indigo,
+          onTap: () {
+            _showComingSoonDialog('System Settings');
+          },
+          enabled: false,
+        ),
+
+      // Backup & Export (Master Admin Only)
+      if (_adminLevel == AdminLevel.master)
+        AdminFunction(
+          title: 'Backup & Export',
+          description: 'Backup and export data',
+          icon: Icons.backup,
+          color: Colors.teal,
+          onTap: () {
+            _showComingSoonDialog('Backup & Export');
+          },
+          enabled: false,
+        ),
+
+      // Connection Test (All Admins)
       AdminFunction(
-        title: 'User Analytics',
-        description: 'View app usage and statistics',
-        icon: Icons.analytics,
-        color: Colors.purple,
+        title: 'Test Connection',
+        description: 'Test Google Sheets connection',
+        icon: Icons.wifi_find,
+        color: Colors.cyan,
         onTap: () {
-          _showComingSoonDialog('User Analytics');
+          _refreshConnection();
         },
         enabled: true,
-      ),
-      AdminFunction(
-        title: 'System Settings',
-        description: 'Configure app settings and preferences',
-        icon: Icons.settings,
-        color: Colors.orange,
-        onTap: () {
-          _showComingSoonDialog('System Settings');
-        },
-        enabled: _adminLevel == AdminLevel.master,
-      ),
-      AdminFunction(
-        title: 'Backup & Export',
-        description: 'Backup data and export content',
-        icon: Icons.backup,
-        color: Colors.teal,
-        onTap: () {
-          _showComingSoonDialog('Backup & Export');
-        },
-        enabled: _adminLevel == AdminLevel.master,
       ),
     ];
 
     return functions
         .map((function) => _AdminFunctionCard(function: function))
         .toList();
+  }
+
+  void _showQuickAddDevotionalDialog() {
+    // Implement quick add devotional dialog
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Quick Add Devotional'),
+        content: const Text(
+            'This will open a simplified form to quickly add today\'s devotional. Would you like to continue?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () {
+              Navigator.pop(context);
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => DevotionalManagementPage(
+                    themeNotifier: ThemeNotifier(),
+                  ),
+                ),
+              );
+            },
+            child: const Text('Continue'),
+          ),
+        ],
+      ),
+    );
   }
 
   void _showComingSoonDialog(String feature) {
@@ -409,7 +638,7 @@ class _AdminFunctionCard extends StatelessWidget {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    'Restricted',
+                    'Coming Soon',
                     style: theme.textTheme.bodySmall?.copyWith(
                       color: Colors.grey[600],
                       fontSize: 10,
