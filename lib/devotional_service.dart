@@ -1,205 +1,558 @@
-// devotional_service.dart - Simple version that works offline first
+// devotional_service.dart - COMPLETE GOOGLE SHEETS INTEGRATION
 import 'dart:convert';
 import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
+import 'package:flutter/foundation.dart';
+import 'package:http/http.dart' as http;
 
 class DevotionalService {
+  // Google Sheets Configuration
+  static const String SHEET_ID = '1E6GVXX3dHpGsohUg5e7qC9jZwRhMvNdmelHQMQ8SWZ8';
+  static const String DEVOTIONAL_CSV_URL =
+      'https://docs.google.com/spreadsheets/d/$SHEET_ID/export?format=csv&gid=0';
+  static const String APPS_SCRIPT_URL =
+      'https://script.google.com/macros/s/AKfycbzD4y9TW9ldAxJ-lhHOR4C1esrutbjjXEhI5KB6OyA8GA0AgtkALfetGRTlO5KW3vZx/exec';
+
+  static const String _cachePrefix = 'devotional_';
+  static const Duration _cacheTimeout = Duration(hours: 6);
+
+  /// Gets today's devotional - NOW ALWAYS FROM GOOGLE SHEETS
   static Future<Map<String, dynamic>> getTodaysDevotional() async {
+    final today = DateTime.now();
+    final todayKey = DateFormat('yyyy-MM-dd').format(today);
+
     try {
-      // 1. Try cache first (for today)
-      final cached = await _getCachedDevotional();
+      // 1. Try cache first
+      final cached = await _getCachedDevotional(todayKey);
       if (cached != null) {
-        print('Loading devotional from cache');
+        debugPrint('📖 Loading devotional from cache');
         return cached;
       }
 
-      // 2. Generate daily devotional from built-in content
-      final devotional = _generateDailyDevotional();
+      // 2. Load from Google Sheets (primary source)
+      final googleSheetsResult = await _loadFromGoogleSheets();
+      if (googleSheetsResult != null) {
+        await _cacheDevotional(todayKey, googleSheetsResult);
+        debugPrint('✅ Loaded devotional from Google Sheets');
+        return googleSheetsResult;
+      }
 
-      // 3. Cache it for today
-      await _cacheDevotional(devotional);
-
-      print('Generated new daily devotional');
-      return devotional;
+      // 3. Emergency fallback only if Google Sheets fails
+      debugPrint('⚠️ Google Sheets unavailable, using fallback');
+      return _getEmergencyFallback();
     } catch (e) {
-      print('Error in getTodaysDevotional: $e');
-      // Return a basic fallback
-      return _getBasicFallback();
+      debugPrint('❌ Error loading devotional: $e');
+      return _getEmergencyFallback();
     }
   }
 
-  static Map<String, dynamic> _generateDailyDevotional() {
-    final today = DateTime.now();
-    final dayOfYear = today.difference(DateTime(today.year, 1, 1)).inDays;
+  /// Loads devotional from Google Sheets
+  static Future<Map<String, dynamic>?> _loadFromGoogleSheets() async {
+    try {
+      debugPrint('📡 Loading devotionals from Google Sheets...');
 
-    // Use day of year as seed for consistent daily content
-    final random = Random(dayOfYear);
-    final devotional = _devotionals[random.nextInt(_devotionals.length)];
+      final response = await http.get(
+        Uri.parse(DEVOTIONAL_CSV_URL),
+        headers: {
+          'User-Agent': 'LaguAdvent/1.0',
+          'Accept-Charset': 'utf-8',
+        },
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        String csvContent;
+        try {
+          csvContent = utf8.decode(response.bodyBytes, allowMalformed: true);
+        } catch (e) {
+          csvContent = latin1.decode(response.bodyBytes);
+        }
+
+        return _parseDevotionalCSV(csvContent);
+      } else {
+        debugPrint('❌ HTTP Error: ${response.statusCode}');
+        return null;
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading from Google Sheets: $e');
+      return null;
+    }
+  }
+
+  /// Parses CSV to find today's devotional
+  static Map<String, dynamic> _parseDevotionalCSV(String csvContent) {
+    final lines =
+        csvContent.split('\n').where((line) => line.trim().isNotEmpty).toList();
+
+    if (lines.length < 2) {
+      throw Exception('Invalid CSV format');
+    }
+
+    final today = DateTime.now();
+    final todayFormatted = DateFormat('dd/MM/yyyy').format(today);
+    final dataLines = lines.skip(1).toList(); // Skip header
+
+    debugPrint('🗓️ Looking for today\'s date: $todayFormatted');
+
+    // First, try to find today's exact date
+    for (int i = 0; i < dataLines.length; i++) {
+      final line = dataLines[i];
+      final values = _parseCSVLine(line);
+
+      if (values.length > 1) {
+        final dateValue = _cleanText(values[1]).trim();
+
+        if (dateValue == todayFormatted) {
+          debugPrint('✅ Found today\'s devotional!');
+          return {
+            'id': 'gsheets_${DateFormat('yyyy-MM-dd').format(today)}',
+            'title':
+                values.length > 2 ? _cleanText(values[2]) : 'Daily Devotional',
+            'content': values.length > 3 ? _cleanText(values[3]) : '',
+            'verse': values.length > 4 ? _cleanText(values[4]) : '',
+            'reference': values.length > 5 ? _cleanText(values[5]) : '',
+            'author':
+                values.length > 6 ? _cleanText(values[6]) : 'Devotional Team',
+            'date': DateFormat('yyyy-MM-dd').format(today),
+            'source': 'Google Sheets',
+            'loaded_at': DateTime.now().millisecondsSinceEpoch,
+          };
+        }
+      }
+    }
+
+    // If no exact date match, find the most recent past devotional
+    debugPrint('⚠️ No exact date match, looking for most recent devotional...');
+
+    DateTime? closestDate;
+    List<String>? closestValues;
+
+    for (final line in dataLines) {
+      final values = _parseCSVLine(line);
+      if (values.length > 1) {
+        final dateValue = _cleanText(values[1]).trim();
+        try {
+          final devotionalDate = DateFormat('dd/MM/yyyy').parse(dateValue);
+          if (devotionalDate.isBefore(today.add(Duration(days: 1))) &&
+              (closestDate == null || devotionalDate.isAfter(closestDate))) {
+            closestDate = devotionalDate;
+            closestValues = values;
+          }
+        } catch (e) {
+          debugPrint('⚠️ Could not parse date: $dateValue');
+        }
+      }
+    }
+
+    if (closestValues != null) {
+      final daysAgo = today.difference(closestDate!).inDays;
+      debugPrint('📅 Using closest devotional from $daysAgo days ago');
+
+      return {
+        'id': 'gsheets_${DateFormat('yyyy-MM-dd').format(today)}',
+        'title': closestValues.length > 2
+            ? _cleanText(closestValues[2])
+            : 'Daily Devotional',
+        'content': closestValues.length > 3 ? _cleanText(closestValues[3]) : '',
+        'verse': closestValues.length > 4 ? _cleanText(closestValues[4]) : '',
+        'reference':
+            closestValues.length > 5 ? _cleanText(closestValues[5]) : '',
+        'author': closestValues.length > 6
+            ? _cleanText(closestValues[6])
+            : 'Devotional Team',
+        'date': DateFormat('yyyy-MM-dd').format(today),
+        'source': 'Google Sheets ($daysAgo days ago)',
+        'loaded_at': DateTime.now().millisecondsSinceEpoch,
+      };
+    }
+
+    // Last resort - use first available devotional
+    debugPrint('❌ No suitable devotional found, using first available');
+    final firstLine = dataLines[0];
+    final values = _parseCSVLine(firstLine);
 
     return {
-      ...devotional,
-      'id': 'daily_${DateFormat('yyyy-MM-dd').format(today)}',
+      'id': 'gsheets_${DateFormat('yyyy-MM-dd').format(today)}',
+      'title': values.length > 2 ? _cleanText(values[2]) : 'Daily Devotional',
+      'content': values.length > 3 ? _cleanText(values[3]) : '',
+      'verse': values.length > 4 ? _cleanText(values[4]) : '',
+      'reference': values.length > 5 ? _cleanText(values[5]) : '',
+      'author': values.length > 6 ? _cleanText(values[6]) : 'Devotional Team',
       'date': DateFormat('yyyy-MM-dd').format(today),
+      'source': 'Google Sheets (Fallback)',
+      'loaded_at': DateTime.now().millisecondsSinceEpoch,
     };
   }
 
-  static Future<Map<String, dynamic>?> _getCachedDevotional() async {
-    final prefs = await SharedPreferences.getInstance();
-    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    final cachedJson = prefs.getString('devotional_$today');
+  /// Adds a new devotional to Google Sheets
+  static Future<bool> addDevotional({
+    required String date,
+    required String title,
+    required String content,
+    String? verse,
+    String? reference,
+    String? author,
+    String addedBy = 'Admin',
+  }) async {
+    try {
+      debugPrint('📝 Adding devotional to Google Sheets...');
 
-    if (cachedJson != null) {
-      try {
-        return json.decode(cachedJson);
-      } catch (e) {
-        await prefs.remove('devotional_$today');
+      final uri = Uri.parse(APPS_SCRIPT_URL).replace(queryParameters: {
+        'action': 'addDevotional',
+        'date': date,
+        'title': title,
+        'content': content,
+        'verse': verse ?? '',
+        'reference': reference ?? '',
+        'author': author ?? 'Devotional Team',
+        'addedBy': addedBy,
+        'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
+      });
+
+      final response = await http.get(uri, headers: {
+        'User-Agent': 'LaguAdvent/1.0',
+        'Accept': 'application/json',
+      }).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        if (result['success'] == true) {
+          debugPrint('✅ Devotional added successfully');
+
+          // Clear cache to force fresh data
+          await _clearCache();
+          return true;
+        } else {
+          debugPrint('❌ Add failed: ${result['error']}');
+          return false;
+        }
+      } else {
+        debugPrint('❌ HTTP Error: ${response.statusCode}');
+        return false;
       }
+    } catch (e) {
+      debugPrint('❌ Error adding devotional: $e');
+      return false;
+    }
+  }
+
+  /// Updates an existing devotional in Google Sheets
+  static Future<bool> updateDevotional({
+    required String originalDate,
+    required String date,
+    required String title,
+    required String content,
+    String? verse,
+    String? reference,
+    String? author,
+    String updatedBy = 'Admin',
+  }) async {
+    try {
+      debugPrint('📝 Updating devotional in Google Sheets...');
+
+      final uri = Uri.parse(APPS_SCRIPT_URL).replace(queryParameters: {
+        'action': 'updateDevotional',
+        'originalDate': originalDate,
+        'date': date,
+        'title': title,
+        'content': content,
+        'verse': verse ?? '',
+        'reference': reference ?? '',
+        'author': author ?? 'Devotional Team',
+        'updatedBy': updatedBy,
+        'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
+      });
+
+      final response = await http.get(uri, headers: {
+        'User-Agent': 'LaguAdvent/1.0',
+        'Accept': 'application/json',
+      }).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        if (result['success'] == true) {
+          debugPrint('✅ Devotional updated successfully');
+
+          // Clear cache to force fresh data
+          await _clearCache();
+          return true;
+        } else {
+          debugPrint('❌ Update failed: ${result['error']}');
+          return false;
+        }
+      } else {
+        debugPrint('❌ HTTP Error: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('❌ Error updating devotional: $e');
+      return false;
+    }
+  }
+
+  /// Deletes a devotional from Google Sheets
+  static Future<bool> deleteDevotional({
+    required String date,
+    String deletedBy = 'Admin',
+  }) async {
+    try {
+      debugPrint('🗑️ Deleting devotional from Google Sheets...');
+
+      final uri = Uri.parse(APPS_SCRIPT_URL).replace(queryParameters: {
+        'action': 'deleteDevotional',
+        'date': date,
+        'deletedBy': deletedBy,
+        'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
+      });
+
+      final response = await http.get(uri, headers: {
+        'User-Agent': 'LaguAdvent/1.0',
+        'Accept': 'application/json',
+      }).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        final result = json.decode(response.body);
+        if (result['success'] == true) {
+          debugPrint('✅ Devotional deleted successfully');
+
+          // Clear cache to force fresh data
+          await _clearCache();
+          return true;
+        } else {
+          debugPrint('❌ Delete failed: ${result['error']}');
+          return false;
+        }
+      } else {
+        debugPrint('❌ HTTP Error: ${response.statusCode}');
+        return false;
+      }
+    } catch (e) {
+      debugPrint('❌ Error deleting devotional: $e');
+      return false;
+    }
+  }
+
+  /// Gets all devotionals from Google Sheets
+  static Future<List<Map<String, dynamic>>> getAllDevotionals() async {
+    try {
+      debugPrint('📡 Loading all devotionals from Google Sheets...');
+
+      final response = await http.get(
+        Uri.parse(DEVOTIONAL_CSV_URL),
+        headers: {
+          'User-Agent': 'LaguAdvent/1.0',
+          'Accept-Charset': 'utf-8',
+        },
+      ).timeout(const Duration(seconds: 15));
+
+      if (response.statusCode == 200) {
+        String csvContent;
+        try {
+          csvContent = utf8.decode(response.bodyBytes, allowMalformed: true);
+        } catch (e) {
+          csvContent = latin1.decode(response.bodyBytes);
+        }
+
+        return _parseAllDevotionals(csvContent);
+      } else {
+        debugPrint('❌ HTTP Error: ${response.statusCode}');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('❌ Error loading all devotionals: $e');
+      return [];
+    }
+  }
+
+  /// Parses CSV to get all devotionals
+  static List<Map<String, dynamic>> _parseAllDevotionals(String csvContent) {
+    final lines =
+        csvContent.split('\n').where((line) => line.trim().isNotEmpty).toList();
+
+    if (lines.length < 2) {
+      return [];
+    }
+
+    final devotionals = <Map<String, dynamic>>[];
+    final dataLines = lines.skip(1).toList(); // Skip header
+
+    for (int i = 0; i < dataLines.length; i++) {
+      try {
+        final line = dataLines[i];
+        final values = _parseCSVLine(line);
+
+        if (values.length >= 3) {
+          // Minimum required columns
+          final devotional = {
+            'id': 'gsheets_$i',
+            'title': values.length > 2 ? _cleanText(values[2]) : 'Untitled',
+            'content': values.length > 3 ? _cleanText(values[3]) : '',
+            'verse': values.length > 4 ? _cleanText(values[4]) : '',
+            'reference': values.length > 5 ? _cleanText(values[5]) : '',
+            'author': values.length > 6 ? _cleanText(values[6]) : 'Unknown',
+            'date': values.length > 1
+                ? _parseDateFromCSV(values[1])
+                : DateFormat('yyyy-MM-dd').format(DateTime.now()),
+            'source': 'Google Sheets',
+          };
+
+          devotionals.add(devotional);
+        }
+      } catch (e) {
+        debugPrint('⚠️ Error parsing line ${i + 1}: $e');
+        continue;
+      }
+    }
+
+    // Sort by date descending (newest first)
+    devotionals.sort((a, b) =>
+        DateTime.parse(b['date']).compareTo(DateTime.parse(a['date'])));
+
+    return devotionals;
+  }
+
+  // Helper methods
+  static List<String> _parseCSVLine(String line) {
+    final values = <String>[];
+    bool inQuotes = false;
+    String currentValue = '';
+
+    for (int i = 0; i < line.length; i++) {
+      final char = line[i];
+      if (char == '"') {
+        if (i + 1 < line.length && line[i + 1] == '"' && inQuotes) {
+          currentValue += '"';
+          i++;
+        } else {
+          inQuotes = !inQuotes;
+        }
+      } else if (char == ',' && !inQuotes) {
+        values.add(currentValue.trim());
+        currentValue = '';
+      } else {
+        currentValue += char;
+      }
+    }
+    values.add(currentValue.trim());
+    return values;
+  }
+
+  static String _cleanText(String text) {
+    if (text.isEmpty) return text;
+
+    return text
+        .replaceAll('â€™', "'")
+        .replaceAll('â€œ', '"')
+        .replaceAll('â€', '"')
+        .replaceAll('â€"', '—')
+        .replaceAll('â€"', '–')
+        .replaceAll('â€¦', '...')
+        .replaceAll('"', '"')
+        .replaceAll('"', '"')
+        .replaceAll(''', "'")
+        .replaceAll(''', "'")
+        .replaceAll(RegExp(r'^"'), '')
+        .replaceAll(RegExp(r'"$'), '')
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
+  }
+
+  static String _parseDateFromCSV(String dateStr) {
+    try {
+      if (dateStr.contains('/')) {
+        final parts = dateStr.split('/');
+        if (parts.length == 3) {
+          final day = int.parse(parts[0]);
+          final month = int.parse(parts[1]);
+          final year = int.parse(parts[2]);
+          final date = DateTime(year, month, day);
+          return DateFormat('yyyy-MM-dd').format(date);
+        }
+      }
+      final parsed = DateTime.parse(dateStr);
+      return DateFormat('yyyy-MM-dd').format(parsed);
+    } catch (e) {
+      return DateFormat('yyyy-MM-dd').format(DateTime.now());
+    }
+  }
+
+  // Cache management
+  static Future<Map<String, dynamic>?> _getCachedDevotional(
+      String dateKey) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final cachedJson = prefs.getString('$_cachePrefix$dateKey');
+
+      if (cachedJson != null) {
+        final cached = json.decode(cachedJson) as Map<String, dynamic>;
+        final cachedAt = cached['cached_at'] as int?;
+        if (cachedAt != null) {
+          final cacheAge = DateTime.now().millisecondsSinceEpoch - cachedAt;
+          if (cacheAge < _cacheTimeout.inMilliseconds) {
+            return cached;
+          } else {
+            await prefs.remove('$_cachePrefix$dateKey');
+          }
+        }
+      }
+    } catch (e) {
+      debugPrint('⚠️ Error reading cache: $e');
     }
     return null;
   }
 
-  static Future<void> _cacheDevotional(Map<String, dynamic> devotional) async {
-    final prefs = await SharedPreferences.getInstance();
-    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
-    await prefs.setString('devotional_$today', json.encode(devotional));
-
-    // Clean old cache (keep only last 30 days)
-    await _cleanOldCache(prefs);
-  }
-
-  static Future<void> _cleanOldCache(SharedPreferences prefs) async {
-    final keys = prefs.getKeys().where((key) => key.startsWith('devotional_'));
-    final cutoffDate = DateTime.now().subtract(const Duration(days: 30));
-
-    for (final key in keys) {
-      try {
-        final dateStr = key.replaceFirst('devotional_', '');
-        final date = DateTime.parse(dateStr);
-        if (date.isBefore(cutoffDate)) {
-          await prefs.remove(key);
-        }
-      } catch (e) {
-        await prefs.remove(key);
-      }
+  static Future<void> _cacheDevotional(
+      String dateKey, Map<String, dynamic> devotional) async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final devotionalWithTimestamp = {
+        ...devotional,
+        'cached_at': DateTime.now().millisecondsSinceEpoch,
+      };
+      await prefs.setString(
+          '$_cachePrefix$dateKey', json.encode(devotionalWithTimestamp));
+    } catch (e) {
+      debugPrint('⚠️ Error caching devotional: $e');
     }
   }
 
-  static Map<String, dynamic> _getBasicFallback() {
+  static Future<void> _clearCache() async {
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      final keys =
+          prefs.getKeys().where((key) => key.startsWith(_cachePrefix)).toList();
+      for (final key in keys) {
+        await prefs.remove(key);
+      }
+      debugPrint('🧹 Cleared devotional cache');
+    } catch (e) {
+      debugPrint('⚠️ Error clearing cache: $e');
+    }
+  }
+
+  static Map<String, dynamic> _getEmergencyFallback() {
     return {
       'id': 'fallback_${DateTime.now().millisecondsSinceEpoch}',
-      'title': 'Daily Encouragement',
+      'title': 'God\'s Faithfulness',
       'content':
-          'Take time today to reflect on God\'s goodness and mercy. In every situation, remember that He is with you and His love for you is unfailing.',
+          'Even when technology fails, God\'s love remains constant. His faithfulness endures through every season. Take this moment to reflect on His goodness and find peace in His presence.',
       'verse':
-          'The Lord your God is with you, the Mighty Warrior who saves. He will take great delight in you; in his love he will no longer rebuke you, but will rejoice over you with singing.',
-      'reference': 'Zephaniah 3:17',
+          'Great is your faithfulness, O Lord; your mercies are new every morning.',
+      'reference': 'Lamentations 3:22-23',
       'date': DateFormat('yyyy-MM-dd').format(DateTime.now()),
-      'source': 'Built-in',
+      'source': 'Emergency Fallback',
       'author': 'Lagu Advent',
+      'loaded_at': DateTime.now().millisecondsSinceEpoch,
     };
   }
 
-  // Rich collection of devotional content
-  static final List<Map<String, dynamic>> _devotionals = [
-    {
-      'title': 'Walking in Faith',
-      'content':
-          'Faith is not about knowing all the answers or seeing the entire path ahead. It\'s about taking the next step, trusting that God is guiding your way. When uncertainty clouds your vision, remember that His light shines brightest in the darkness. Each step of faith, no matter how small, brings you closer to His perfect plan for your life.',
-      'verse':
-          'Trust in the Lord with all your heart and lean not on your own understanding; in all your ways submit to him, and he will make your paths straight.',
-      'reference': 'Proverbs 3:5-6',
-      'source': 'Built-in',
-      'author': 'Lagu Advent',
-    },
-    {
-      'title': 'The Peace of Christ',
-      'content':
-          'In a world filled with anxiety and turmoil, Christ offers us a peace that transcends understanding. This peace doesn\'t come from the absence of problems, but from the presence of God in our midst. When storms rage around you, anchor your heart in His promises. Let His peace guard your mind and heart, knowing that He is in control of every circumstance.',
-      'verse':
-          'Peace I leave with you; my peace I give you. I do not give to you as the world gives. Do not let your hearts be troubled and do not be afraid.',
-      'reference': 'John 14:27',
-      'source': 'Built-in',
-      'author': 'Lagu Advent',
-    },
-    {
-      'title': 'Unconditional Love',
-      'content':
-          'God\'s love for you is not based on your performance, achievements, or worthiness. It\'s rooted in His character - unchanging, eternal, and perfect. When you feel unlovable or make mistakes, remember that His love remains constant. This love has the power to transform, heal, and restore. Let it fill every empty space in your heart today.',
-      'verse':
-          'For God so loved the world that he gave his one and only Son, that whoever believes in him shall not perish but have eternal life.',
-      'reference': 'John 3:16',
-      'source': 'Built-in',
-      'author': 'Lagu Advent',
-    },
-    {
-      'title': 'Strength in Weakness',
-      'content':
-          'Your weaknesses are not obstacles to God\'s power - they are invitations for His strength to be displayed. When you feel inadequate or overwhelmed, remember that God chooses the weak things of this world to shame the strong. In your vulnerability, His grace is sufficient. Allow His strength to be perfected in your weakness today.',
-      'verse':
-          'But he said to me, "My grace is sufficient for you, for my power is made perfect in weakness." Therefore I will boast all the more gladly about my weaknesses, so that Christ\'s power may rest on me.',
-      'reference': '2 Corinthians 12:9',
-      'source': 'Built-in',
-      'author': 'Lagu Advent',
-    },
-    {
-      'title': 'Hope in Difficult Times',
-      'content':
-          'Even in the darkest moments, hope remains. It\'s not wishful thinking or denial of reality - it\'s confident expectation based on God\'s faithful character. When circumstances seem impossible, remember that nothing is too difficult for God. He has a purpose in every season, including the difficult ones. Hold onto hope, for your story is not over.',
-      'verse':
-          'For I know the plans I have for you," declares the Lord, "plans to prosper you and not to harm you, plans to give you hope and a future.',
-      'reference': 'Jeremiah 29:11',
-      'source': 'Built-in',
-      'author': 'Lagu Advent',
-    },
-    {
-      'title': 'The Joy of the Lord',
-      'content':
-          'Joy is not dependent on your circumstances - it flows from your relationship with God. Even in sorrow, this divine joy can coexist with pain, bringing light to dark places. The joy of the Lord is your strength, sustaining you through every trial. Choose to find reasons for gratitude today, and let His joy be your portion.',
-      'verse': 'Do not grieve, for the joy of the Lord is your strength.',
-      'reference': 'Nehemiah 8:10',
-      'source': 'Built-in',
-      'author': 'Lagu Advent',
-    },
-    {
-      'title': 'God\'s Faithfulness',
-      'content':
-          'Throughout history, God has never failed to keep His promises. His faithfulness spans generations, remaining constant when everything else changes. Today, you can trust in His proven track record of love and care. Whatever you\'re facing, remember His faithfulness in the past and rest in the assurance of His continued faithfulness in your future.',
-      'verse':
-          'Great is your faithfulness, O Lord; your mercies are new every morning.',
-      'reference': 'Lamentations 3:23',
-      'source': 'Built-in',
-      'author': 'Lagu Advent',
-    },
-    {
-      'title': 'Walking in Purpose',
-      'content':
-          'You were created with intention and designed for a purpose. Every experience, every gift, every passion has been woven together by God for His glory and your fulfillment. Don\'t underestimate the importance of your calling. Whether big or small in the world\'s eyes, your purpose matters in God\'s kingdom. Step boldly into what He has prepared for you.',
-      'verse':
-          'For we are God\'s handiwork, created in Christ Jesus to do good works, which God prepared in advance for us to do.',
-      'reference': 'Ephesians 2:10',
-      'source': 'Built-in',
-      'author': 'Lagu Advent',
-    },
-    {
-      'title': 'Divine Protection',
-      'content':
-          'You are not walking through life alone or unprotected. God\'s watchful eye is always upon you, His mighty hand ready to shield and deliver. Under the shadow of His wings, you find refuge from every storm. Trust in His protection today, knowing that no weapon formed against you shall prosper.',
-      'verse':
-          'He will cover you with his feathers, and under his wings you will find refuge; his faithfulness will be your shield and rampart.',
-      'reference': 'Psalm 91:4',
-      'source': 'Built-in',
-      'author': 'Lagu Advent',
-    },
-    {
-      'title': 'Forgiveness and Grace',
-      'content':
-          'God\'s forgiveness is complete and His grace is abundant. When guilt and shame try to define you, remember that you are defined by His love and grace instead. Your past mistakes do not determine your future. In Christ, you are a new creation - the old has gone, the new has come. Walk in the freedom of His forgiveness today.',
-      'verse':
-          'Therefore, if anyone is in Christ, the new creation has come: The old has gone, the new is here!',
-      'reference': '2 Corinthians 5:17',
-      'source': 'Built-in',
-      'author': 'Lagu Advent',
-    },
-  ];
+  /// Test connection to Google Sheets
+  static Future<bool> testConnection() async {
+    try {
+      final result = await _loadFromGoogleSheets();
+      return result != null;
+    } catch (e) {
+      return false;
+    }
+  }
 }
