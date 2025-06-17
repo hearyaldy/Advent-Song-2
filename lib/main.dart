@@ -2,6 +2,9 @@
 import 'package:flutter/material.dart';
 import 'theme_notifier.dart'; // Import the new theme notifier
 import 'landing_page.dart';
+import 'admin_login_page.dart';
+import 'admin_dashboard.dart';
+import 'admin_password_management_page.dart';
 
 void main() {
   runApp(const MyApp());
