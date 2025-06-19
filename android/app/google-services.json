@@ -8,6 +8,42 @@
   "client": [
     {
       "client_info": {
+        "mobilesdk_app_id": "1:1043393288929:android:37026635326c13d15cf5a0",
+        "android_client_info": {
+          "package_name": "com.haweeinc.advent_song"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1043393288929-qe78ech4in858hf7ggjs7tmpdh3r9lc8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAY_v5VGSEjU-3Uf4bOtSHMdu3xLeNANdc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1043393288929-qe78ech4in858hf7ggjs7tmpdh3r9lc8.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "1043393288929-eaciqjnimpbr2ica47knd396sgjqa68m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.adventSong"
+              }
+            }
+          ]
+        }
+      }
+    },
+    {
+      "client_info": {
         "mobilesdk_app_id": "1:1043393288929:android:66e54660a143eede5cf5a0",
         "android_client_info": {
           "package_name": "haweeinc.adventsong.com"
@@ -30,6 +66,13 @@
             {
               "client_id": "1043393288929-qe78ech4in858hf7ggjs7tmpdh3r9lc8.apps.googleusercontent.com",
               "client_type": 3
+            },
+            {
+              "client_id": "1043393288929-eaciqjnimpbr2ica47knd396sgjqa68m.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.example.adventSong"
+              }
             }
           ]
         }

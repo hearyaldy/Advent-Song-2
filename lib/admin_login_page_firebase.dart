@@ -2,7 +2,7 @@
 import 'package:flutter/material.dart';
 import 'services/auth_service.dart';
 import 'services/firebase_service.dart';
-import 'admin_dashboard.dart';
+import 'admin_dashboard_firebase.dart';
 
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({super.key});

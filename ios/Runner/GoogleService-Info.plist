@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CLIENT_ID</key>
+	<string>1043393288929-eaciqjnimpbr2ica47knd396sgjqa68m.apps.googleusercontent.com</string>
+	<key>REVERSED_CLIENT_ID</key>
+	<string>com.googleusercontent.apps.1043393288929-eaciqjnimpbr2ica47knd396sgjqa68m</string>
+	<key>API_KEY</key>
+	<string>AIzaSyA8wrzNc-36-A5A_RbZxzc_oUk7gMqDnYU</string>
+	<key>GCM_SENDER_ID</key>
+	<string>1043393288929</string>
+	<key>PLIST_VERSION</key>
+	<string>1</string>
+	<key>BUNDLE_ID</key>
+	<string>com.example.adventSong</string>
+	<key>PROJECT_ID</key>
+	<string>advent-song</string>
+	<key>STORAGE_BUCKET</key>
+	<string>advent-song.firebasestorage.app</string>
+	<key>IS_ADS_ENABLED</key>
+	<false></false>
+	<key>IS_ANALYTICS_ENABLED</key>
+	<false></false>
+	<key>IS_APPINVITE_ENABLED</key>
+	<true></true>
+	<key>IS_GCM_ENABLED</key>
+	<true></true>
+	<key>IS_SIGNIN_ENABLED</key>
+	<true></true>
+	<key>GOOGLE_APP_ID</key>
+	<string>1:1043393288929:ios:e0120ef64ac505465cf5a0</string>
+	<key>DATABASE_URL</key>
+	<string>https://advent-song-default-rtdb.asia-southeast1.firebasedatabase.app</string>
+</dict>
+</plist>
