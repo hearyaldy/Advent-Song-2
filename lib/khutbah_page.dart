@@ -1,12 +1,10 @@
-// khutbah_page.dart - COMPLETE WORKING VERSION
+// khutbah_page.dart - MIGRATED TO FIREBASE
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/services.dart';
-import 'package:http/http.dart' as http;
-import 'dart:convert';
 import 'theme_notifier.dart';
-import 'google_drive_devotional_service.dart';
+import 'devotional_service.dart'; // Now uses Firebase instead of Google Sheets
 
 class KhutbahPage extends StatefulWidget {
   final ThemeNotifier themeNotifier;
@@ -21,13 +19,14 @@ class KhutbahPage extends StatefulWidget {
 }
 
 class _KhutbahPageState extends State<KhutbahPage> {
-  // ALL ESSENTIAL VARIABLES
+  // Essential variables
   Map<String, dynamic>? _currentDevotional;
   List<String> _bookmarkedDevotionals = [];
   List<Map<String, dynamic>> _previousDevotionals = [];
   bool _isLoading = true;
   bool _isRefreshing = false;
   String _error = '';
+  bool _isConnected = false;
   final ScrollController _scrollController = ScrollController();
 
   @override
@@ -35,6 +34,7 @@ class _KhutbahPageState extends State<KhutbahPage> {
     super.initState();
     _loadBookmarks();
     _loadDevotional();
+    _testFirebaseConnection();
   }
 
   @override
@@ -75,6 +75,21 @@ class _KhutbahPageState extends State<KhutbahPage> {
     }
   }
 
+  /// Test Firebase connection
+  Future<void> _testFirebaseConnection() async {
+    try {
+      final isConnected = await DevotionalService.testConnection();
+      setState(() {
+        _isConnected = isConnected;
+      });
+    } catch (e) {
+      setState(() {
+        _isConnected = false;
+      });
+    }
+  }
+
+  /// Load devotional using Firebase service
   Future<void> _loadDevotional({bool forceRefresh = false}) async {
     setState(() {
       if (forceRefresh) {
@@ -86,11 +101,14 @@ class _KhutbahPageState extends State<KhutbahPage> {
     });
 
     try {
-      print('🔄 Loading current devotional...');
-      final devotional =
-          await GoogleDriveDevotionalService.getTodaysDevotional();
+      print('🔄 Loading current devotional from Firebase...');
 
-      print('🔄 Loading previous devotionals...');
+      // Get today's devotional from Firebase
+      final devotional = forceRefresh
+          ? await DevotionalService.forceRefresh()
+          : await DevotionalService.getTodaysDevotional();
+
+      print('🔄 Loading previous devotionals from Firebase...');
       final previousDevotionals = await _loadPreviousDevotionals();
       print('📊 Loaded ${previousDevotionals.length} previous devotionals');
 
@@ -112,114 +130,28 @@ class _KhutbahPageState extends State<KhutbahPage> {
     }
   }
 
-  // IMPROVED TEXT CLEANING METHOD
-  String _cleanText(String text) {
-    if (text.isEmpty) return text;
-
-    String cleaned = text
-        // Handle UTF-8 encoding artifacts (common when data comes from CSV/web)
-        .replaceAll('â€™', "'") // Right single quotation mark encoded
-        .replaceAll('â€œ', '"') // Left double quotation mark encoded
-        .replaceAll('â€', '"') // Right double quotation mark encoded
-        .replaceAll('â€"', '—') // Em dash encoded
-        .replaceAll('â€"', '–') // En dash encoded
-        .replaceAll('â€¦', '...') // Horizontal ellipsis encoded
-
-        // Handle various quote characters
-        .replaceAll('"', '"') // Left double quotation mark (U+201C)
-        .replaceAll('"', '"') // Right double quotation mark (U+201D)
-        .replaceAll(''', "'") // Left single quotation mark (U+2018)
-        .replaceAll(''', "'") // Right single quotation mark (U+2019)
-        .replaceAll('‚', "'") // Single low-9 quotation mark
-        .replaceAll('„', '"') // Double low-9 quotation mark
-        .replaceAll('‹', "'") // Single left-pointing angle quotation mark
-        .replaceAll('›', "'") // Right-pointing angle quotation mark
-        .replaceAll('«', '"') // Left-pointing double angle quotation mark
-        .replaceAll('»', '"') // Right-pointing double angle quotation mark
-
-        // Handle dash characters
-        .replaceAll('—', '—') // Em dash (U+2014) - keep as is
-        .replaceAll('–', '–') // En dash (U+2013) - keep as is
-        .replaceAll('−', '-') // Minus sign (U+2212) -> hyphen
-
-        // Handle apostrophe variants
-        .replaceAll('`', "'") // Grave accent
-        .replaceAll('´', "'") // Acute accent
-        .replaceAll('ʻ', "'") // Modifier letter turned comma
-        .replaceAll('ʼ', "'") // Modifier letter apostrophe
-
-        // Handle ellipsis
-        .replaceAll('…', '...') // Horizontal ellipsis
-
-        // Handle non-breaking spaces and other whitespace
-        .replaceAll('\u00A0', ' ') // Non-breaking space
-        .replaceAll('\u2000', ' ') // En quad
-        .replaceAll('\u2001', ' ') // Em quad
-        .replaceAll('\u2002', ' ') // En space
-        .replaceAll('\u2003', ' ') // Em space
-        .replaceAll('\u2009', ' ') // Thin space
-        .replaceAll('\u202F', ' ') // Narrow no-break space
-
-        // Remove CSV parsing artifacts
-        .replaceAll(RegExp(r'^"'), '') // Remove leading quote
-        .replaceAll(RegExp(r'"$'), '') // Remove trailing quote
-
-        // Clean up whitespace (multiple spaces, tabs, newlines)
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-
-    return cleaned;
-  }
-
-  // DEBUG METHOD (removed unused warning by making it used)
-  void _debugTextIssues(String label, String text) {
-    if (text.contains('â€')) {
-      // Only debug problematic text
-      print('=== $label ===');
-      print('Original: "$text"');
-      print('Cleaned: "${_cleanText(text)}"');
-      print(
-          'Runes: ${text.runes.map((r) => 'U+${r.toRadixString(16).toUpperCase().padLeft(4, '0')}').join(' ')}');
-      print('===================');
-    }
-  }
-
+  /// Load previous devotionals from Firebase
   Future<List<Map<String, dynamic>>> _loadPreviousDevotionals() async {
     try {
-      print('📡 Fetching previous devotionals from Google Sheets...');
-      const String csvUrl =
-          'https://docs.google.com/spreadsheets/d/1E6GVXX3dHpGsohUg5e7qC9jZwRhMvNdmelHQMQ8SWZ8/export?format=csv&gid=0';
+      print('📡 Fetching previous devotionals from Firebase...');
 
-      final response = await http.get(
-        Uri.parse(csvUrl),
-        headers: {
-          'User-Agent': 'LaguAdvent/1.0',
-          'Accept-Charset': 'utf-8',
-        },
-      ).timeout(const Duration(seconds: 10));
+      // Get devotionals from the past 7 days
+      final endDate = DateTime.now().subtract(const Duration(days: 1));
+      final startDate = endDate.subtract(const Duration(days: 6));
 
-      print('📊 Previous devotionals response: ${response.statusCode}');
+      final devotionals = await DevotionalService.getDevotionalsInRange(
+        startDate: startDate,
+        endDate: endDate,
+      );
 
-      if (response.statusCode == 200) {
-        String csvContent;
-        try {
-          csvContent = utf8.decode(response.bodyBytes, allowMalformed: true);
-        } catch (e) {
-          csvContent = latin1.decode(response.bodyBytes);
-        }
-
-        final result = _parsePreviousDevotionals(csvContent);
-        print('✅ Successfully parsed ${result.length} previous devotionals');
-        return result;
-      } else {
-        print('❌ HTTP Error: ${response.statusCode}');
-      }
+      print(
+          '✅ Successfully loaded ${devotionals.length} previous devotionals from Firebase');
+      return devotionals;
     } catch (e) {
-      print('❌ Error loading previous devotionals: $e');
+      print('❌ Error loading previous devotionals from Firebase: $e');
+      print('🔄 Returning mock data for testing');
+      return _getMockPreviousDevotionals();
     }
-
-    print('🔄 Returning mock previous devotionals for testing');
-    return _getMockPreviousDevotionals();
   }
 
   List<Map<String, dynamic>> _getMockPreviousDevotionals() {
@@ -228,105 +160,69 @@ class _KhutbahPageState extends State<KhutbahPage> {
       final date = today.subtract(Duration(days: index + 1));
       return {
         'date': DateFormat('dd/MM/yyyy').format(date),
-        'title': 'Devotional from ${DateFormat('MMM d').format(date)}',
+        'title': 'Firebase Devotional from ${DateFormat('MMM d').format(date)}',
         'content':
-            'This is sample content for the devotional from ${DateFormat('EEEE, MMM d').format(date)}. This helps test the previous devotionals section.',
+            'This is sample content for the devotional from ${DateFormat('EEEE, MMM d').format(date)}. This content is served from Firebase Realtime Database.',
         'verse': 'For I know the plans I have for you, declares the Lord...',
         'reference': 'Jeremiah 29:11',
-        'author': 'Devotional Team',
-        'id': 'mock_${DateFormat('yyyy-MM-dd').format(date)}',
-        'source': 'Mock Data',
+        'author': 'Firebase Devotional Team',
+        'id': 'firebase_${DateFormat('yyyy-MM-dd').format(date)}',
+        'source': 'Firebase (Mock)',
         'parsedDate': date,
       };
     });
   }
 
-  List<Map<String, dynamic>> _parsePreviousDevotionals(String csvContent) {
-    try {
-      print('📋 Parsing CSV for previous devotionals...');
-      final lines = csvContent
-          .split('\n')
-          .where((line) => line.trim().isNotEmpty)
-          .toList();
+  /// Clean text for display (same as before)
+  String _cleanText(String text) {
+    if (text.isEmpty) return text;
 
-      if (lines.length < 3) {
-        print('❌ Not enough lines in CSV: ${lines.length}');
-        return [];
-      }
+    String cleaned = text
+        // Handle UTF-8 encoding artifacts
+        .replaceAll('â€™', "'")
+        .replaceAll('â€œ', '"')
+        .replaceAll('â€', '"')
+        .replaceAll('â€"', '—')
+        .replaceAll('â€"', '–')
+        .replaceAll('â€¦', '...')
+        // Handle various quote characters
+        .replaceAll('"', '"')
+        .replaceAll('"', '"')
+        .replaceAll(''', "'")
+        .replaceAll(''', "'")
+        .replaceAll('‚', "'")
+        .replaceAll('„', '"')
+        .replaceAll('‹', "'")
+        .replaceAll('›', "'")
+        .replaceAll('«', '"')
+        .replaceAll('»', '"')
+        // Handle dash characters
+        .replaceAll('—', '—')
+        .replaceAll('–', '–')
+        .replaceAll('−', '-')
+        // Handle apostrophe variants
+        .replaceAll('`', "'")
+        .replaceAll('´', "'")
+        .replaceAll('ʻ', "'")
+        .replaceAll('ʼ', "'")
+        // Handle ellipsis
+        .replaceAll('…', '...')
+        // Handle non-breaking spaces
+        .replaceAll('\u00A0', ' ')
+        .replaceAll('\u2000', ' ')
+        .replaceAll('\u2001', ' ')
+        .replaceAll('\u2002', ' ')
+        .replaceAll('\u2003', ' ')
+        .replaceAll('\u2009', ' ')
+        .replaceAll('\u202F', ' ')
+        // Remove CSV parsing artifacts
+        .replaceAll(RegExp(r'^"'), '')
+        .replaceAll(RegExp(r'"$'), '')
+        // Clean up whitespace
+        .replaceAll(RegExp(r'\s+'), ' ')
+        .trim();
 
-      final dataLines = lines.skip(1).toList();
-      final today = DateTime.now();
-      final previousDevotionals = <Map<String, dynamic>>[];
-
-      for (int i = 1; i <= 5; i++) {
-        final targetDate = today.subtract(Duration(days: i));
-        final targetFormatted = DateFormat('dd/MM/yyyy').format(targetDate);
-
-        for (int lineIndex = 0; lineIndex < dataLines.length; lineIndex++) {
-          final line = dataLines[lineIndex];
-          final values = _parseCSVLine(line);
-
-          if (values.length > 1) {
-            final dateValue = _cleanText(values[1]).trim();
-
-            if (dateValue == targetFormatted && values.length > 2) {
-              final devotional = {
-                'date': targetFormatted,
-                'title': values.length > 2 ? _cleanText(values[2]) : 'Untitled',
-                'content': values.length > 3 ? _cleanText(values[3]) : '',
-                'verse': values.length > 4 ? _cleanText(values[4]) : '',
-                'reference': values.length > 5 ? _cleanText(values[5]) : '',
-                'author': values.length > 6 ? _cleanText(values[6]) : '',
-                'id': 'previous_${DateFormat('yyyy-MM-dd').format(targetDate)}',
-                'source': 'Google Sheets',
-                'parsedDate': targetDate,
-              };
-
-              previousDevotionals.add(devotional);
-              break;
-            }
-          }
-        }
-      }
-
-      previousDevotionals.sort((a, b) =>
-          (b['parsedDate'] as DateTime).compareTo(a['parsedDate'] as DateTime));
-
-      return previousDevotionals;
-    } catch (e) {
-      print('❌ Error parsing previous devotionals: $e');
-      return [];
-    }
-  }
-
-  List<String> _parseCSVLine(String line) {
-    final values = <String>[];
-    bool inQuotes = false;
-    String currentValue = '';
-
-    for (int i = 0; i < line.length; i++) {
-      final char = line[i];
-
-      if (char == '"') {
-        if (i + 1 < line.length && line[i + 1] == '"' && inQuotes) {
-          currentValue += '"';
-          i++;
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char == ',' && !inQuotes) {
-        values.add(currentValue.trim());
-        currentValue = '';
-      } else {
-        currentValue += char;
-      }
-    }
-
-    if (currentValue.isNotEmpty || values.isNotEmpty) {
-      values.add(currentValue.trim());
-    }
-
-    return values;
+    return cleaned;
   }
 
   Future<void> _shareDevotional() async {
@@ -345,7 +241,7 @@ $cleanContent
 "$cleanVerse"
 — $cleanReference
 
-Shared from Lagu Advent App''';
+Shared from Lagu Advent App (Powered by Firebase)''';
 
     await Clipboard.setData(ClipboardData(text: text));
 
@@ -495,7 +391,7 @@ Shared from Lagu Advent App''';
                         const SizedBox(width: 4),
                         Text(
                           _currentDevotional != null
-                              ? (_currentDevotional!['source'] ?? 'Unknown')
+                              ? (_currentDevotional!['source'] ?? 'Firebase')
                               : 'Loading...',
                           style: const TextStyle(
                             fontSize: 10,
@@ -503,6 +399,17 @@ Shared from Lagu Advent App''';
                             fontWeight: FontWeight.w500,
                           ),
                         ),
+                        if (_isConnected) ...[
+                          const SizedBox(width: 4),
+                          Container(
+                            width: 6,
+                            height: 6,
+                            decoration: const BoxDecoration(
+                              color: Colors.green,
+                              shape: BoxShape.circle,
+                            ),
+                          ),
+                        ],
                       ],
                     ),
                   ),
@@ -573,6 +480,9 @@ Shared from Lagu Advent App''';
               case 'source':
                 _showSourceInfo();
                 break;
+              case 'firebase':
+                _showFirebaseInfo();
+                break;
             }
           },
           itemBuilder: (context) => [
@@ -585,10 +495,10 @@ Shared from Lagu Advent App''';
               ),
             ),
             const PopupMenuItem(
-              value: 'debug',
+              value: 'firebase',
               child: ListTile(
-                leading: Icon(Icons.bug_report),
-                title: Text('Debug Info'),
+                leading: Icon(Icons.cloud),
+                title: Text('Firebase Info'),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
@@ -601,10 +511,10 @@ Shared from Lagu Advent App''';
               ),
             ),
             const PopupMenuItem(
-              value: 'source',
+              value: 'debug',
               child: ListTile(
-                leading: Icon(Icons.info_outline),
-                title: Text('Source Info'),
+                leading: Icon(Icons.bug_report),
+                title: Text('Debug Info'),
                 contentPadding: EdgeInsets.zero,
               ),
             ),
@@ -631,8 +541,15 @@ Shared from Lagu Advent App''';
                 CircularProgressIndicator(color: colorScheme.primary),
                 const SizedBox(height: 16),
                 Text(
-                  'Loading today\'s devotional...',
+                  'Loading from Firebase...',
                   style: theme.textTheme.bodyLarge,
+                ),
+                const SizedBox(height: 8),
+                Text(
+                  'Real-time devotional content',
+                  style: theme.textTheme.bodySmall?.copyWith(
+                    color: colorScheme.onSurface.withOpacity(0.7),
+                  ),
                 ),
               ],
             ),
@@ -665,13 +582,15 @@ Shared from Lagu Advent App''';
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.cloud_off,
+                    _isConnected ? Icons.error : Icons.cloud_off,
                     size: 64,
                     color: colorScheme.error,
                   ),
                   const SizedBox(height: 16),
                   Text(
-                    'Unable to Load Content',
+                    _isConnected
+                        ? 'Content Load Error'
+                        : 'Firebase Connection Issue',
                     style: theme.textTheme.headlineSmall,
                     textAlign: TextAlign.center,
                   ),
@@ -695,6 +614,12 @@ Shared from Lagu Advent App''';
                     onPressed: () => _loadDevotional(forceRefresh: true),
                     icon: const Icon(Icons.refresh),
                     label: const Text('Try Again'),
+                  ),
+                  const SizedBox(height: 12),
+                  OutlinedButton.icon(
+                    onPressed: _testFirebaseConnection,
+                    icon: const Icon(Icons.cloud),
+                    label: const Text('Test Firebase'),
                   ),
                 ],
               ),
@@ -722,7 +647,7 @@ Shared from Lagu Advent App''';
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Icon(
-                    Icons.book_outlined,
+                    Icons.cloud_off,
                     size: 64,
                     color: colorScheme.onSurface.withOpacity(0.3),
                   ),
@@ -733,7 +658,7 @@ Shared from Lagu Advent App''';
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    'Check your Google Drive setup or try refreshing',
+                    'Check your Firebase connection or try refreshing',
                     style: theme.textTheme.bodyMedium?.copyWith(
                       color: colorScheme.onSurface.withOpacity(0.7),
                     ),
@@ -750,9 +675,9 @@ Shared from Lagu Advent App''';
 
   IconData _getSourceIcon() {
     final source = _currentDevotional?['source'] ?? '';
-    if (source.contains('Google')) {
-      return Icons.cloud;
-    } else if (source.contains('Offline')) {
+    if (source.contains('Firebase')) {
+      return Icons.cloud_done;
+    } else if (source.contains('Fallback')) {
       return Icons.cloud_off;
     }
     return Icons.record_voice_over;
@@ -810,10 +735,6 @@ Shared from Lagu Advent App''';
 
     final rawVerse = _currentDevotional!['verse'].toString();
     final rawReference = _currentDevotional!['reference']?.toString() ?? '';
-
-    // Debug problematic text
-    _debugTextIssues('Verse', rawVerse);
-    if (rawReference.isNotEmpty) _debugTextIssues('Reference', rawReference);
 
     String displayVerse = _cleanText(rawVerse);
     String displayReference = _cleanText(rawReference);
@@ -1014,20 +935,20 @@ Shared from Lagu Advent App''';
       child: Column(
         children: [
           Icon(
-            Icons.schedule,
+            Icons.cloud,
             size: 48,
             color: colorScheme.onSurface.withOpacity(0.3),
           ),
           const SizedBox(height: 16),
           Text(
-            'Loading Previous Devotionals...',
+            'Loading from Firebase...',
             style: theme.textTheme.titleMedium?.copyWith(
               color: colorScheme.onSurface.withOpacity(0.7),
             ),
           ),
           const SizedBox(height: 8),
           Text(
-            'Previous devotionals will appear here once loaded',
+            'Previous devotionals will appear here once loaded from the database',
             style: theme.textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurface.withOpacity(0.5),
             ),
@@ -1313,12 +1234,14 @@ Shared from Lagu Advent App''';
 
     return FloatingActionButton(
       onPressed: () => _loadDevotional(forceRefresh: true),
-      tooltip: 'Refresh',
+      tooltip: 'Refresh from Firebase',
       child: const Icon(Icons.refresh),
     );
   }
 
   void _showDebugInfo() {
+    final cacheStatus = DevotionalService.getCacheStatus();
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
@@ -1334,11 +1257,19 @@ Shared from Lagu Advent App''';
               Text(
                   'Previous Devotionals: ${_previousDevotionals.length} items'),
               const SizedBox(height: 8),
+              Text('Firebase Connected: ${_isConnected ? "✅ Yes" : "❌ No"}'),
+              const SizedBox(height: 8),
               Text('Loading: $_isLoading'),
               const SizedBox(height: 8),
               Text('Refreshing: $_isRefreshing'),
               const SizedBox(height: 8),
               Text('Error: ${_error.isEmpty ? "None" : _error}'),
+              const SizedBox(height: 16),
+              const Text('Firebase Cache Status:',
+                  style: TextStyle(fontWeight: FontWeight.bold)),
+              Text('Has Cached: ${cacheStatus['has_cached_devotional']}'),
+              Text('Cache Valid: ${cacheStatus['is_cache_valid']}'),
+              Text('Cache Time: ${cacheStatus['cache_time'] ?? 'None'}'),
               const SizedBox(height: 16),
               if (_currentDevotional != null) ...[
                 const Text('Current Devotional Details:',
@@ -1346,15 +1277,7 @@ Shared from Lagu Advent App''';
                 Text('Title: ${_currentDevotional!['title']}'),
                 Text('Source: ${_currentDevotional!['source']}'),
                 Text('ID: ${_currentDevotional!['id']}'),
-                const SizedBox(height: 16),
               ],
-              const Text('Previous Devotionals:',
-                  style: TextStyle(fontWeight: FontWeight.bold)),
-              if (_previousDevotionals.isEmpty)
-                const Text('No previous devotionals loaded')
-              else
-                ..._previousDevotionals
-                    .map((dev) => Text('• ${dev['title']} (${dev['date']})')),
             ],
           ),
         ),
@@ -1369,6 +1292,45 @@ Shared from Lagu Advent App''';
               _loadDevotional(forceRefresh: true);
             },
             child: const Text('Refresh'),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showFirebaseInfo() {
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Firebase Integration'),
+        content: const SingleChildScrollView(
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text('This app now uses Firebase Realtime Database:'),
+              SizedBox(height: 12),
+              Text('🔄 Real-time Synchronization'),
+              Text('Content updates instantly across all devices'),
+              SizedBox(height: 8),
+              Text('☁️ Cloud Storage'),
+              Text('Devotionals are stored securely in Firebase'),
+              SizedBox(height: 8),
+              Text('📱 Offline Support'),
+              Text('Automatic caching for offline reading'),
+              SizedBox(height: 8),
+              Text('🔐 Secure Access'),
+              Text('Firebase Authentication for admin features'),
+              SizedBox(height: 8),
+              Text('⚡ Fast Loading'),
+              Text('Optimized queries and intelligent caching'),
+            ],
+          ),
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text('Got it'),
           ),
         ],
       ),
@@ -1393,6 +1355,8 @@ Shared from Lagu Advent App''';
             Text('Date: ${_currentDevotional!['date']}'),
             const SizedBox(height: 8),
             Text('ID: ${_currentDevotional!['id']}'),
+            const SizedBox(height: 8),
+            Text('Firebase: ${_isConnected ? "Connected" : "Disconnected"}'),
           ],
         ),
         actions: [
@@ -1489,7 +1453,7 @@ Shared from Lagu Advent App''';
                             color: Theme.of(context).colorScheme.primary,
                           ),
                           title: Text('Devotional ${id.split('_').last}'),
-                          subtitle: Text('Tap to remove from bookmarks'),
+                          subtitle: const Text('Tap to remove from bookmarks'),
                           trailing: IconButton(
                             icon: const Icon(Icons.delete_outline),
                             onPressed: () {

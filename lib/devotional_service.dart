@@ -1,189 +1,60 @@
-// devotional_service.dart - COMPLETE GOOGLE SHEETS INTEGRATION
-import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:intl/intl.dart';
+// devotional_service.dart - FULLY MIGRATED TO FIREBASE
 import 'package:flutter/foundation.dart';
-import 'package:http/http.dart' as http;
+import 'package:intl/intl.dart';
+import 'services/firebase_service.dart';
+import 'services/database_service.dart';
+import 'models/devotional_model.dart';
 
+/// Primary devotional service - now using Firebase instead of Google Sheets
 class DevotionalService {
-  // Google Sheets Configuration
-  static const String SHEET_ID = '1E6GVXX3dHpGsohUg5e7qC9jZwRhMvNdmelHQMQ8SWZ8';
-  static const String DEVOTIONAL_CSV_URL =
-      'https://docs.google.com/spreadsheets/d/$SHEET_ID/export?format=csv&gid=0';
-  static const String APPS_SCRIPT_URL =
-      'https://script.google.com/macros/s/AKfycbzD4y9TW9ldAxJ-lhHOR4C1esrutbjjXEhI5KB6OyA8GA0AgtkALfetGRTlO5KW3vZx/exec';
+  // Cache management
+  static const Duration _cacheTimeout = Duration(hours: 1);
+  static DevotionalModel? _cachedTodaysDevotional;
+  static DateTime? _cacheTime;
 
-  static const String _cachePrefix = 'devotional_';
-  static const Duration _cacheTimeout = Duration(hours: 6);
-
-  /// Gets today's devotional - NOW ALWAYS FROM GOOGLE SHEETS
+  /// Gets today's devotional - NOW FROM FIREBASE
   static Future<Map<String, dynamic>> getTodaysDevotional() async {
-    final today = DateTime.now();
-    final todayKey = DateFormat('yyyy-MM-dd').format(today);
-
     try {
-      // 1. Try cache first
-      final cached = await _getCachedDevotional(todayKey);
-      if (cached != null) {
+      debugPrint('📖 Loading today\'s devotional from Firebase...');
+
+      // Check cache first
+      if (_cachedTodaysDevotional != null && _isCacheValid()) {
         debugPrint('📖 Loading devotional from cache');
-        return cached;
+        return _cachedTodaysDevotional!.toDisplayMap();
       }
 
-      // 2. Load from Google Sheets (primary source)
-      final googleSheetsResult = await _loadFromGoogleSheets();
-      if (googleSheetsResult != null) {
-        await _cacheDevotional(todayKey, googleSheetsResult);
-        debugPrint('✅ Loaded devotional from Google Sheets');
-        return googleSheetsResult;
-      }
+      // Load from Firebase
+      final result = await FirebaseService.getTodaysDevotional();
 
-      // 3. Emergency fallback only if Google Sheets fails
-      debugPrint('⚠️ Google Sheets unavailable, using fallback');
-      return _getEmergencyFallback();
+      if (result.isSuccess) {
+        _cachedTodaysDevotional = result.data!;
+        _cacheTime = DateTime.now();
+        debugPrint('✅ Loaded devotional from Firebase');
+        return result.data!.toDisplayMap();
+      } else {
+        debugPrint('⚠️ Firebase failed, using fallback: ${result.error}');
+        return _getEmergencyFallback();
+      }
     } catch (e) {
       debugPrint('❌ Error loading devotional: $e');
       return _getEmergencyFallback();
     }
   }
 
-  /// Loads devotional from Google Sheets
-  static Future<Map<String, dynamic>?> _loadFromGoogleSheets() async {
-    try {
-      debugPrint('📡 Loading devotionals from Google Sheets...');
-
-      final response = await http.get(
-        Uri.parse(DEVOTIONAL_CSV_URL),
-        headers: {
-          'User-Agent': 'LaguAdvent/1.0',
-          'Accept-Charset': 'utf-8',
-        },
-      ).timeout(const Duration(seconds: 15));
-
-      if (response.statusCode == 200) {
-        String csvContent;
-        try {
-          csvContent = utf8.decode(response.bodyBytes, allowMalformed: true);
-        } catch (e) {
-          csvContent = latin1.decode(response.bodyBytes);
-        }
-
-        return _parseDevotionalCSV(csvContent);
+  /// Stream today's devotional with real-time updates
+  static Stream<Map<String, dynamic>> getTodaysDevotionalStream() {
+    return FirebaseService.getTodaysDevotionalStream().map((devotional) {
+      if (devotional != null) {
+        _cachedTodaysDevotional = devotional;
+        _cacheTime = DateTime.now();
+        return devotional.toDisplayMap();
       } else {
-        debugPrint('❌ HTTP Error: ${response.statusCode}');
-        return null;
+        return _getEmergencyFallback();
       }
-    } catch (e) {
-      debugPrint('❌ Error loading from Google Sheets: $e');
-      return null;
-    }
+    });
   }
 
-  /// Parses CSV to find today's devotional
-  static Map<String, dynamic> _parseDevotionalCSV(String csvContent) {
-    final lines =
-        csvContent.split('\n').where((line) => line.trim().isNotEmpty).toList();
-
-    if (lines.length < 2) {
-      throw Exception('Invalid CSV format');
-    }
-
-    final today = DateTime.now();
-    final todayFormatted = DateFormat('dd/MM/yyyy').format(today);
-    final dataLines = lines.skip(1).toList(); // Skip header
-
-    debugPrint('🗓️ Looking for today\'s date: $todayFormatted');
-
-    // First, try to find today's exact date
-    for (int i = 0; i < dataLines.length; i++) {
-      final line = dataLines[i];
-      final values = _parseCSVLine(line);
-
-      if (values.length > 1) {
-        final dateValue = _cleanText(values[1]).trim();
-
-        if (dateValue == todayFormatted) {
-          debugPrint('✅ Found today\'s devotional!');
-          return {
-            'id': 'gsheets_${DateFormat('yyyy-MM-dd').format(today)}',
-            'title':
-                values.length > 2 ? _cleanText(values[2]) : 'Daily Devotional',
-            'content': values.length > 3 ? _cleanText(values[3]) : '',
-            'verse': values.length > 4 ? _cleanText(values[4]) : '',
-            'reference': values.length > 5 ? _cleanText(values[5]) : '',
-            'author':
-                values.length > 6 ? _cleanText(values[6]) : 'Devotional Team',
-            'date': DateFormat('yyyy-MM-dd').format(today),
-            'source': 'Google Sheets',
-            'loaded_at': DateTime.now().millisecondsSinceEpoch,
-          };
-        }
-      }
-    }
-
-    // If no exact date match, find the most recent past devotional
-    debugPrint('⚠️ No exact date match, looking for most recent devotional...');
-
-    DateTime? closestDate;
-    List<String>? closestValues;
-
-    for (final line in dataLines) {
-      final values = _parseCSVLine(line);
-      if (values.length > 1) {
-        final dateValue = _cleanText(values[1]).trim();
-        try {
-          final devotionalDate = DateFormat('dd/MM/yyyy').parse(dateValue);
-          if (devotionalDate.isBefore(today.add(Duration(days: 1))) &&
-              (closestDate == null || devotionalDate.isAfter(closestDate))) {
-            closestDate = devotionalDate;
-            closestValues = values;
-          }
-        } catch (e) {
-          debugPrint('⚠️ Could not parse date: $dateValue');
-        }
-      }
-    }
-
-    if (closestValues != null) {
-      final daysAgo = today.difference(closestDate!).inDays;
-      debugPrint('📅 Using closest devotional from $daysAgo days ago');
-
-      return {
-        'id': 'gsheets_${DateFormat('yyyy-MM-dd').format(today)}',
-        'title': closestValues.length > 2
-            ? _cleanText(closestValues[2])
-            : 'Daily Devotional',
-        'content': closestValues.length > 3 ? _cleanText(closestValues[3]) : '',
-        'verse': closestValues.length > 4 ? _cleanText(closestValues[4]) : '',
-        'reference':
-            closestValues.length > 5 ? _cleanText(closestValues[5]) : '',
-        'author': closestValues.length > 6
-            ? _cleanText(closestValues[6])
-            : 'Devotional Team',
-        'date': DateFormat('yyyy-MM-dd').format(today),
-        'source': 'Google Sheets ($daysAgo days ago)',
-        'loaded_at': DateTime.now().millisecondsSinceEpoch,
-      };
-    }
-
-    // Last resort - use first available devotional
-    debugPrint('❌ No suitable devotional found, using first available');
-    final firstLine = dataLines[0];
-    final values = _parseCSVLine(firstLine);
-
-    return {
-      'id': 'gsheets_${DateFormat('yyyy-MM-dd').format(today)}',
-      'title': values.length > 2 ? _cleanText(values[2]) : 'Daily Devotional',
-      'content': values.length > 3 ? _cleanText(values[3]) : '',
-      'verse': values.length > 4 ? _cleanText(values[4]) : '',
-      'reference': values.length > 5 ? _cleanText(values[5]) : '',
-      'author': values.length > 6 ? _cleanText(values[6]) : 'Devotional Team',
-      'date': DateFormat('yyyy-MM-dd').format(today),
-      'source': 'Google Sheets (Fallback)',
-      'loaded_at': DateTime.now().millisecondsSinceEpoch,
-    };
-  }
-
-  /// Adds a new devotional to Google Sheets
+  /// Adds a new devotional to Firebase
   static Future<bool> addDevotional({
     required String date,
     required String title,
@@ -194,39 +65,36 @@ class DevotionalService {
     String addedBy = 'Admin',
   }) async {
     try {
-      debugPrint('📝 Adding devotional to Google Sheets...');
+      debugPrint('📝 Adding devotional to Firebase...');
 
-      final uri = Uri.parse(APPS_SCRIPT_URL).replace(queryParameters: {
-        'action': 'addDevotional',
-        'date': date,
-        'title': title,
-        'content': content,
-        'verse': verse ?? '',
-        'reference': reference ?? '',
-        'author': author ?? 'Devotional Team',
-        'addedBy': addedBy,
-        'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
-      });
+      // Parse date from DD/MM/YYYY to YYYY-MM-DD for Firebase key
+      final dateFormat = DateFormat('dd/MM/yyyy');
+      final parsedDate = dateFormat.parse(date);
+      final dateKey = DateFormat('yyyy-MM-dd').format(parsedDate);
 
-      final response = await http.get(uri, headers: {
-        'User-Agent': 'LaguAdvent/1.0',
-        'Accept': 'application/json',
-      }).timeout(const Duration(seconds: 15));
+      // Create devotional model
+      final devotional = DevotionalModel(
+        id: dateKey,
+        date: dateKey,
+        title: title,
+        content: content,
+        verse: verse ?? '',
+        reference: reference ?? '',
+        author: author ?? 'Devotional Team',
+        addedBy: addedBy,
+        createdAt: DateTime.now(),
+        source: 'Firebase',
+      );
 
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        if (result['success'] == true) {
-          debugPrint('✅ Devotional added successfully');
+      // Save to Firebase
+      final result = await FirebaseService.addDevotional(devotional);
 
-          // Clear cache to force fresh data
-          await _clearCache();
-          return true;
-        } else {
-          debugPrint('❌ Add failed: ${result['error']}');
-          return false;
-        }
+      if (result.isSuccess) {
+        debugPrint('✅ Devotional added successfully to Firebase');
+        _clearCache(); // Clear cache to force refresh
+        return true;
       } else {
-        debugPrint('❌ HTTP Error: ${response.statusCode}');
+        debugPrint('❌ Failed to add devotional: ${result.error}');
         return false;
       }
     } catch (e) {
@@ -235,7 +103,7 @@ class DevotionalService {
     }
   }
 
-  /// Updates an existing devotional in Google Sheets
+  /// Updates an existing devotional in Firebase
   static Future<bool> updateDevotional({
     required String originalDate,
     required String date,
@@ -247,40 +115,36 @@ class DevotionalService {
     String updatedBy = 'Admin',
   }) async {
     try {
-      debugPrint('📝 Updating devotional in Google Sheets...');
+      debugPrint('📝 Updating devotional in Firebase...');
 
-      final uri = Uri.parse(APPS_SCRIPT_URL).replace(queryParameters: {
-        'action': 'updateDevotional',
-        'originalDate': originalDate,
-        'date': date,
-        'title': title,
-        'content': content,
-        'verse': verse ?? '',
-        'reference': reference ?? '',
-        'author': author ?? 'Devotional Team',
-        'updatedBy': updatedBy,
-        'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
-      });
+      // Parse dates
+      final dateFormat = DateFormat('dd/MM/yyyy');
+      final parsedDate = dateFormat.parse(date);
+      final dateKey = DateFormat('yyyy-MM-dd').format(parsedDate);
 
-      final response = await http.get(uri, headers: {
-        'User-Agent': 'LaguAdvent/1.0',
-        'Accept': 'application/json',
-      }).timeout(const Duration(seconds: 15));
+      // Create updated devotional model
+      final devotional = DevotionalModel(
+        id: dateKey,
+        date: dateKey,
+        title: title,
+        content: content,
+        verse: verse ?? '',
+        reference: reference ?? '',
+        author: author ?? 'Devotional Team',
+        updatedBy: updatedBy,
+        updatedAt: DateTime.now(),
+        source: 'Firebase',
+      );
 
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        if (result['success'] == true) {
-          debugPrint('✅ Devotional updated successfully');
+      // Update in Firebase
+      final result = await FirebaseService.updateDevotional(devotional);
 
-          // Clear cache to force fresh data
-          await _clearCache();
-          return true;
-        } else {
-          debugPrint('❌ Update failed: ${result['error']}');
-          return false;
-        }
+      if (result.isSuccess) {
+        debugPrint('✅ Devotional updated successfully in Firebase');
+        _clearCache(); // Clear cache to force refresh
+        return true;
       } else {
-        debugPrint('❌ HTTP Error: ${response.statusCode}');
+        debugPrint('❌ Failed to update devotional: ${result.error}');
         return false;
       }
     } catch (e) {
@@ -289,40 +153,28 @@ class DevotionalService {
     }
   }
 
-  /// Deletes a devotional from Google Sheets
+  /// Deletes a devotional from Firebase (Master Admin only)
   static Future<bool> deleteDevotional({
     required String date,
     String deletedBy = 'Admin',
   }) async {
     try {
-      debugPrint('🗑️ Deleting devotional from Google Sheets...');
+      debugPrint('🗑️ Deleting devotional from Firebase...');
 
-      final uri = Uri.parse(APPS_SCRIPT_URL).replace(queryParameters: {
-        'action': 'deleteDevotional',
-        'date': date,
-        'deletedBy': deletedBy,
-        'timestamp': DateTime.now().millisecondsSinceEpoch.toString(),
-      });
+      // Parse date to Firebase key format
+      final dateFormat = DateFormat('dd/MM/yyyy');
+      final parsedDate = dateFormat.parse(date);
+      final dateKey = DateFormat('yyyy-MM-dd').format(parsedDate);
 
-      final response = await http.get(uri, headers: {
-        'User-Agent': 'LaguAdvent/1.0',
-        'Accept': 'application/json',
-      }).timeout(const Duration(seconds: 15));
+      // Delete from Firebase
+      final result = await FirebaseService.deleteDevotional(dateKey);
 
-      if (response.statusCode == 200) {
-        final result = json.decode(response.body);
-        if (result['success'] == true) {
-          debugPrint('✅ Devotional deleted successfully');
-
-          // Clear cache to force fresh data
-          await _clearCache();
-          return true;
-        } else {
-          debugPrint('❌ Delete failed: ${result['error']}');
-          return false;
-        }
+      if (result.isSuccess) {
+        debugPrint('✅ Devotional deleted successfully from Firebase');
+        _clearCache(); // Clear cache to force refresh
+        return true;
       } else {
-        debugPrint('❌ HTTP Error: ${response.statusCode}');
+        debugPrint('❌ Failed to delete devotional: ${result.error}');
         return false;
       }
     } catch (e) {
@@ -331,204 +183,187 @@ class DevotionalService {
     }
   }
 
-  /// Gets all devotionals from Google Sheets
+  /// Gets all devotionals from Firebase
   static Future<List<Map<String, dynamic>>> getAllDevotionals() async {
     try {
-      debugPrint('📡 Loading all devotionals from Google Sheets...');
+      debugPrint('📡 Loading all devotionals from Firebase...');
 
-      final response = await http.get(
-        Uri.parse(DEVOTIONAL_CSV_URL),
-        headers: {
-          'User-Agent': 'LaguAdvent/1.0',
-          'Accept-Charset': 'utf-8',
-        },
-      ).timeout(const Duration(seconds: 15));
+      // Get all devotionals stream and take first emission
+      final streamResult =
+          await FirebaseService.getAllDevotionalsStream().first;
 
-      if (response.statusCode == 200) {
-        String csvContent;
-        try {
-          csvContent = utf8.decode(response.bodyBytes, allowMalformed: true);
-        } catch (e) {
-          csvContent = latin1.decode(response.bodyBytes);
-        }
+      final devotionals = streamResult.map((devotional) {
+        return {
+          'id': devotional.id,
+          'date': devotional.date,
+          'title': devotional.title,
+          'content': devotional.content,
+          'verse': devotional.verse,
+          'reference': devotional.reference,
+          'author': devotional.author,
+          'source': devotional.source,
+          'parsedDate': DateTime.parse(devotional.date),
+        };
+      }).toList();
 
-        return _parseAllDevotionals(csvContent);
-      } else {
-        debugPrint('❌ HTTP Error: ${response.statusCode}');
-        return [];
-      }
+      debugPrint('✅ Loaded ${devotionals.length} devotionals from Firebase');
+      return devotionals;
     } catch (e) {
       debugPrint('❌ Error loading all devotionals: $e');
       return [];
     }
   }
 
-  /// Parses CSV to get all devotionals
-  static List<Map<String, dynamic>> _parseAllDevotionals(String csvContent) {
-    final lines =
-        csvContent.split('\n').where((line) => line.trim().isNotEmpty).toList();
+  /// Stream all devotionals with real-time updates
+  static Stream<List<Map<String, dynamic>>> getAllDevotionalsStream() {
+    return FirebaseService.getAllDevotionalsStream().map((devotionals) {
+      return devotionals.map((devotional) {
+        return {
+          'id': devotional.id,
+          'date': devotional.date,
+          'title': devotional.title,
+          'content': devotional.content,
+          'verse': devotional.verse,
+          'reference': devotional.reference,
+          'author': devotional.author,
+          'source': devotional.source,
+          'parsedDate': DateTime.parse(devotional.date),
+        };
+      }).toList();
+    });
+  }
 
-    if (lines.length < 2) {
+  /// Search devotionals in Firebase
+  static Future<List<Map<String, dynamic>>> searchDevotionals(
+      String query) async {
+    try {
+      debugPrint('🔍 Searching devotionals in Firebase for: $query');
+
+      final result = await DatabaseService.searchDevotionals(query);
+
+      if (result.isSuccess) {
+        final devotionals = result.data!.map((devotional) {
+          return {
+            'id': devotional.id,
+            'date': devotional.date,
+            'title': devotional.title,
+            'content': devotional.content,
+            'verse': devotional.verse,
+            'reference': devotional.reference,
+            'author': devotional.author,
+            'source': devotional.source,
+            'parsedDate': DateTime.parse(devotional.date),
+          };
+        }).toList();
+
+        debugPrint(
+            '✅ Found ${devotionals.length} devotionals matching: $query');
+        return devotionals;
+      } else {
+        debugPrint('❌ Search failed: ${result.error}');
+        return [];
+      }
+    } catch (e) {
+      debugPrint('❌ Error searching devotionals: $e');
       return [];
     }
-
-    final devotionals = <Map<String, dynamic>>[];
-    final dataLines = lines.skip(1).toList(); // Skip header
-
-    for (int i = 0; i < dataLines.length; i++) {
-      try {
-        final line = dataLines[i];
-        final values = _parseCSVLine(line);
-
-        if (values.length >= 3) {
-          // Minimum required columns
-          final devotional = {
-            'id': 'gsheets_$i',
-            'title': values.length > 2 ? _cleanText(values[2]) : 'Untitled',
-            'content': values.length > 3 ? _cleanText(values[3]) : '',
-            'verse': values.length > 4 ? _cleanText(values[4]) : '',
-            'reference': values.length > 5 ? _cleanText(values[5]) : '',
-            'author': values.length > 6 ? _cleanText(values[6]) : 'Unknown',
-            'date': values.length > 1
-                ? _parseDateFromCSV(values[1])
-                : DateFormat('yyyy-MM-dd').format(DateTime.now()),
-            'source': 'Google Sheets',
-          };
-
-          devotionals.add(devotional);
-        }
-      } catch (e) {
-        debugPrint('⚠️ Error parsing line ${i + 1}: $e');
-        continue;
-      }
-    }
-
-    // Sort by date descending (newest first)
-    devotionals.sort((a, b) =>
-        DateTime.parse(b['date']).compareTo(DateTime.parse(a['date'])));
-
-    return devotionals;
   }
 
-  // Helper methods
-  static List<String> _parseCSVLine(String line) {
-    final values = <String>[];
-    bool inQuotes = false;
-    String currentValue = '';
+  /// Test Firebase connection
+  static Future<bool> testConnection() async {
+    try {
+      debugPrint('🧪 Testing Firebase connection...');
 
-    for (int i = 0; i < line.length; i++) {
-      final char = line[i];
-      if (char == '"') {
-        if (i + 1 < line.length && line[i + 1] == '"' && inQuotes) {
-          currentValue += '"';
-          i++;
-        } else {
-          inQuotes = !inQuotes;
-        }
-      } else if (char == ',' && !inQuotes) {
-        values.add(currentValue.trim());
-        currentValue = '';
+      final result = await FirebaseService.testConnection();
+
+      if (result.isSuccess) {
+        debugPrint('✅ Firebase connection successful!');
+        return true;
       } else {
-        currentValue += char;
-      }
-    }
-    values.add(currentValue.trim());
-    return values;
-  }
-
-  static String _cleanText(String text) {
-    if (text.isEmpty) return text;
-
-    return text
-        .replaceAll('â€™', "'")
-        .replaceAll('â€œ', '"')
-        .replaceAll('â€', '"')
-        .replaceAll('â€"', '—')
-        .replaceAll('â€"', '–')
-        .replaceAll('â€¦', '...')
-        .replaceAll('"', '"')
-        .replaceAll('"', '"')
-        .replaceAll(''', "'")
-        .replaceAll(''', "'")
-        .replaceAll(RegExp(r'^"'), '')
-        .replaceAll(RegExp(r'"$'), '')
-        .replaceAll(RegExp(r'\s+'), ' ')
-        .trim();
-  }
-
-  static String _parseDateFromCSV(String dateStr) {
-    try {
-      if (dateStr.contains('/')) {
-        final parts = dateStr.split('/');
-        if (parts.length == 3) {
-          final day = int.parse(parts[0]);
-          final month = int.parse(parts[1]);
-          final year = int.parse(parts[2]);
-          final date = DateTime(year, month, day);
-          return DateFormat('yyyy-MM-dd').format(date);
-        }
-      }
-      final parsed = DateTime.parse(dateStr);
-      return DateFormat('yyyy-MM-dd').format(parsed);
-    } catch (e) {
-      return DateFormat('yyyy-MM-dd').format(DateTime.now());
-    }
-  }
-
-  // Cache management
-  static Future<Map<String, dynamic>?> _getCachedDevotional(
-      String dateKey) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final cachedJson = prefs.getString('$_cachePrefix$dateKey');
-
-      if (cachedJson != null) {
-        final cached = json.decode(cachedJson) as Map<String, dynamic>;
-        final cachedAt = cached['cached_at'] as int?;
-        if (cachedAt != null) {
-          final cacheAge = DateTime.now().millisecondsSinceEpoch - cachedAt;
-          if (cacheAge < _cacheTimeout.inMilliseconds) {
-            return cached;
-          } else {
-            await prefs.remove('$_cachePrefix$dateKey');
-          }
-        }
+        debugPrint('❌ Firebase connection failed: ${result.error}');
+        return false;
       }
     } catch (e) {
-      debugPrint('⚠️ Error reading cache: $e');
-    }
-    return null;
-  }
-
-  static Future<void> _cacheDevotional(
-      String dateKey, Map<String, dynamic> devotional) async {
-    try {
-      final prefs = await SharedPreferences.getInstance();
-      final devotionalWithTimestamp = {
-        ...devotional,
-        'cached_at': DateTime.now().millisecondsSinceEpoch,
-      };
-      await prefs.setString(
-          '$_cachePrefix$dateKey', json.encode(devotionalWithTimestamp));
-    } catch (e) {
-      debugPrint('⚠️ Error caching devotional: $e');
+      debugPrint('❌ Firebase connection test error: $e');
+      return false;
     }
   }
 
-  static Future<void> _clearCache() async {
+  /// Get devotional for specific date
+  static Future<Map<String, dynamic>?> getDevotionalForDate(
+      DateTime date) async {
     try {
-      final prefs = await SharedPreferences.getInstance();
-      final keys =
-          prefs.getKeys().where((key) => key.startsWith(_cachePrefix)).toList();
-      for (final key in keys) {
-        await prefs.remove(key);
+      final dateKey = DateFormat('yyyy-MM-dd').format(date);
+      debugPrint('📖 Loading devotional for date: $dateKey');
+
+      final result = await DatabaseService.getDevotional(date);
+
+      if (result.isSuccess && result.data != null) {
+        debugPrint('✅ Found devotional for $dateKey');
+        return result.data!.toDisplayMap();
+      } else {
+        debugPrint('❌ No devotional found for $dateKey');
+        return null;
       }
-      debugPrint('🧹 Cleared devotional cache');
     } catch (e) {
-      debugPrint('⚠️ Error clearing cache: $e');
+      debugPrint('❌ Error loading devotional for date: $e');
+      return null;
     }
   }
 
+  /// Get devotionals for date range
+  static Future<List<Map<String, dynamic>>> getDevotionalsInRange({
+    required DateTime startDate,
+    required DateTime endDate,
+  }) async {
+    try {
+      debugPrint(
+          '📡 Loading devotionals from ${DateFormat('yyyy-MM-dd').format(startDate)} to ${DateFormat('yyyy-MM-dd').format(endDate)}');
+
+      final streamResult = await DatabaseService.getDevotionalsStream(
+        startDate: startDate,
+        endDate: endDate,
+      ).first;
+
+      final devotionals = streamResult.map((devotional) {
+        return {
+          'id': devotional.id,
+          'date': devotional.date,
+          'title': devotional.title,
+          'content': devotional.content,
+          'verse': devotional.verse,
+          'reference': devotional.reference,
+          'author': devotional.author,
+          'source': devotional.source,
+          'parsedDate': DateTime.parse(devotional.date),
+        };
+      }).toList();
+
+      debugPrint('✅ Loaded ${devotionals.length} devotionals in date range');
+      return devotionals;
+    } catch (e) {
+      debugPrint('❌ Error loading devotionals in range: $e');
+      return [];
+    }
+  }
+
+  // Private helper methods
+
+  /// Check if cache is still valid
+  static bool _isCacheValid() {
+    if (_cacheTime == null) return false;
+    final age = DateTime.now().difference(_cacheTime!);
+    return age < _cacheTimeout;
+  }
+
+  /// Clear the cache
+  static void _clearCache() {
+    _cachedTodaysDevotional = null;
+    _cacheTime = null;
+    debugPrint('🧹 Cleared devotional cache');
+  }
+
+  /// Get emergency fallback devotional
   static Map<String, dynamic> _getEmergencyFallback() {
     return {
       'id': 'fallback_${DateTime.now().millisecondsSinceEpoch}',
@@ -545,13 +380,42 @@ class DevotionalService {
     };
   }
 
-  /// Test connection to Google Sheets
-  static Future<bool> testConnection() async {
+  /// Force refresh cache (useful for debugging)
+  static Future<Map<String, dynamic>> forceRefresh() async {
+    debugPrint('🔄 Force refreshing devotional from Firebase...');
+    _clearCache();
+    return await getTodaysDevotional();
+  }
+
+  /// Get cache status (for debugging)
+  static Map<String, dynamic> getCacheStatus() {
+    return {
+      'has_cached_devotional': _cachedTodaysDevotional != null,
+      'cache_time': _cacheTime?.toIso8601String(),
+      'is_cache_valid': _isCacheValid(),
+      'cached_devotional_id': _cachedTodaysDevotional?.id,
+      'cached_devotional_title': _cachedTodaysDevotional?.title,
+    };
+  }
+
+  /// Preload devotionals for better performance
+  static Future<void> preloadDevotionals() async {
     try {
-      final result = await _loadFromGoogleSheets();
-      return result != null;
+      debugPrint('🚀 Preloading devotionals...');
+
+      // Preload today's devotional
+      await getTodaysDevotional();
+
+      // Preload recent devotionals for offline access
+      final recentDate = DateTime.now().subtract(const Duration(days: 7));
+      await getDevotionalsInRange(
+        startDate: recentDate,
+        endDate: DateTime.now().add(const Duration(days: 1)),
+      );
+
+      debugPrint('✅ Preloading completed');
     } catch (e) {
-      return false;
+      debugPrint('❌ Preloading failed: $e');
     }
   }
 }

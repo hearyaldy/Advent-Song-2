@@ -811,7 +811,7 @@ class _AnalyticsPage extends StatelessWidget {
       case 'delete_devotional':
         return Icons.delete;
       default:
-        return Icons.activity;
+        return Icons.history;
     }
   }
 
