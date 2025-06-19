@@ -235,8 +235,8 @@ class _AdminPageState extends State<AdminPage> {
         await prefs.setBool('admin_authenticated', true);
         await prefs.setInt(
             'admin_auth_time', DateTime.now().millisecondsSinceEpoch);
-        await prefs.setString('admin_level', level!);
-        await prefs.setString('current_user', userName!);
+        await prefs.setString('admin_level', level);
+        await prefs.setString('current_user', userName);
 
         setState(() {
           _isAuthenticated = true;

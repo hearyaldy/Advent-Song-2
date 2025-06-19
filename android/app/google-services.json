@@ -1,0 +1,40 @@
+{
+  "project_info": {
+    "project_number": "1043393288929",
+    "firebase_url": "https://advent-song-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "advent-song",
+    "storage_bucket": "advent-song.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:1043393288929:android:66e54660a143eede5cf5a0",
+        "android_client_info": {
+          "package_name": "haweeinc.adventsong.com"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "1043393288929-qe78ech4in858hf7ggjs7tmpdh3r9lc8.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAY_v5VGSEjU-3Uf4bOtSHMdu3xLeNANdc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "1043393288929-qe78ech4in858hf7ggjs7tmpdh3r9lc8.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme_notifier.dart';
-import 'admin_login_page.dart'; // UPDATED: Changed from admin_page.dart
+import 'admin_login_page_firebase.dart'; // UPDATED: Changed from admin_page.dart
 
 class SettingsPage extends StatefulWidget {
   final ThemeNotifier themeNotifier;

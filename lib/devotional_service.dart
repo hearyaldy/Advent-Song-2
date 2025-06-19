@@ -1,6 +1,5 @@
 // devotional_service.dart - COMPLETE GOOGLE SHEETS INTEGRATION
 import 'dart:convert';
-import 'dart:math';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'package:intl/intl.dart';
 import 'package:flutter/foundation.dart';

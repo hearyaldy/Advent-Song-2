@@ -19,6 +19,9 @@ dependencies:
   xml: ^6.3.0  # For RSS parsing
   share_plus: ^7.2.1  # For sharing functionality
   connectivity_plus: ^5.0.0  # For network status
+  firebase_core: ^3.14.0
+  firebase_auth: ^5.6.0
+  firebase_database: ^11.3.7
 
 dev_dependencies:
   flutter_test:

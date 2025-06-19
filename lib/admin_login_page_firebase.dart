@@ -1,8 +1,8 @@
-// admin_login_page.dart - UPDATED TO NAVIGATE TO ADMIN DASHBOARD
+// admin_login_page.dart - Firebase Auth Version
 import 'package:flutter/material.dart';
-import 'admin_service.dart';
-import 'admin_dashboard.dart'; // UPDATED: Changed from admin_page.dart
-import 'package:shared_preferences/shared_preferences.dart'; // Added for session management
+import 'services/auth_service.dart';
+import 'services/firebase_service.dart';
+import 'admin_dashboard.dart';
 
 class AdminLoginPage extends StatefulWidget {
   const AdminLoginPage({super.key});
@@ -12,58 +12,55 @@ class AdminLoginPage extends StatefulWidget {
 }
 
 class _AdminLoginPageState extends State<AdminLoginPage> {
+  final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
   bool _obscurePassword = true;
   String? _errorMessage;
+  bool _isConnected = false;
 
   @override
   void initState() {
     super.initState();
-    _checkExistingSession(); // Check if user already has valid session
+    _checkExistingSession();
+    _testConnection();
   }
 
   @override
   void dispose() {
+    _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
   }
 
-  // ADDED: Check for existing admin session
+  /// Check if user is already signed in
   Future<void> _checkExistingSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    final isAuth = prefs.getBool('admin_authenticated') ?? false;
-    final authTime = prefs.getInt('admin_auth_time') ?? 0;
-    final now = DateTime.now().millisecondsSinceEpoch;
-
-    // Session expires after 2 hours
-    if (isAuth && (now - authTime) < (2 * 60 * 60 * 1000)) {
-      // Valid session exists, navigate to dashboard
-      if (mounted) {
+    if (AuthService.isSignedIn) {
+      // Check if user is admin
+      final isAdmin = await AuthService.isAdmin();
+      if (isAdmin && mounted) {
         Navigator.of(context).pushReplacement(
-          MaterialPageRoute(
-            builder: (context) => const AdminDashboard(),
-          ),
+          MaterialPageRoute(builder: (context) => const AdminDashboard()),
         );
+      } else if (AuthService.isSignedIn) {
+        // Sign out non-admin user
+        await AuthService.signOut();
       }
-    } else if (isAuth) {
-      // Expired session, clear it
-      await _clearSession();
     }
   }
 
-  // ADDED: Clear expired session
-  Future<void> _clearSession() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('admin_authenticated');
-    await prefs.remove('admin_auth_time');
-    await prefs.remove('admin_level');
-    await prefs.remove('current_user');
+  /// Test Firebase connection
+  Future<void> _testConnection() async {
+    final result = await FirebaseService.testConnection();
+    setState(() {
+      _isConnected = result.isSuccess;
+    });
   }
 
-  Future<void> _login() async {
+  /// Sign in admin user
+  Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() {
@@ -71,45 +68,23 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
       _errorMessage = null;
     });
 
-    final password = _passwordController.text.trim();
-
     try {
-      final result = await AdminService.validateCredentials(password: password);
+      final result = await AuthService.signInAdmin(
+        email: _emailController.text.trim(),
+        password: _passwordController.text,
+      );
 
-      if (result.isSuccess && result.data != null) {
-        // UPDATED: Store session information for dashboard
-        final adminLevel = result.data!;
-        final prefs = await SharedPreferences.getInstance();
-
-        await prefs.setBool('admin_authenticated', true);
-        await prefs.setInt(
-            'admin_auth_time', DateTime.now().millisecondsSinceEpoch);
-        await prefs.setString('admin_level',
-            adminLevel == AdminLevel.master ? 'master' : 'content');
-        await prefs.setString(
-            'current_user',
-            adminLevel == AdminLevel.master
-                ? 'Master Admin'
-                : 'Content Contributor');
-
-        // UPDATED: Navigate to AdminDashboard instead of AdminPage
+      if (result.isSuccess && result.adminUser != null) {
+        // Navigate to admin dashboard
         if (mounted) {
           Navigator.of(context).pushReplacement(
-            MaterialPageRoute(
-              builder: (context) => const AdminDashboard(),
-            ),
+            MaterialPageRoute(builder: (context) => const AdminDashboard()),
           );
         }
-      } else if (result.isSuccess && result.data == null) {
-        // Invalid credentials
-        setState(() {
-          _errorMessage = 'Invalid admin password';
-          _passwordController.clear();
-        });
       } else {
-        // Service error
         setState(() {
-          _errorMessage = result.error ?? 'Authentication failed';
+          _errorMessage = result.error ?? 'Login failed';
+          _passwordController.clear();
         });
       }
     } catch (e) {
@@ -123,39 +98,30 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
     }
   }
 
-  // ADDED: Test connection method
-  Future<void> _testConnection() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-    });
+  /// Send password reset email
+  Future<void> _resetPassword() async {
+    final email = _emailController.text.trim();
+    if (email.isEmpty) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(
+          content: Text('Please enter your email address first'),
+          backgroundColor: Colors.orange,
+        ),
+      );
+      return;
+    }
 
-    try {
-      final result = await AdminService.testConnection();
+    final result = await AuthService.sendPasswordResetEmail(email);
 
-      if (result.isSuccess) {
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(
-              content: Text('✅ Connection to Google Sheets successful!'),
-              backgroundColor: Colors.green,
-              duration: Duration(seconds: 2),
-            ),
-          );
-        }
-      } else {
-        setState(() {
-          _errorMessage = 'Connection test failed: ${result.error}';
-        });
-      }
-    } catch (e) {
-      setState(() {
-        _errorMessage = 'Connection test failed: $e';
-      });
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(result.isSuccess
+              ? 'Password reset email sent to $email'
+              : result.error ?? 'Failed to send reset email'),
+          backgroundColor: result.isSuccess ? Colors.green : Colors.red,
+        ),
+      );
     }
   }
 
@@ -173,7 +139,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
             child: Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // App Logo/Icon
+                // Firebase logo/icon
                 Container(
                   width: 120,
                   height: 120,
@@ -195,16 +161,39 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                       ),
                     ],
                   ),
-                  child: Icon(
-                    Icons.admin_panel_settings,
-                    size: 60,
-                    color: colorScheme.onPrimary,
+                  child: Stack(
+                    alignment: Alignment.center,
+                    children: [
+                      Icon(
+                        Icons.admin_panel_settings,
+                        size: 60,
+                        color: colorScheme.onPrimary,
+                      ),
+                      Positioned(
+                        bottom: 20,
+                        right: 20,
+                        child: Container(
+                          width: 24,
+                          height: 24,
+                          decoration: BoxDecoration(
+                            color: _isConnected ? Colors.green : Colors.red,
+                            shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 2),
+                          ),
+                          child: Icon(
+                            _isConnected ? Icons.cloud_done : Icons.cloud_off,
+                            size: 12,
+                            color: Colors.white,
+                          ),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
 
                 const SizedBox(height: 40),
 
-                // Title
+                // Title with Firebase branding
                 Text(
                   'Admin Panel',
                   style: theme.textTheme.headlineMedium?.copyWith(
@@ -215,12 +204,51 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
 
                 const SizedBox(height: 8),
 
-                Text(
-                  'Enter your admin password to continue',
-                  style: theme.textTheme.bodyLarge?.copyWith(
-                    color: colorScheme.onSurface.withOpacity(0.7),
-                  ),
-                  textAlign: TextAlign.center,
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'Powered by Firebase',
+                      style: theme.textTheme.bodyMedium?.copyWith(
+                        color: colorScheme.onSurface.withOpacity(0.7),
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(
+                          horizontal: 8, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: _isConnected
+                            ? Colors.green.withOpacity(0.1)
+                            : Colors.red.withOpacity(0.1),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(
+                          color: _isConnected
+                              ? Colors.green.withOpacity(0.3)
+                              : Colors.red.withOpacity(0.3),
+                        ),
+                      ),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          Icon(
+                            _isConnected ? Icons.wifi : Icons.wifi_off,
+                            size: 12,
+                            color: _isConnected ? Colors.green : Colors.red,
+                          ),
+                          const SizedBox(width: 4),
+                          Text(
+                            _isConnected ? 'Online' : 'Offline',
+                            style: TextStyle(
+                              fontSize: 10,
+                              color: _isConnected ? Colors.green : Colors.red,
+                              fontWeight: FontWeight.w600,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ],
                 ),
 
                 const SizedBox(height: 40),
@@ -264,12 +292,36 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                             const SizedBox(height: 16),
                           ],
 
+                          // Email field
+                          TextFormField(
+                            controller: _emailController,
+                            keyboardType: TextInputType.emailAddress,
+                            decoration: const InputDecoration(
+                              labelText: 'Admin Email',
+                              border: OutlineInputBorder(),
+                              prefixIcon: Icon(Icons.email),
+                              hintText: 'admin@example.com',
+                            ),
+                            validator: (value) {
+                              if (value == null || value.trim().isEmpty) {
+                                return 'Please enter your email';
+                              }
+                              if (!RegExp(r'^[^@]+@[^@]+\.[^@]+')
+                                  .hasMatch(value)) {
+                                return 'Please enter a valid email';
+                              }
+                              return null;
+                            },
+                          ),
+
+                          const SizedBox(height: 16),
+
                           // Password field
                           TextFormField(
                             controller: _passwordController,
                             obscureText: _obscurePassword,
                             decoration: InputDecoration(
-                              labelText: 'Admin Password',
+                              labelText: 'Password',
                               border: const OutlineInputBorder(),
                               prefixIcon: const Icon(Icons.lock),
                               suffixIcon: IconButton(
@@ -286,21 +338,40 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                               ),
                             ),
                             validator: (value) {
-                              if (value == null || value.trim().isEmpty) {
-                                return 'Please enter your admin password';
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your password';
                               }
                               return null;
                             },
-                            onFieldSubmitted: (_) => _login(),
+                            onFieldSubmitted: (_) => _signIn(),
                           ),
 
-                          const SizedBox(height: 24),
+                          const SizedBox(height: 8),
+
+                          // Forgot password link
+                          Align(
+                            alignment: Alignment.centerRight,
+                            child: TextButton(
+                              onPressed: _resetPassword,
+                              child: Text(
+                                'Forgot Password?',
+                                style: TextStyle(
+                                  color: colorScheme.primary,
+                                  fontSize: 12,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          const SizedBox(height: 16),
 
                           // Login button
                           SizedBox(
                             width: double.infinity,
                             child: ElevatedButton.icon(
-                              onPressed: _isLoading ? null : _login,
+                              onPressed: (_isLoading || !_isConnected)
+                                  ? null
+                                  : _signIn,
                               icon: _isLoading
                                   ? SizedBox(
                                       width: 20,
@@ -315,7 +386,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                                     )
                                   : const Icon(Icons.login),
                               label: Text(
-                                  _isLoading ? 'Authenticating...' : 'Login'),
+                                  _isLoading ? 'Signing In...' : 'Sign In'),
                               style: ElevatedButton.styleFrom(
                                 backgroundColor: colorScheme.primary,
                                 foregroundColor: colorScheme.onPrimary,
@@ -328,19 +399,37 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                             ),
                           ),
 
-                          // ADDED: Test connection button
+                          // Test connection button
                           const SizedBox(height: 12),
                           SizedBox(
                             width: double.infinity,
                             child: OutlinedButton.icon(
                               onPressed: _isLoading ? null : _testConnection,
-                              icon: const Icon(Icons.wifi_find),
-                              label: const Text('Test Connection'),
+                              icon: Icon(
+                                _isConnected ? Icons.refresh : Icons.wifi_find,
+                                color:
+                                    _isConnected ? Colors.green : Colors.orange,
+                              ),
+                              label: Text(
+                                _isConnected
+                                    ? 'Refresh Connection'
+                                    : 'Test Connection',
+                                style: TextStyle(
+                                  color: _isConnected
+                                      ? Colors.green
+                                      : Colors.orange,
+                                ),
+                              ),
                               style: OutlinedButton.styleFrom(
                                 padding:
                                     const EdgeInsets.symmetric(vertical: 16),
                                 shape: RoundedRectangleBorder(
                                   borderRadius: BorderRadius.circular(8),
+                                ),
+                                side: BorderSide(
+                                  color: _isConnected
+                                      ? Colors.green
+                                      : Colors.orange,
                                 ),
                               ),
                             ),
@@ -353,7 +442,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
 
                 const SizedBox(height: 32),
 
-                // Info section
+                // Info section with Firebase features
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
@@ -363,13 +452,13 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                   child: Column(
                     children: [
                       Icon(
-                        Icons.info_outline,
+                        Icons.security,
                         color: colorScheme.onSurfaceVariant,
                         size: 20,
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Access Levels',
+                        'Firebase Security',
                         style: theme.textTheme.titleSmall?.copyWith(
                           fontWeight: FontWeight.w600,
                           color: colorScheme.onSurfaceVariant,
@@ -377,11 +466,13 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        '👑 Master Admin: Full access to all features\n'
-                        '✏️ Content Admin: Access to content management\n\n'
-                        'Sessions expire after 2 hours for security.',
+                        '🔐 Industry-standard authentication\n'
+                        '☁️ Real-time data synchronization\n'
+                        '📱 Automatic offline support\n'
+                        '🔄 Instant updates across devices',
                         style: theme.textTheme.bodySmall?.copyWith(
                           color: colorScheme.onSurfaceVariant,
+                          height: 1.4,
                         ),
                         textAlign: TextAlign.center,
                       ),
@@ -389,7 +480,7 @@ class _AdminLoginPageState extends State<AdminLoginPage> {
                   ),
                 ),
 
-                // ADDED: Back to settings button
+                // Back to settings button
                 const SizedBox(height: 24),
                 TextButton.icon(
                   onPressed: () => Navigator.of(context).pop(),
