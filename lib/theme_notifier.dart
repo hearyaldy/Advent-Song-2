@@ -1,4 +1,4 @@
-// theme_notifier.dart - CREATE THIS NEW FILE
+// theme_notifier.dart - FIXED NULL SAFETY VERSION
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -11,8 +11,8 @@ class ThemeNotifier extends ChangeNotifier {
   String get selectedColorTheme => _selectedColorTheme;
   bool get isInitialized => _isInitialized;
 
-  // Color themes map
-  final Map<String, Map<String, Color>> _colorThemes = {
+  // Color themes map - FIXED: Made this final and ensured it's always available
+  static const Map<String, Map<String, Color>> _colorThemes = {
     'default': {
       'primary': Color(0xFF6366F1),
       'secondary': Color(0xFF8B5CF6),
@@ -48,31 +48,61 @@ class ThemeNotifier extends ChangeNotifier {
   };
 
   Future<void> initialize() async {
-    final prefs = await SharedPreferences.getInstance();
-    _isDarkMode = prefs.getBool('isDarkMode') ?? false;
-    _selectedColorTheme = prefs.getString('colorTheme') ?? 'default';
-    _isInitialized = true;
-    notifyListeners();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      _isDarkMode = prefs.getBool('isDarkMode') ?? false;
+
+      // FIXED: Validate theme exists before setting it
+      final savedTheme = prefs.getString('colorTheme') ?? 'default';
+      _selectedColorTheme =
+          _colorThemes.containsKey(savedTheme) ? savedTheme : 'default';
+
+      _isInitialized = true;
+      notifyListeners();
+    } catch (e) {
+      // FIXED: Handle initialization errors gracefully
+      print('Theme initialization error: $e');
+      _isDarkMode = false;
+      _selectedColorTheme = 'default';
+      _isInitialized = true;
+      notifyListeners();
+    }
   }
 
   Future<void> updateTheme(bool isDarkMode) async {
-    _isDarkMode = isDarkMode;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setBool('isDarkMode', isDarkMode);
-    notifyListeners();
+    try {
+      _isDarkMode = isDarkMode;
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setBool('isDarkMode', isDarkMode);
+      notifyListeners();
+    } catch (e) {
+      print('Theme update error: $e');
+    }
   }
 
   Future<void> updateColorTheme(String colorTheme) async {
-    _selectedColorTheme = colorTheme;
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setString('colorTheme', colorTheme);
-    notifyListeners();
+    try {
+      // FIXED: Validate theme exists before setting it
+      if (_colorThemes.containsKey(colorTheme)) {
+        _selectedColorTheme = colorTheme;
+        final prefs = await SharedPreferences.getInstance();
+        await prefs.setString('colorTheme', colorTheme);
+        notifyListeners();
+      } else {
+        print('Invalid color theme: $colorTheme');
+      }
+    } catch (e) {
+      print('Color theme update error: $e');
+    }
   }
 
+  // FIXED: Added null safety and validation
   ColorScheme buildColorScheme(bool isDark) {
-    final themeColors = _colorThemes[_selectedColorTheme]!;
-    final primary = themeColors['primary']!;
-    final secondary = themeColors['secondary']!;
+    // FIXED: Safely get theme colors with fallback
+    final themeColors =
+        _colorThemes[_selectedColorTheme] ?? _colorThemes['default']!;
+    final primary = themeColors['primary'] ?? const Color(0xFF6366F1);
+    final secondary = themeColors['secondary'] ?? const Color(0xFF8B5CF6);
 
     if (isDark) {
       return ColorScheme.dark(
@@ -94,6 +124,36 @@ class ThemeNotifier extends ChangeNotifier {
         onSurfaceVariant: const Color(0xFF475569),
         outline: const Color(0xFFCBD5E1),
       );
+    }
+  }
+
+  // FIXED: Added method to get available themes safely
+  List<String> get availableThemes => _colorThemes.keys.toList();
+
+  // FIXED: Added method to check if theme exists
+  bool isValidTheme(String theme) => _colorThemes.containsKey(theme);
+
+  // FIXED: Added method to get theme display name safely
+  String getThemeDisplayName(String theme) {
+    switch (theme) {
+      case 'default':
+        return 'Default Blue';
+      case 'emerald':
+        return 'Emerald Green';
+      case 'rose':
+        return 'Rose Pink';
+      case 'amber':
+        return 'Amber Orange';
+      case 'violet':
+        return 'Deep Violet';
+      case 'teal':
+        return 'Ocean Teal';
+      case 'burgundy':
+        return 'Burgundy Red';
+      case 'forest':
+        return 'Forest Green';
+      default:
+        return 'Default Blue';
     }
   }
 }
