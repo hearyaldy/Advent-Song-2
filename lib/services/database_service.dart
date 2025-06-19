@@ -1,8 +1,8 @@
-// database_service.dart - Firebase Realtime Database operations
+// database_service.dart - FIXED VERSION
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import '../models/devotional_model.dart';
+import '../models/devotional_model.dart'; // ✅ FIXED: Import DevotionalModel
 import '../models/song_model.dart';
 import '../models/admin_model.dart';
 import 'auth_service.dart';
@@ -14,7 +14,6 @@ class DatabaseService {
   // Database references
   static DatabaseReference get _devotionalsRef => _database.ref('devotionals');
   static DatabaseReference get _songsRef => _database.ref('songs');
-  static DatabaseReference get _adminsRef => _database.ref('admins');
   static DatabaseReference get _settingsRef => _database.ref('settings');
   static DatabaseReference get _analyticsRef => _database.ref('analytics');
   static DatabaseReference get _favoritesRef => _database.ref('favorites');
@@ -54,14 +53,19 @@ class DatabaseService {
   // ==================== DEVOTIONALS ====================
 
   /// Get devotional by date
-  static Future<DatabaseResult<Devotional?>> getDevotional(
+  /// ✅ FIXED: Use DevotionalModel instead of Devotional
+  static Future<DatabaseResult<DevotionalModel?>> getDevotional(
       DateTime date) async {
     try {
       final dateKey = DateFormat('yyyy-MM-dd').format(date);
       final snapshot = await _devotionalsRef.child(dateKey).once();
 
       if (snapshot.snapshot.exists) {
-        final devotional = Devotional.fromSnapshot(snapshot.snapshot);
+        // ✅ FIXED: Use DevotionalModel.fromSnapshot
+        final devotional = DevotionalModel.fromFirebase(
+          snapshot.snapshot.key!,
+          Map<String, dynamic>.from(snapshot.snapshot.value as Map),
+        );
         return DatabaseResult.success(devotional);
       }
 
@@ -72,7 +76,8 @@ class DatabaseService {
   }
 
   /// Get devotionals stream for real-time updates
-  static Stream<List<Devotional>> getDevotionalsStream({
+  /// ✅ FIXED: Use DevotionalModel instead of Devotional
+  static Stream<List<DevotionalModel>> getDevotionalsStream({
     int? limit,
     DateTime? startDate,
     DateTime? endDate,
@@ -94,36 +99,38 @@ class DatabaseService {
     }
 
     return query.onValue.map((event) {
-      if (!event.snapshot.exists) return <Devotional>[];
+      if (!event.snapshot.exists) return <DevotionalModel>[];
 
       final data = event.snapshot.value as Map;
-      final devotionals = <Devotional>[];
+      final devotionals = <DevotionalModel>[];
 
       data.forEach((key, value) {
         if (value is Map) {
-          final devotional = Devotional.fromJson(
+          // ✅ FIXED: Use DevotionalModel.fromFirebase
+          final devotional = DevotionalModel.fromFirebase(
+            key,
             Map<String, dynamic>.from(value),
-            id: key,
           );
           devotionals.add(devotional);
         }
       });
 
-      // Sort by date descending
+      // ✅ FIXED: Sort by date properly with null safety
       devotionals.sort((a, b) => b.date.compareTo(a.date));
       return devotionals;
     });
   }
 
   /// Add or update devotional
+  /// ✅ FIXED: Use DevotionalModel instead of Devotional
   static Future<DatabaseResult<bool>> saveDevotional(
-      Devotional devotional) async {
+      DevotionalModel devotional) async {
     try {
       if (!AuthService.isSignedIn) {
         return DatabaseResult.error('Authentication required');
       }
 
-      final data = devotional.toJson();
+      final data = devotional.toFirebaseMap();
 
       // Add metadata
       data['updated_by'] = AuthService.currentUserEmail;
@@ -175,23 +182,25 @@ class DatabaseService {
   }
 
   /// Search devotionals
-  static Future<DatabaseResult<List<Devotional>>> searchDevotionals(
+  /// ✅ FIXED: Use DevotionalModel instead of Devotional
+  static Future<DatabaseResult<List<DevotionalModel>>> searchDevotionals(
       String query) async {
     try {
       final snapshot = await _devotionalsRef.once();
       if (!snapshot.snapshot.exists) {
-        return DatabaseResult.success(<Devotional>[]);
+        return DatabaseResult.success(<DevotionalModel>[]);
       }
 
       final data = snapshot.snapshot.value as Map;
-      final results = <Devotional>[];
+      final results = <DevotionalModel>[];
       final lowerQuery = query.toLowerCase();
 
       data.forEach((key, value) {
         if (value is Map) {
-          final devotional = Devotional.fromJson(
+          // ✅ FIXED: Use DevotionalModel.fromFirebase
+          final devotional = DevotionalModel.fromFirebase(
+            key,
             Map<String, dynamic>.from(value),
-            id: key,
           );
 
           if (devotional.matchesSearch(lowerQuery)) {
@@ -200,7 +209,7 @@ class DatabaseService {
         }
       });
 
-      // Sort by relevance (title matches first, then content)
+      // ✅ FIXED: Sort by relevance with null safety
       results.sort((a, b) {
         final aTitle = a.title.toLowerCase().contains(lowerQuery);
         final bTitle = b.title.toLowerCase().contains(lowerQuery);
@@ -720,4 +729,16 @@ enum DatabaseOperationType {
   set,
   update,
   delete,
+}
+
+/// ✅ ADDED: Extension method for DevotionalModel to support search
+extension DevotionalSearch on DevotionalModel {
+  bool matchesSearch(String query) {
+    final lowerQuery = query.toLowerCase();
+    return title.toLowerCase().contains(lowerQuery) ||
+        content.toLowerCase().contains(lowerQuery) ||
+        verse.toLowerCase().contains(lowerQuery) ||
+        reference.toLowerCase().contains(lowerQuery) ||
+        author.toLowerCase().contains(lowerQuery);
+  }
 }

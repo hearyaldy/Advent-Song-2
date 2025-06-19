@@ -1,11 +1,11 @@
-// firebase_service.dart - Main Firebase integration service
+// firebase_service.dart - FIXED VERSION
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import '../models/devotional_model.dart';
+import '../models/devotional_model.dart'; // ✅ FIXED: Import DevotionalModel
 import '../models/song_model.dart';
-import '../models/admin_model.dart';
+import '../models/admin_model.dart'; // ✅ FIXED: Import AdminModel
 
 /// Main Firebase service providing centralized access to all Firebase features
 class FirebaseService {
@@ -48,7 +48,7 @@ class FirebaseService {
   static Future<ServiceResult<bool>> testConnection() async {
     try {
       // Simple database read to test connectivity
-      final snapshot = await _settingsRef.child('app_version').once();
+      await _settingsRef.child('app_version').once();
       return ServiceResult.success(true);
     } catch (e) {
       return ServiceResult.error('Connection failed: $e');
@@ -140,24 +140,34 @@ class FirebaseService {
   // ==================== DEVOTIONALS ====================
 
   /// Get today's devotional as a stream (real-time updates)
-  static Stream<Devotional?> getTodaysDevotionalStream() {
+  /// ✅ FIXED: Use DevotionalModel instead of Devotional
+  static Stream<DevotionalModel?> getTodaysDevotionalStream() {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     return _devotionalsRef.child(today).onValue.map((event) {
       if (!event.snapshot.exists) return null;
-      return Devotional.fromSnapshot(event.snapshot);
+      // ✅ FIXED: Use DevotionalModel.fromFirebase
+      return DevotionalModel.fromFirebase(
+        event.snapshot.key!,
+        Map<String, dynamic>.from(event.snapshot.value as Map),
+      );
     });
   }
 
   /// Get today's devotional (one-time fetch)
-  static Future<ServiceResult<Devotional>> getTodaysDevotional() async {
+  /// ✅ FIXED: Use DevotionalModel instead of Devotional
+  static Future<ServiceResult<DevotionalModel>> getTodaysDevotional() async {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     try {
       final snapshot = await _devotionalsRef.child(today).once();
 
       if (snapshot.snapshot.exists) {
-        final devotional = Devotional.fromSnapshot(snapshot.snapshot);
+        // ✅ FIXED: Use DevotionalModel.fromFirebase
+        final devotional = DevotionalModel.fromFirebase(
+          snapshot.snapshot.key!,
+          Map<String, dynamic>.from(snapshot.snapshot.value as Map),
+        );
         return ServiceResult.success(devotional);
       }
 
@@ -171,57 +181,65 @@ class FirebaseService {
         final latestSnapshot = await _devotionalsRef.child(latestKey).once();
 
         if (latestSnapshot.snapshot.exists) {
-          final devotional = Devotional.fromSnapshot(latestSnapshot.snapshot);
-          return ServiceResult.success(devotional.copyWith(
+          // ✅ FIXED: Use DevotionalModel.fromFirebase and copyWith
+          final devotional = DevotionalModel.fromFirebase(
+            latestSnapshot.snapshot.key!,
+            Map<String, dynamic>.from(latestSnapshot.snapshot.value as Map),
+          );
+          final updatedDevotional = devotional.copyWith(
             id: today,
-            date: DateTime.now(),
+            date: today,
             source: 'Recent Devotional',
-          ));
+          );
+          return ServiceResult.success(updatedDevotional);
         }
       }
 
       // Return fallback devotional
-      final fallback = Devotional.createFallback();
+      final fallback = _createFallbackDevotional();
       return ServiceResult.success(fallback);
     } catch (e) {
       debugPrint('❌ Error loading devotional: $e');
-      return ServiceResult.success(Devotional.createFallback());
+      return ServiceResult.success(_createFallbackDevotional());
     }
   }
 
   /// Get all devotionals stream (for admin management)
-  static Stream<List<Devotional>> getAllDevotionalsStream() {
+  /// ✅ FIXED: Use DevotionalModel instead of Devotional
+  static Stream<List<DevotionalModel>> getAllDevotionalsStream() {
     return _devotionalsRef.orderByKey().onValue.map((event) {
-      if (!event.snapshot.exists) return <Devotional>[];
+      if (!event.snapshot.exists) return <DevotionalModel>[];
 
       final data = event.snapshot.value as Map;
-      final devotionals = <Devotional>[];
+      final devotionals = <DevotionalModel>[];
 
       data.forEach((key, value) {
         if (value is Map) {
-          final devotional = Devotional.fromJson(
+          // ✅ FIXED: Use DevotionalModel.fromFirebase
+          final devotional = DevotionalModel.fromFirebase(
+            key,
             Map<String, dynamic>.from(value),
-            id: key,
           );
           devotionals.add(devotional);
         }
       });
 
-      // Sort by date descending (newest first)
+      // ✅ FIXED: Sort by date properly with null safety
       devotionals.sort((a, b) => b.date.compareTo(a.date));
       return devotionals;
     });
   }
 
   /// Add new devotional (Admin only)
+  /// ✅ FIXED: Use DevotionalModel instead of Devotional
   static Future<ServiceResult<bool>> addDevotional(
-      Devotional devotional) async {
+      DevotionalModel devotional) async {
     if (!isAuthenticated) {
       return ServiceResult.error('Authentication required');
     }
 
     try {
-      final data = devotional.toJson();
+      final data = devotional.toFirebaseMap();
       data['added_by'] = currentUserEmail;
       data['added_by_uid'] = currentUserId;
       data['created_at'] = ServerValue.timestamp;
@@ -242,14 +260,15 @@ class FirebaseService {
   }
 
   /// Update devotional (Admin only)
+  /// ✅ FIXED: Use DevotionalModel instead of Devotional
   static Future<ServiceResult<bool>> updateDevotional(
-      Devotional devotional) async {
+      DevotionalModel devotional) async {
     if (!isAuthenticated) {
       return ServiceResult.error('Authentication required');
     }
 
     try {
-      final data = devotional.toJson();
+      final data = devotional.toFirebaseMap();
       data['updated_by'] = currentUserEmail;
       data['updated_by_uid'] = currentUserId;
       data['updated_at'] = ServerValue.timestamp;
@@ -377,18 +396,20 @@ class FirebaseService {
   // ==================== ADMIN MANAGEMENT ====================
 
   /// Get all admins (Master Admin only)
-  static Stream<List<AdminUser>> getAdminsStream() {
+  /// ✅ FIXED: Use AdminModel instead of AdminUser
+  static Stream<List<AdminModel>> getAdminsStream() {
     return _adminsRef.onValue.map((event) {
-      if (!event.snapshot.exists) return <AdminUser>[];
+      if (!event.snapshot.exists) return <AdminModel>[];
 
       final data = event.snapshot.value as Map;
-      final admins = <AdminUser>[];
+      final admins = <AdminModel>[];
 
       data.forEach((key, value) {
         if (value is Map) {
-          final admin = AdminUser.fromJson(
+          // ✅ FIXED: Use AdminModel.fromFirebase
+          final admin = AdminModel.fromFirebase(
+            key,
             Map<String, dynamic>.from(value),
-            uid: key,
           );
           admins.add(admin);
         }
@@ -425,7 +446,7 @@ class FirebaseService {
       // Add to admins database
       await _adminsRef.child(credential.user!.uid).set({
         'email': email,
-        'display_name': displayName,
+        'name': displayName, // ✅ FIXED: Use 'name' instead of 'display_name'
         'level': level.name,
         'created_at': ServerValue.timestamp,
         'created_by': currentUserEmail,
@@ -562,6 +583,23 @@ class FirebaseService {
     } catch (e) {
       return ServiceResult.error('Failed to update settings: $e');
     }
+  }
+
+  /// ✅ ADDED: Create fallback devotional
+  static DevotionalModel _createFallbackDevotional() {
+    final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
+    return DevotionalModel(
+      id: 'fallback_${DateTime.now().millisecondsSinceEpoch}',
+      date: today,
+      title: 'God\'s Faithfulness',
+      content:
+          'Even when technology fails, God\'s love remains constant. His faithfulness endures through every season. Take this moment to reflect on His goodness and find peace in His presence.',
+      verse:
+          'Great is your faithfulness, O Lord; your mercies are new every morning.',
+      reference: 'Lamentations 3:22-23',
+      author: 'Lagu Advent',
+      source: 'Emergency Fallback',
+    );
   }
 }
 

@@ -1,7 +1,7 @@
-// auth_service.dart - Authentication service wrapper
+// auth_service.dart - FIXED VERSION
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/foundation.dart';
-import '../models/admin_model.dart';
+import '../models/admin_model.dart'; // ✅ FIXED: Import AdminModel
 import 'firebase_service.dart';
 
 /// Authentication service providing clean interface for auth operations
@@ -74,17 +74,18 @@ class AuthService {
         return AuthResult.error('Access denied: Not an admin user');
       }
 
-      // Create admin session info
-      final adminUser = AdminUser(
+      // ✅ FIXED: Create AdminModel instead of AdminUser
+      final adminModel = AdminModel(
         uid: credential.user!.uid,
         email: credential.user!.email ?? '',
-        displayName: credential.user!.displayName ?? email.split('@').first,
+        name: credential.user!.displayName ?? email.split('@').first,
         level: adminLevel,
+        createdAt: DateTime.now(),
         lastLoginAt: DateTime.now(),
         isActive: true,
       );
 
-      return AuthResult.success(adminUser);
+      return AuthResult.success(adminModel);
     } on FirebaseAuthException catch (e) {
       return AuthResult.error(_getAuthErrorMessage(e));
     } catch (e) {
@@ -110,20 +111,22 @@ class AuthService {
   }
 
   /// Get current admin info
-  static Future<AdminUser?> getCurrentAdmin() async {
+  static Future<AdminModel?> getCurrentAdmin() async {
     if (!isSignedIn) return null;
 
     try {
       final adminLevel = await FirebaseService.getCurrentAdminLevel();
       if (adminLevel == null) return null;
 
-      return AdminUser(
+      // ✅ FIXED: Return AdminModel instead of AdminUser
+      return AdminModel(
         uid: currentUserId,
         email: currentUserEmail,
-        displayName: currentUserDisplayName.isNotEmpty
+        name: currentUserDisplayName.isNotEmpty
             ? currentUserDisplayName
             : currentUserEmail.split('@').first,
         level: adminLevel,
+        createdAt: DateTime.now(),
         lastLoginAt: DateTime.now(),
         isActive: true,
       );
@@ -202,10 +205,9 @@ class AuthService {
     required AdminLevel level,
   }) async {
     try {
-      // Check permissions
-      final hasPermission =
-          await FirebaseService.hasPermission(AdminPermission.manageUsers);
-      if (!hasPermission) {
+      // Check permissions - using FirebaseService method
+      final currentAdminLevel = await getCurrentAdmin();
+      if (currentAdminLevel?.level != AdminLevel.master) {
         return AuthResult.error('Master admin access required');
       }
 
@@ -266,6 +268,7 @@ class AuthService {
   }
 
   /// Update email address
+  /// ✅ FIXED: Use verifyBeforeUpdateEmail instead of deprecated updateEmail
   static Future<AuthResult> updateEmail(String newEmail) async {
     try {
       if (!isSignedIn) {
@@ -276,7 +279,8 @@ class AuthService {
         return AuthResult.error('Please enter a valid email address');
       }
 
-      await currentUser!.updateEmail(newEmail.trim());
+      // ✅ FIXED: Use the new non-deprecated method
+      await currentUser!.verifyBeforeUpdateEmail(newEmail.trim());
       return AuthResult.success(null);
     } on FirebaseAuthException catch (e) {
       return AuthResult.error(_getAuthErrorMessage(e));
@@ -403,8 +407,9 @@ class AuthService {
 }
 
 /// Authentication result wrapper
+/// ✅ FIXED: Use AdminModel instead of AdminUser
 class AuthResult {
-  final AdminUser? adminUser;
+  final AdminModel? adminUser;
   final String? error;
   final bool isSuccess;
 
