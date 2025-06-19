@@ -1,13 +1,11 @@
-// settings_page.dart - UPDATED WITH NEW ADMIN FLOW
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import 'theme_notifier.dart';
-import 'admin_login_page_firebase.dart'; // UPDATED: Changed from admin_page.dart
+import 'admin_login_page_firebase.dart';
 
 class SettingsPage extends StatefulWidget {
   final ThemeNotifier themeNotifier;
-
   const SettingsPage({
     super.key,
     required this.themeNotifier,
@@ -25,7 +23,6 @@ class _SettingsPageState extends State<SettingsPage> {
   bool _hasUnsavedChanges = false;
   bool _isDeveloperMode = false;
 
-  // Available color themes (matching theme notifier)
   final Map<String, Map<String, dynamic>> _colorThemes = {
     'default': {
       'name': 'Default Blue',
@@ -68,7 +65,6 @@ class _SettingsPageState extends State<SettingsPage> {
       'secondary': Color(0xFF15803D),
     },
   };
-
   @override
   void initState() {
     super.initState();
@@ -76,57 +72,74 @@ class _SettingsPageState extends State<SettingsPage> {
   }
 
   Future<void> _loadSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _fontSize = prefs.getDouble('fontSize') ?? 16.0;
-      _fontFamily = prefs.getString('fontFamily') ?? 'Roboto';
-      _textAlign = TextAlign.values[prefs.getInt('textAlign') ?? 0];
-      _isDeveloperMode = prefs.getBool('developer_mode') ?? false;
-      _isLoading = false;
-    });
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      setState(() {
+        _fontSize = prefs.getDouble('fontSize') ?? 16.0;
+        _fontFamily = prefs.getString('fontFamily') ?? 'Roboto';
+        _textAlign = TextAlign.values[prefs.getInt('textAlign') ?? 0];
+        _isDeveloperMode = prefs.getBool('developer_mode') ?? false;
+        _isLoading = false;
+      });
+    } catch (e) {
+      print('Settings loading error: $e');
+      setState(() {
+        _isLoading = false;
+      });
+    }
   }
 
   Future<void> _saveSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.setDouble('fontSize', _fontSize);
-    await prefs.setString('fontFamily', _fontFamily);
-    await prefs.setInt('textAlign', _textAlign.index);
-    await prefs.setBool('developer_mode', _isDeveloperMode);
-
-    setState(() {
-      _hasUnsavedChanges = false;
-    });
-
-    if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(
-          content: Text('Settings saved successfully'),
-          duration: Duration(seconds: 2),
-        ),
-      );
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.setDouble('fontSize', _fontSize);
+      await prefs.setString('fontFamily', _fontFamily);
+      await prefs.setInt('textAlign', _textAlign.index);
+      await prefs.setBool('developer_mode', _isDeveloperMode);
+      setState(() {
+        _hasUnsavedChanges = false;
+      });
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Settings saved successfully'),
+            duration: Duration(seconds: 2),
+          ),
+        );
+      }
+    } catch (e) {
+      print('Settings saving error: $e');
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(
+            content: Text('Failed to save settings'),
+            backgroundColor: Colors.red,
+          ),
+        );
+      }
     }
   }
 
   Future<void> _resetSettings() async {
-    final prefs = await SharedPreferences.getInstance();
-    await prefs.remove('fontSize');
-    await prefs.remove('fontFamily');
-    await prefs.remove('textAlign');
-    await prefs.remove('developer_mode');
-
-    setState(() {
-      _fontSize = 16.0;
-      _fontFamily = 'Roboto';
-      _textAlign = TextAlign.left;
-      _isDeveloperMode = false;
-      _hasUnsavedChanges = true;
-    });
-
-    // Reset theme settings using theme notifier
-    await widget.themeNotifier.updateTheme(false);
-    await widget.themeNotifier.updateColorTheme('default');
-
-    await _saveSettings();
+    try {
+      final prefs = await SharedPreferences.getInstance();
+      await prefs.remove('fontSize');
+      await prefs.remove('fontFamily');
+      await prefs.remove('textAlign');
+      await prefs.remove('developer_mode');
+      setState(() {
+        _fontSize = 16.0;
+        _fontFamily = 'Roboto';
+        _textAlign = TextAlign.left;
+        _isDeveloperMode = false;
+        _hasUnsavedChanges = true;
+      });
+      await widget.themeNotifier.updateTheme(false);
+      await widget.themeNotifier.updateColorTheme('default');
+      await _saveSettings();
+    } catch (e) {
+      print('Settings reset error: $e');
+    }
   }
 
   void _onSettingChanged() {
@@ -137,13 +150,13 @@ class _SettingsPageState extends State<SettingsPage> {
 
   Future<bool> _onWillPop() async {
     if (!_hasUnsavedChanges) return true;
-
     final shouldPop = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
         title: const Text('Unsaved Changes'),
         content: const Text(
-            'You have unsaved changes. Do you want to save them before leaving?'),
+          'You have unsaved changes. Do you want to save them before leaving?',
+        ),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
@@ -163,7 +176,6 @@ class _SettingsPageState extends State<SettingsPage> {
         ],
       ),
     );
-
     return shouldPop ?? false;
   }
 
@@ -174,9 +186,7 @@ class _SettingsPageState extends State<SettingsPage> {
 
     if (_isLoading) {
       return Scaffold(
-        appBar: AppBar(
-          title: const Text('Settings'),
-        ),
+        appBar: AppBar(title: const Text('Settings')),
         body: const Center(child: CircularProgressIndicator()),
       );
     }
@@ -239,7 +249,6 @@ class _SettingsPageState extends State<SettingsPage> {
             return ListView(
               padding: const EdgeInsets.all(16.0),
               children: [
-                // Text Settings Section
                 _buildSectionCard(
                   title: 'Text Display',
                   icon: Icons.text_fields,
@@ -251,10 +260,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     _buildTextAlignmentSelector(),
                   ],
                 ),
-
                 const SizedBox(height: 16),
-
-                // Theme Settings Section
                 _buildSectionCard(
                   title: 'Appearance',
                   icon: Icons.palette,
@@ -264,30 +270,21 @@ class _SettingsPageState extends State<SettingsPage> {
                     _buildColorThemeSelector(),
                   ],
                 ),
-
                 const SizedBox(height: 16),
-
-                // ADMIN & DEVELOPER SECTION
                 _buildSectionCard(
                   title: 'Advanced',
                   icon: Icons.settings_applications,
                   children: [
                     _buildDeveloperModeSwitch(),
-                    if (kDebugMode || _isDeveloperMode) ...[
+                    if (kDebugMode && _isDeveloperMode) ...[
                       const Divider(),
                       _buildAdminPanelTile(),
                     ],
                   ],
                 ),
-
                 const SizedBox(height: 16),
-
-                // Preview Section
                 _buildPreviewCard(),
-
                 const SizedBox(height: 24),
-
-                // Action Buttons
                 Row(
                   children: [
                     Expanded(
@@ -315,6 +312,334 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
+  Widget _buildSectionCard({
+    required String title,
+    required IconData icon,
+    required List<Widget> children,
+  }) {
+    return Card(
+      child: Padding(
+        padding: const EdgeInsets.all(16.0),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Icon(icon, color: Theme.of(context).colorScheme.primary),
+                const SizedBox(width: 8),
+                Text(
+                  title,
+                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                        fontWeight: FontWeight.bold,
+                      ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            ...children,
+          ],
+        ),
+      ),
+    );
+  }
+
+  Widget _buildFontSizeSlider() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            const Text('Font Size'),
+            Container(
+              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+              decoration: BoxDecoration(
+                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Text(
+                '${_fontSize.toInt()}px',
+                style: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
+              ),
+            ),
+          ],
+        ),
+        const SizedBox(height: 8),
+        Slider(
+          value: _fontSize,
+          min: 12.0,
+          max: 28.0,
+          divisions: 16,
+          onChanged: (value) {
+            setState(() {
+              _fontSize = value;
+            });
+            _onSettingChanged();
+          },
+        ),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          children: [
+            Text('12px', style: Theme.of(context).textTheme.bodySmall),
+            Text('28px', style: Theme.of(context).textTheme.bodySmall),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFontFamilySelector() {
+    final fontFamilies = [
+      'Roboto',
+      'SF Pro Display',
+      'Arial',
+      'Georgia',
+      'Times New Roman',
+      'Courier New',
+    ];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Font Family'),
+        const SizedBox(height: 8),
+        Wrap(
+          spacing: 8,
+          children: fontFamilies.map((font) {
+            final isSelected = _fontFamily == font;
+            return ChoiceChip(
+              label: Text(font, style: TextStyle(fontFamily: font)),
+              selected: isSelected,
+              onSelected: (selected) {
+                if (selected) {
+                  setState(() {
+                    _fontFamily = font;
+                  });
+                  _onSettingChanged();
+                }
+              },
+            );
+          }).toList(),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildTextAlignmentSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Text Alignment'),
+        const SizedBox(height: 8),
+        Row(
+          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+          children: [
+            _buildAlignmentChip(
+                TextAlign.left, Icons.format_align_left, 'Left'),
+            _buildAlignmentChip(
+                TextAlign.center, Icons.format_align_center, 'Center'),
+            _buildAlignmentChip(
+                TextAlign.right, Icons.format_align_right, 'Right'),
+            _buildAlignmentChip(
+                TextAlign.justify, Icons.format_align_justify, 'Justify'),
+          ],
+        ),
+      ],
+    );
+  }
+
+  Widget _buildAlignmentChip(TextAlign alignment, IconData icon, String label) {
+    final isSelected = _textAlign == alignment;
+    return Expanded(
+      child: Padding(
+        padding: const EdgeInsets.symmetric(horizontal: 2),
+        child: ChoiceChip(
+          label: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(icon,
+                  size: 20,
+                  color: isSelected
+                      ? Theme.of(context).colorScheme.onPrimary
+                      : null),
+              const SizedBox(height: 4),
+              Text(label, style: const TextStyle(fontSize: 12)),
+            ],
+          ),
+          selected: isSelected,
+          onSelected: (selected) {
+            if (selected) {
+              setState(() {
+                _textAlign = alignment;
+              });
+              _onSettingChanged();
+            }
+          },
+        ),
+      ),
+    );
+  }
+
+  Widget _buildDarkModeSwitch() {
+    return SwitchListTile(
+      secondary: Icon(
+        widget.themeNotifier.isDarkMode ? Icons.dark_mode : Icons.light_mode,
+      ),
+      title: const Text('Dark Mode'),
+      subtitle: Text(widget.themeNotifier.isDarkMode
+          ? 'Dark theme enabled'
+          : 'Light theme enabled'),
+      value: widget.themeNotifier.isDarkMode,
+      onChanged: (value) async {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(value
+                ? 'Switching to Dark Mode...'
+                : 'Switching to Light Mode...'),
+            duration: const Duration(seconds: 1),
+          ),
+        );
+        await widget.themeNotifier.updateTheme(value);
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content:
+                  Text(value ? 'Dark mode enabled!' : 'Light mode enabled!'),
+              duration: const Duration(seconds: 1),
+            ),
+          );
+        }
+      },
+    );
+  }
+
+  Widget _buildColorThemeSelector() {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        const Text('Color Theme'),
+        const SizedBox(height: 12),
+        GridView.builder(
+          shrinkWrap: true,
+          physics: const NeverScrollableScrollPhysics(),
+          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+            crossAxisCount: 2,
+            crossAxisSpacing: 8,
+            mainAxisSpacing: 8,
+            childAspectRatio: 3.5,
+          ),
+          itemCount: _colorThemes.length,
+          itemBuilder: (context, index) {
+            final themeKey = _colorThemes.keys.elementAt(index);
+            final themeData = _colorThemes[themeKey]!;
+            final isSelected =
+                widget.themeNotifier.selectedColorTheme == themeKey;
+            return Container(
+              decoration: BoxDecoration(
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(
+                  color: isSelected
+                      ? themeData['primary'] as Color
+                      : Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                  width: isSelected ? 2 : 1,
+                ),
+                color: isSelected
+                    ? (themeData['primary'] as Color).withOpacity(0.1)
+                    : null,
+              ),
+              child: InkWell(
+                borderRadius: BorderRadius.circular(8),
+                onTap: () async {
+                  if (themeKey == widget.themeNotifier.selectedColorTheme)
+                    return;
+                  try {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(
+                        content: Text('Applying ${themeData['name']}...'),
+                        duration: const Duration(seconds: 1),
+                        backgroundColor: themeData['primary'] as Color,
+                      ),
+                    );
+                    await widget.themeNotifier.updateColorTheme(themeKey);
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(
+                          content: Text('${themeData['name']} theme applied!'),
+                          duration: const Duration(seconds: 1),
+                          backgroundColor: themeData['primary'] as Color,
+                        ),
+                      );
+                    }
+                  } catch (e) {
+                    print('Theme update error: $e');
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(
+                          content: Text('Failed to update theme'),
+                          backgroundColor: Colors.red,
+                        ),
+                      );
+                    }
+                  }
+                },
+                child: Padding(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                  child: Row(
+                    children: [
+                      Container(
+                        width: 16,
+                        height: 16,
+                        decoration: BoxDecoration(
+                          color: themeData['primary'] as Color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 4),
+                      Container(
+                        width: 12,
+                        height: 12,
+                        decoration: BoxDecoration(
+                          color: themeData['secondary'] as Color,
+                          shape: BoxShape.circle,
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          themeData['name'].toString(),
+                          style:
+                              Theme.of(context).textTheme.bodySmall?.copyWith(
+                                    fontWeight: isSelected
+                                        ? FontWeight.w600
+                                        : FontWeight.normal,
+                                    color: isSelected
+                                        ? themeData['primary'] as Color
+                                        : null,
+                                  ),
+                          maxLines: 1,
+                          overflow: TextOverflow.ellipsis,
+                        ),
+                      ),
+                      if (isSelected)
+                        Icon(
+                          Icons.check_circle,
+                          size: 16,
+                          color: themeData['primary'] as Color,
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+            );
+          },
+        ),
+      ],
+    );
+  }
+
   Widget _buildDeveloperModeSwitch() {
     return SwitchListTile(
       secondary: Icon(
@@ -333,7 +658,6 @@ class _SettingsPageState extends State<SettingsPage> {
           _isDeveloperMode = value;
         });
         _onSettingChanged();
-
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(value
@@ -346,10 +670,8 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // UPDATED: Admin Panel Tile - Now navigates to AdminLoginPage
   Widget _buildAdminPanelTile() {
     final colorScheme = Theme.of(context).colorScheme;
-
     return Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(12),
@@ -426,7 +748,6 @@ class _SettingsPageState extends State<SettingsPage> {
           ],
         ),
         onTap: () {
-          // UPDATED: Navigate to AdminLoginPage instead of AdminPage
           Navigator.push(
             context,
             MaterialPageRoute(
@@ -438,348 +759,14 @@ class _SettingsPageState extends State<SettingsPage> {
     );
   }
 
-  // ... (Keep all other existing methods unchanged: _buildSectionCard, _buildFontSizeSlider, etc.)
-  Widget _buildSectionCard({
-    required String title,
-    required IconData icon,
-    required List<Widget> children,
-  }) {
-    return Card(
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Row(
-              children: [
-                Icon(icon, color: Theme.of(context).colorScheme.primary),
-                const SizedBox(width: 8),
-                Text(
-                  title,
-                  style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                        fontWeight: FontWeight.bold,
-                      ),
-                ),
-              ],
-            ),
-            const SizedBox(height: 16),
-            ...children,
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildFontSizeSlider() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            const Text('Font Size'),
-            Container(
-              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-              decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(
-                '${_fontSize.toInt()}px',
-                style: TextStyle(
-                  fontWeight: FontWeight.bold,
-                  color: Theme.of(context).colorScheme.primary,
-                ),
-              ),
-            ),
-          ],
-        ),
-        const SizedBox(height: 8),
-        Slider(
-          value: _fontSize,
-          min: 12.0,
-          max: 28.0,
-          divisions: 16,
-          onChanged: (value) {
-            setState(() {
-              _fontSize = value;
-            });
-            _onSettingChanged();
-          },
-        ),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              '12px',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-            Text(
-              '28px',
-              style: Theme.of(context).textTheme.bodySmall,
-            ),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildFontFamilySelector() {
-    final fontFamilies = [
-      'Roboto',
-      'SF Pro Display',
-      'Arial',
-      'Georgia',
-      'Times New Roman',
-      'Courier New',
-    ];
-
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Font Family'),
-        const SizedBox(height: 8),
-        Wrap(
-          spacing: 8,
-          children: fontFamilies.map((font) {
-            final isSelected = _fontFamily == font;
-            return ChoiceChip(
-              label: Text(
-                font,
-                style: TextStyle(fontFamily: font),
-              ),
-              selected: isSelected,
-              onSelected: (selected) {
-                if (selected) {
-                  setState(() {
-                    _fontFamily = font;
-                  });
-                  _onSettingChanged();
-                }
-              },
-            );
-          }).toList(),
-        ),
-      ],
-    );
-  }
-
-  Widget _buildTextAlignmentSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Text Alignment'),
-        const SizedBox(height: 8),
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-          children: [
-            _buildAlignmentChip(
-                TextAlign.left, Icons.format_align_left, 'Left'),
-            _buildAlignmentChip(
-                TextAlign.center, Icons.format_align_center, 'Center'),
-            _buildAlignmentChip(
-                TextAlign.right, Icons.format_align_right, 'Right'),
-            _buildAlignmentChip(
-                TextAlign.justify, Icons.format_align_justify, 'Justify'),
-          ],
-        ),
-      ],
-    );
-  }
-
-  Widget _buildAlignmentChip(TextAlign alignment, IconData icon, String label) {
-    final isSelected = _textAlign == alignment;
-    return Expanded(
-      child: Padding(
-        padding: const EdgeInsets.symmetric(horizontal: 2),
-        child: ChoiceChip(
-          label: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Icon(
-                icon,
-                size: 20,
-                color:
-                    isSelected ? Theme.of(context).colorScheme.onPrimary : null,
-              ),
-              const SizedBox(height: 4),
-              Text(
-                label,
-                style: const TextStyle(fontSize: 12),
-              ),
-            ],
-          ),
-          selected: isSelected,
-          onSelected: (selected) {
-            if (selected) {
-              setState(() {
-                _textAlign = alignment;
-              });
-              _onSettingChanged();
-            }
-          },
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDarkModeSwitch() {
-    return SwitchListTile(
-      secondary: Icon(
-          widget.themeNotifier.isDarkMode ? Icons.dark_mode : Icons.light_mode),
-      title: const Text('Dark Mode'),
-      subtitle: Text(widget.themeNotifier.isDarkMode
-          ? 'Dark theme enabled'
-          : 'Light theme enabled'),
-      value: widget.themeNotifier.isDarkMode,
-      onChanged: (value) async {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text(value
-                ? 'Switching to Dark Mode...'
-                : 'Switching to Light Mode...'),
-            duration: const Duration(seconds: 1),
-          ),
-        );
-
-        await widget.themeNotifier.updateTheme(value);
-
-        if (mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(
-              content:
-                  Text(value ? 'Dark mode enabled!' : 'Light mode enabled!'),
-              duration: const Duration(seconds: 1),
-            ),
-          );
-        }
-      },
-    );
-  }
-
-  Widget _buildColorThemeSelector() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        const Text('Color Theme'),
-        const SizedBox(height: 12),
-        GridView.builder(
-          shrinkWrap: true,
-          physics: const NeverScrollableScrollPhysics(),
-          gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
-            crossAxisCount: 2,
-            crossAxisSpacing: 8,
-            mainAxisSpacing: 8,
-            childAspectRatio: 3.5,
-          ),
-          itemCount: _colorThemes.length,
-          itemBuilder: (context, index) {
-            final themeKey = _colorThemes.keys.elementAt(index);
-            final themeData = _colorThemes[themeKey]!;
-            final isSelected =
-                widget.themeNotifier.selectedColorTheme == themeKey;
-
-            return Container(
-              decoration: BoxDecoration(
-                borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: isSelected
-                      ? themeData['primary'] as Color
-                      : Theme.of(context).colorScheme.outline.withOpacity(0.3),
-                  width: isSelected ? 2 : 1,
-                ),
-                color: isSelected
-                    ? (themeData['primary'] as Color).withOpacity(0.1)
-                    : null,
-              ),
-              child: InkWell(
-                borderRadius: BorderRadius.circular(8),
-                onTap: () async {
-                  if (themeKey == widget.themeNotifier.selectedColorTheme) {
-                    return;
-                  }
-
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(
-                      content: Text('Applying ${themeData['name']}...'),
-                      duration: const Duration(seconds: 1),
-                      backgroundColor: themeData['primary'] as Color,
-                    ),
-                  );
-
-                  await widget.themeNotifier.updateColorTheme(themeKey);
-
-                  if (mounted) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(
-                        content: Text('${themeData['name']} theme applied!'),
-                        duration: const Duration(seconds: 1),
-                        backgroundColor: themeData['primary'] as Color,
-                      ),
-                    );
-                  }
-                },
-                child: Padding(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                  child: Row(
-                    children: [
-                      Container(
-                        width: 16,
-                        height: 16,
-                        decoration: BoxDecoration(
-                          color: themeData['primary'] as Color,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 4),
-                      Container(
-                        width: 12,
-                        height: 12,
-                        decoration: BoxDecoration(
-                          color: themeData['secondary'] as Color,
-                          shape: BoxShape.circle,
-                        ),
-                      ),
-                      const SizedBox(width: 8),
-                      Expanded(
-                        child: Text(
-                          themeData['name'].toString(),
-                          style:
-                              Theme.of(context).textTheme.bodySmall?.copyWith(
-                                    fontWeight: isSelected
-                                        ? FontWeight.w600
-                                        : FontWeight.normal,
-                                    color: isSelected
-                                        ? themeData['primary'] as Color
-                                        : null,
-                                  ),
-                          maxLines: 1,
-                          overflow: TextOverflow.ellipsis,
-                        ),
-                      ),
-                      if (isSelected)
-                        Icon(
-                          Icons.check_circle,
-                          size: 16,
-                          color: themeData['primary'] as Color,
-                        ),
-                    ],
-                  ),
-                ),
-              ),
-            );
-          },
-        ),
-      ],
-    );
-  }
-
   Widget _buildPreviewCard() {
-    final selectedTheme =
-        _colorThemes[widget.themeNotifier.selectedColorTheme]!;
-    final primaryColor = selectedTheme['primary'] as Color;
-    final secondaryColor = selectedTheme['secondary'] as Color;
+    final selectedThemeData =
+        _colorThemes[widget.themeNotifier.selectedColorTheme];
+    final primaryColor =
+        selectedThemeData?['primary'] as Color? ?? const Color(0xFF6366F1);
+    final secondaryColor =
+        selectedThemeData?['secondary'] as Color? ?? const Color(0xFF8B5CF6);
+    final themeName = selectedThemeData?['name']?.toString() ?? 'Default Blue';
 
     return Card(
       child: Padding(
@@ -806,7 +793,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     borderRadius: BorderRadius.circular(12),
                   ),
                   child: Text(
-                    selectedTheme['name'].toString(),
+                    themeName,
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           color: primaryColor,
                           fontWeight: FontWeight.w600,
@@ -824,9 +811,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ? Colors.grey[800]
                     : Theme.of(context).colorScheme.surfaceContainerHighest,
                 borderRadius: BorderRadius.circular(8),
-                border: Border.all(
-                  color: primaryColor.withOpacity(0.2),
-                ),
+                border: Border.all(color: primaryColor.withOpacity(0.2)),
               ),
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
@@ -950,7 +935,8 @@ class _SettingsPageState extends State<SettingsPage> {
             Text('• Developer Mode: Enables advanced features'),
             SizedBox(height: 12),
             Text(
-                'All settings are automatically saved and will persist between app launches. Theme changes apply immediately throughout the app.'),
+              'All settings are automatically saved and will persist between app launches. Theme changes apply immediately throughout the app.',
+            ),
           ],
         ),
         actions: [
