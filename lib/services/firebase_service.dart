@@ -1,11 +1,11 @@
-// firebase_service.dart - FIXED VERSION
+// firebase_service.dart - COMPLETE UPDATED VERSION WITH updateAdminStatus
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:firebase_database/firebase_database.dart';
 import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
-import '../models/devotional_model.dart'; // ✅ FIXED: Import DevotionalModel
+import '../models/devotional_model.dart';
 import '../models/song_model.dart';
-import '../models/admin_model.dart'; // ✅ FIXED: Import AdminModel
+import '../models/admin_model.dart';
 
 /// Main Firebase service providing centralized access to all Firebase features
 class FirebaseService {
@@ -140,13 +140,11 @@ class FirebaseService {
   // ==================== DEVOTIONALS ====================
 
   /// Get today's devotional as a stream (real-time updates)
-  /// ✅ FIXED: Use DevotionalModel instead of Devotional
   static Stream<DevotionalModel?> getTodaysDevotionalStream() {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
     return _devotionalsRef.child(today).onValue.map((event) {
       if (!event.snapshot.exists) return null;
-      // ✅ FIXED: Use DevotionalModel.fromFirebase
       return DevotionalModel.fromFirebase(
         event.snapshot.key!,
         Map<String, dynamic>.from(event.snapshot.value as Map),
@@ -155,7 +153,6 @@ class FirebaseService {
   }
 
   /// Get today's devotional (one-time fetch)
-  /// ✅ FIXED: Use DevotionalModel instead of Devotional
   static Future<ServiceResult<DevotionalModel>> getTodaysDevotional() async {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
 
@@ -163,7 +160,6 @@ class FirebaseService {
       final snapshot = await _devotionalsRef.child(today).once();
 
       if (snapshot.snapshot.exists) {
-        // ✅ FIXED: Use DevotionalModel.fromFirebase
         final devotional = DevotionalModel.fromFirebase(
           snapshot.snapshot.key!,
           Map<String, dynamic>.from(snapshot.snapshot.value as Map),
@@ -181,7 +177,6 @@ class FirebaseService {
         final latestSnapshot = await _devotionalsRef.child(latestKey).once();
 
         if (latestSnapshot.snapshot.exists) {
-          // ✅ FIXED: Use DevotionalModel.fromFirebase and copyWith
           final devotional = DevotionalModel.fromFirebase(
             latestSnapshot.snapshot.key!,
             Map<String, dynamic>.from(latestSnapshot.snapshot.value as Map),
@@ -205,7 +200,6 @@ class FirebaseService {
   }
 
   /// Get all devotionals stream (for admin management)
-  /// ✅ FIXED: Use DevotionalModel instead of Devotional
   static Stream<List<DevotionalModel>> getAllDevotionalsStream() {
     return _devotionalsRef.orderByKey().onValue.map((event) {
       if (!event.snapshot.exists) return <DevotionalModel>[];
@@ -215,7 +209,6 @@ class FirebaseService {
 
       data.forEach((key, value) {
         if (value is Map) {
-          // ✅ FIXED: Use DevotionalModel.fromFirebase
           final devotional = DevotionalModel.fromFirebase(
             key,
             Map<String, dynamic>.from(value),
@@ -224,16 +217,15 @@ class FirebaseService {
         }
       });
 
-      // ✅ FIXED: Sort by date properly with null safety
       devotionals.sort((a, b) => b.date.compareTo(a.date));
       return devotionals;
     });
   }
 
   /// Add new devotional (Admin only)
-  /// ✅ FIXED: Use DevotionalModel instead of Devotional
   static Future<ServiceResult<bool>> addDevotional(
-      DevotionalModel devotional) async {
+    DevotionalModel devotional,
+  ) async {
     if (!isAuthenticated) {
       return ServiceResult.error('Authentication required');
     }
@@ -260,9 +252,9 @@ class FirebaseService {
   }
 
   /// Update devotional (Admin only)
-  /// ✅ FIXED: Use DevotionalModel instead of Devotional
   static Future<ServiceResult<bool>> updateDevotional(
-      DevotionalModel devotional) async {
+    DevotionalModel devotional,
+  ) async {
     if (!isAuthenticated) {
       return ServiceResult.error('Authentication required');
     }
@@ -289,9 +281,11 @@ class FirebaseService {
 
   /// Delete devotional (Master Admin only)
   static Future<ServiceResult<bool>> deleteDevotional(
-      String devotionalId) async {
-    final hasPermission =
-        await FirebaseService.hasPermission(AdminPermission.deleteContent);
+    String devotionalId,
+  ) async {
+    final hasPermission = await FirebaseService.hasPermission(
+      AdminPermission.deleteContent,
+    );
     if (!hasPermission) {
       return ServiceResult.error('Master admin access required');
     }
@@ -322,10 +316,7 @@ class FirebaseService {
 
       data.forEach((key, value) {
         if (value is Map) {
-          final song = Song.fromJson(
-            Map<String, dynamic>.from(value),
-            id: key,
-          );
+          final song = Song.fromJson(Map<String, dynamic>.from(value), id: key);
           songs.add(song);
         }
       });
@@ -396,7 +387,6 @@ class FirebaseService {
   // ==================== ADMIN MANAGEMENT ====================
 
   /// Get all admins (Master Admin only)
-  /// ✅ FIXED: Use AdminModel instead of AdminUser
   static Stream<List<AdminModel>> getAdminsStream() {
     return _adminsRef.onValue.map((event) {
       if (!event.snapshot.exists) return <AdminModel>[];
@@ -406,7 +396,6 @@ class FirebaseService {
 
       data.forEach((key, value) {
         if (value is Map) {
-          // ✅ FIXED: Use AdminModel.fromFirebase
           final admin = AdminModel.fromFirebase(
             key,
             Map<String, dynamic>.from(value),
@@ -426,8 +415,9 @@ class FirebaseService {
     required AdminLevel level,
     required String displayName,
   }) async {
-    final hasPermission =
-        await FirebaseService.hasPermission(AdminPermission.manageUsers);
+    final hasPermission = await FirebaseService.hasPermission(
+      AdminPermission.manageUsers,
+    );
     if (!hasPermission) {
       return ServiceResult.error('Master admin access required');
     }
@@ -446,7 +436,7 @@ class FirebaseService {
       // Add to admins database
       await _adminsRef.child(credential.user!.uid).set({
         'email': email,
-        'name': displayName, // ✅ FIXED: Use 'name' instead of 'display_name'
+        'name': displayName,
         'level': level.name,
         'created_at': ServerValue.timestamp,
         'created_by': currentUserEmail,
@@ -466,11 +456,44 @@ class FirebaseService {
     }
   }
 
+  /// Update admin status (active/inactive) - Master Admin only
+  static Future<ServiceResult<bool>> updateAdminStatus(
+    String adminUid,
+    bool isActive,
+  ) async {
+    final hasPermission = await FirebaseService.hasPermission(
+      AdminPermission.manageUsers,
+    );
+    if (!hasPermission) {
+      return ServiceResult.error('Master admin access required');
+    }
+
+    try {
+      await _adminsRef.child(adminUid).update({
+        'is_active': isActive,
+        'updated_at': ServerValue.timestamp,
+        'updated_by': currentUserEmail,
+      });
+
+      // Log activity
+      await _logAdminActivity('update_admin_status', {
+        'target_admin_uid': adminUid,
+        'is_active': isActive,
+      });
+
+      return ServiceResult.success(true);
+    } catch (e) {
+      return ServiceResult.error('Failed to update admin status: $e');
+    }
+  }
+
   // ==================== ANALYTICS ====================
 
   /// Log admin activity
   static Future<void> _logAdminActivity(
-      String action, Map<String, dynamic> data) async {
+    String action,
+    Map<String, dynamic> data,
+  ) async {
     if (!isAuthenticated) return;
 
     try {
@@ -495,22 +518,23 @@ class FirebaseService {
         .limitToLast(100)
         .onValue
         .map((event) {
-      if (!event.snapshot.exists) return <Map<String, dynamic>>[];
+          if (!event.snapshot.exists) return <Map<String, dynamic>>[];
 
-      final data = event.snapshot.value as Map;
-      final activities = <Map<String, dynamic>>[];
+          final data = event.snapshot.value as Map;
+          final activities = <Map<String, dynamic>>[];
 
-      data.forEach((key, value) {
-        if (value is Map) {
-          activities.add(Map<String, dynamic>.from(value));
-        }
-      });
+          data.forEach((key, value) {
+            if (value is Map) {
+              activities.add(Map<String, dynamic>.from(value));
+            }
+          });
 
-      // Sort by timestamp descending
-      activities.sort(
-          (a, b) => (b['timestamp'] as int).compareTo(a['timestamp'] as int));
-      return activities;
-    });
+          // Sort by timestamp descending
+          activities.sort(
+            (a, b) => (b['timestamp'] as int).compareTo(a['timestamp'] as int),
+          );
+          return activities;
+        });
   }
 
   // ==================== UTILITY METHODS ====================
@@ -570,9 +594,11 @@ class FirebaseService {
 
   /// Update app settings (Master Admin only)
   static Future<ServiceResult<bool>> updateAppSettings(
-      Map<String, dynamic> settings) async {
-    final hasPermission =
-        await FirebaseService.hasPermission(AdminPermission.systemSettings);
+    Map<String, dynamic> settings,
+  ) async {
+    final hasPermission = await FirebaseService.hasPermission(
+      AdminPermission.systemSettings,
+    );
     if (!hasPermission) {
       return ServiceResult.error('Master admin access required');
     }
@@ -585,7 +611,7 @@ class FirebaseService {
     }
   }
 
-  /// ✅ ADDED: Create fallback devotional
+  /// Create fallback devotional
   static DevotionalModel _createFallbackDevotional() {
     final today = DateFormat('yyyy-MM-dd').format(DateTime.now());
     return DevotionalModel(
@@ -609,13 +635,9 @@ class ServiceResult<T> {
   final String? error;
   final bool isSuccess;
 
-  ServiceResult.success(this.data)
-      : error = null,
-        isSuccess = true;
+  ServiceResult.success(this.data) : error = null, isSuccess = true;
 
-  ServiceResult.error(this.error)
-      : data = null,
-        isSuccess = false;
+  ServiceResult.error(this.error) : data = null, isSuccess = false;
 }
 
 /// Admin permissions enum

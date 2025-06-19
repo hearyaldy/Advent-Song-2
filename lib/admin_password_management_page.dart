@@ -1,7 +1,9 @@
-// admin_password_management_page.dart - NEW DEDICATED PASSWORD MANAGEMENT PAGE
+// admin_password_management_page.dart - FULLY MIGRATED TO FIREBASE
 import 'package:flutter/material.dart';
-import 'admin_service.dart';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'services/auth_service.dart';
+import 'services/firebase_service.dart';
+import 'models/admin_model.dart';
 
 class AdminPasswordManagementPage extends StatefulWidget {
   const AdminPasswordManagementPage({super.key});
@@ -13,149 +15,237 @@ class AdminPasswordManagementPage extends StatefulWidget {
 
 class _AdminPasswordManagementPageState
     extends State<AdminPasswordManagementPage> {
-  final _newMasterPasswordController = TextEditingController();
-  final _confirmMasterPasswordController = TextEditingController();
-  final _newContentPasswordController = TextEditingController();
-  final _confirmContentPasswordController = TextEditingController();
-  final _masterFormKey = GlobalKey<FormState>();
-  final _contentFormKey = GlobalKey<FormState>();
+  // Current password controller for reauthentication
+  final _currentPasswordController = TextEditingController();
+  final _newPasswordController = TextEditingController();
+  final _confirmPasswordController = TextEditingController();
+  final _formKey = GlobalKey<FormState>();
 
   bool _isLoading = false;
-  bool _isMasterLoading = false;
-  bool _isContentLoading = false;
-  bool _obscureMasterNew = true;
-  bool _obscureMasterConfirm = true;
-  bool _obscureContentNew = true;
-  bool _obscureContentConfirm = true;
-  String _currentUser = '';
-  bool _isConnected = false;
+  bool _obscureCurrentPassword = true;
+  bool _obscureNewPassword = true;
+  bool _obscureConfirmPassword = true;
+
+  AdminModel? _currentAdmin;
+  List<AdminModel> _allAdmins = [];
+  bool _canManageOtherAdmins = false;
 
   @override
   void initState() {
     super.initState();
-    _loadUserInfo();
-    _testConnection();
+    _loadAdminInfo();
   }
 
   @override
   void dispose() {
-    _newMasterPasswordController.dispose();
-    _confirmMasterPasswordController.dispose();
-    _newContentPasswordController.dispose();
-    _confirmContentPasswordController.dispose();
+    _currentPasswordController.dispose();
+    _newPasswordController.dispose();
+    _confirmPasswordController.dispose();
     super.dispose();
   }
 
-  Future<void> _loadUserInfo() async {
-    final prefs = await SharedPreferences.getInstance();
-    setState(() {
-      _currentUser = prefs.getString('current_user') ?? 'Master Admin';
-    });
-  }
-
-  Future<void> _testConnection() async {
-    setState(() {
-      _isLoading = true;
-    });
+  Future<void> _loadAdminInfo() async {
+    setState(() => _isLoading = true);
 
     try {
-      final result = await AdminService.testConnection();
+      // Get current admin info
+      final admin = await AuthService.getCurrentAdmin();
+      if (admin == null) {
+        _showError('Not authenticated as admin');
+        return;
+      }
+
+      // Check if master admin (can manage other admins)
+      final canManage = admin.level == AdminLevel.master;
+
+      // If master admin, load all admins
+      List<AdminModel> allAdmins = [];
+      if (canManage) {
+        final adminsStream = await FirebaseService.getAdminsStream().first;
+        allAdmins = adminsStream.where((a) => a.uid != admin.uid).toList();
+      }
+
       setState(() {
-        _isConnected = result.isSuccess;
+        _currentAdmin = admin;
+        _canManageOtherAdmins = canManage;
+        _allAdmins = allAdmins;
       });
     } catch (e) {
-      setState(() {
-        _isConnected = false;
-      });
+      _showError('Failed to load admin info: $e');
     } finally {
-      setState(() {
-        _isLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _updateMasterPassword() async {
-    if (!_masterFormKey.currentState!.validate()) return;
+  /// Update current admin's own password
+  Future<void> _updateOwnPassword() async {
+    if (!_formKey.currentState!.validate()) return;
 
-    setState(() {
-      _isMasterLoading = true;
-    });
+    setState(() => _isLoading = true);
 
     try {
-      final result = await AdminService.updateAdminPassword(
-        passwordType: 'admin_master',
-        newPassword: _newMasterPasswordController.text.trim(),
-        updatedBy: _currentUser,
+      // Step 1: Reauthenticate user
+      final reauthResult = await AuthService.reauthenticate(
+        _currentPasswordController.text,
       );
 
-      if (result.isSuccess && result.data == true) {
-        _newMasterPasswordController.clear();
-        _confirmMasterPasswordController.clear();
-        _showSuccess(
-            '🔒 Master Admin password updated globally!\n\nAll app instances will use the new password immediately.');
-      } else {
-        _showError(result.error ?? 'Failed to update master password');
+      if (!reauthResult.isSuccess) {
+        _showError(reauthResult.error ?? 'Current password is incorrect');
+        return;
       }
-    } catch (e) {
-      _showError('Error updating master password: $e');
-    } finally {
-      setState(() {
-        _isMasterLoading = false;
-      });
-    }
-  }
 
-  Future<void> _updateContentPassword() async {
-    if (!_contentFormKey.currentState!.validate()) return;
-
-    setState(() {
-      _isContentLoading = true;
-    });
-
-    try {
-      final result = await AdminService.updateAdminPassword(
-        passwordType: 'content_password',
-        newPassword: _newContentPasswordController.text.trim(),
-        updatedBy: _currentUser,
+      // Step 2: Update password
+      final updateResult = await AuthService.updatePassword(
+        _newPasswordController.text,
       );
 
-      if (result.isSuccess && result.data == true) {
-        _newContentPasswordController.clear();
-        _confirmContentPasswordController.clear();
+      if (updateResult.isSuccess) {
+        _clearForm();
         _showSuccess(
-            '👥 Content Team password updated globally!\n\nPlease share the new password with content contributors.');
+          '🔒 Your password has been updated successfully!\n\n'
+          'You will remain logged in with your new password.',
+        );
       } else {
-        _showError(result.error ?? 'Failed to update content password');
+        _showError(updateResult.error ?? 'Failed to update password');
       }
     } catch (e) {
-      _showError('Error updating content password: $e');
+      _showError('Error updating password: $e');
     } finally {
-      setState(() {
-        _isContentLoading = false;
-      });
+      setState(() => _isLoading = false);
     }
   }
 
-  Future<void> _testPasswordUpdate() async {
-    setState(() {
-      _isLoading = true;
-    });
+  /// Reset another admin's password (Master Admin only)
+  Future<void> _resetAdminPassword(AdminModel admin) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Reset Admin Password'),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text('Reset password for ${admin.displayName}?'),
+            const SizedBox(height: 12),
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.orange.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(8),
+                border: Border.all(color: Colors.orange.withOpacity(0.3)),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.info, color: Colors.orange, size: 20),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'A password reset email will be sent to their registered email address.',
+                      style: TextStyle(fontSize: 12, color: Colors.orange),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(backgroundColor: Colors.orange),
+            child: const Text('Send Reset Email'),
+          ),
+        ],
+      ),
+    );
 
-    try {
-      final result = await AdminService.testPasswordUpdate();
+    if (confirmed == true) {
+      setState(() => _isLoading = true);
 
-      if (result.isSuccess && result.data == true) {
-        _showSuccess('✅ Password update system is working correctly!');
-      } else {
-        _showError('❌ Password update system test failed');
+      try {
+        final result = await AuthService.sendPasswordResetEmail(admin.email);
+
+        if (result.isSuccess) {
+          _showSuccess(
+            '✅ Password reset email sent to ${admin.email}\n\n'
+            'The admin will receive instructions to create a new password.',
+          );
+        } else {
+          _showError(result.error ?? 'Failed to send reset email');
+        }
+      } catch (e) {
+        _showError('Error sending reset email: $e');
+      } finally {
+        setState(() => _isLoading = false);
       }
-    } catch (e) {
-      _showError('Test failed: $e');
-    } finally {
-      setState(() {
-        _isLoading = false;
-      });
     }
+  }
+
+  /// Deactivate/Reactivate admin (Master Admin only)
+  Future<void> _toggleAdminStatus(AdminModel admin) async {
+    final action = admin.isActive ? 'deactivate' : 'reactivate';
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: Text(
+            '${action.substring(0, 1).toUpperCase()}${action.substring(1)} Admin'),
+        content: Text(
+          'Are you sure you want to $action ${admin.displayName}?\n\n'
+          '${admin.isActive ? 'They will not be able to log in until reactivated.' : 'They will be able to log in again.'}',
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Cancel'),
+          ),
+          FilledButton(
+            onPressed: () => Navigator.pop(context, true),
+            style: FilledButton.styleFrom(
+              backgroundColor: admin.isActive ? Colors.red : Colors.green,
+            ),
+            child: Text(
+                action.substring(0, 1).toUpperCase() + action.substring(1)),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true) {
+      setState(() => _isLoading = true);
+
+      try {
+        // Update admin status in Firebase
+        final result = await FirebaseService.updateAdminStatus(
+          admin.uid,
+          !admin.isActive,
+        );
+
+        if (result.isSuccess) {
+          await _loadAdminInfo(); // Reload admin list
+          _showSuccess(
+            admin.isActive
+                ? '🔒 ${admin.displayName} has been deactivated'
+                : '✅ ${admin.displayName} has been reactivated',
+          );
+        } else {
+          _showError(result.error ?? 'Failed to update admin status');
+        }
+      } catch (e) {
+        _showError('Error updating admin status: $e');
+      } finally {
+        setState(() => _isLoading = false);
+      }
+    }
+  }
+
+  void _clearForm() {
+    _currentPasswordController.clear();
+    _newPasswordController.clear();
+    _confirmPasswordController.clear();
   }
 
   void _showSuccess(String message) {
@@ -164,11 +254,6 @@ class _AdminPasswordManagementPageState
         content: Text(message),
         backgroundColor: Colors.green,
         duration: const Duration(seconds: 4),
-        action: SnackBarAction(
-          label: 'OK',
-          textColor: Colors.white,
-          onPressed: () {},
-        ),
       ),
     );
   }
@@ -177,8 +262,8 @@ class _AdminPasswordManagementPageState
     ScaffoldMessenger.of(context).showSnackBar(
       SnackBar(
         content: Text('⚠️ $message'),
-        backgroundColor: Colors.orange,
-        duration: const Duration(seconds: 3),
+        backgroundColor: Colors.red,
+        duration: const Duration(seconds: 4),
       ),
     );
   }
@@ -190,17 +275,14 @@ class _AdminPasswordManagementPageState
     if (value.length < 6) {
       return 'Password must be at least 6 characters';
     }
-    if (value.length > 50) {
-      return 'Password must be less than 50 characters';
-    }
     return null;
   }
 
-  String? _validateConfirmPassword(String? value, String originalPassword) {
+  String? _validateConfirmPassword(String? value) {
     if (value == null || value.trim().isEmpty) {
       return 'Please confirm your password';
     }
-    if (value != originalPassword) {
+    if (value != _newPasswordController.text) {
       return 'Passwords do not match';
     }
     return null;
@@ -217,74 +299,13 @@ class _AdminPasswordManagementPageState
         backgroundColor: colorScheme.primary,
         foregroundColor: colorScheme.onPrimary,
         actions: [
-          // Connection indicator
-          Container(
-            margin: const EdgeInsets.only(right: 8),
-            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-            decoration: BoxDecoration(
-              color: _isConnected
-                  ? Colors.green.withOpacity(0.2)
-                  : Colors.red.withOpacity(0.2),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: Row(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                Icon(
-                  _isConnected ? Icons.cloud_done : Icons.cloud_off,
-                  color: _isConnected ? Colors.green : Colors.red,
-                  size: 16,
-                ),
-                const SizedBox(width: 4),
-                Text(
-                  _isConnected ? 'Online' : 'Offline',
-                  style: TextStyle(
-                    fontSize: 10,
-                    color: _isConnected ? Colors.green : Colors.red,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-              ],
-            ),
-          ),
           IconButton(
-            icon: const Icon(Icons.refresh),
-            onPressed: _testConnection,
-            tooltip: 'Test Connection',
-          ),
-          PopupMenuButton<String>(
-            onSelected: (value) {
-              switch (value) {
-                case 'test':
-                  _testPasswordUpdate();
-                  break;
-                case 'info':
-                  _showInfoDialog();
-                  break;
-              }
-            },
-            itemBuilder: (context) => [
-              const PopupMenuItem(
-                value: 'test',
-                child: ListTile(
-                  leading: Icon(Icons.bug_report),
-                  title: Text('Test System'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-              const PopupMenuItem(
-                value: 'info',
-                child: ListTile(
-                  leading: Icon(Icons.info_outline),
-                  title: Text('About'),
-                  contentPadding: EdgeInsets.zero,
-                ),
-              ),
-            ],
+            icon: const Icon(Icons.info_outline),
+            onPressed: _showInfoDialog,
           ),
         ],
       ),
-      body: _isLoading
+      body: _isLoading && _currentAdmin == null
           ? const Center(child: CircularProgressIndicator())
           : SingleChildScrollView(
               padding: const EdgeInsets.all(20.0),
@@ -295,12 +316,16 @@ class _AdminPasswordManagementPageState
                   _buildHeaderInfo(),
                   const SizedBox(height: 24),
 
-                  // Master Password Section
-                  _buildMasterPasswordSection(),
-                  const SizedBox(height: 24),
+                  // Update Own Password Section
+                  _buildUpdatePasswordSection(),
 
-                  // Content Password Section
-                  _buildContentPasswordSection(),
+                  if (_canManageOtherAdmins) ...[
+                    const SizedBox(height: 24),
+
+                    // Other Admins Management Section
+                    _buildOtherAdminsSection(),
+                  ],
+
                   const SizedBox(height: 24),
 
                   // Security Notice
@@ -344,7 +369,7 @@ class _AdminPasswordManagementPageState
               ),
               const SizedBox(width: 8),
               Text(
-                'Global Password Management',
+                'Firebase Password Management',
                 style: theme.textTheme.titleLarge?.copyWith(
                   fontWeight: FontWeight.bold,
                   color: colorScheme.onSurface,
@@ -354,7 +379,8 @@ class _AdminPasswordManagementPageState
           ),
           const SizedBox(height: 12),
           Text(
-            'Manage admin passwords that are synchronized across all app instances through Google Sheets. Changes take effect immediately for all users.',
+            'Manage admin passwords securely through Firebase Authentication. '
+            'All password changes are encrypted and handled by Firebase\'s secure infrastructure.',
             style: theme.textTheme.bodyMedium?.copyWith(
               color: colorScheme.onSurface.withOpacity(0.7),
               height: 1.5,
@@ -376,9 +402,30 @@ class _AdminPasswordManagementPageState
                 ),
                 const SizedBox(width: 8),
                 Text(
-                  'Current User: $_currentUser',
+                  'Logged in as: ${_currentAdmin?.displayName ?? 'Unknown'}',
                   style: theme.textTheme.bodyMedium?.copyWith(
                     fontWeight: FontWeight.w500,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: _currentAdmin?.level == AdminLevel.master
+                        ? Colors.red.withOpacity(0.1)
+                        : Colors.blue.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _currentAdmin?.levelDisplayName ?? '',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: _currentAdmin?.level == AdminLevel.master
+                          ? Colors.red
+                          : Colors.blue,
+                      fontWeight: FontWeight.bold,
+                    ),
                   ),
                 ),
               ],
@@ -389,7 +436,7 @@ class _AdminPasswordManagementPageState
     );
   }
 
-  Widget _buildMasterPasswordSection() {
+  Widget _buildUpdatePasswordSection() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
@@ -397,7 +444,7 @@ class _AdminPasswordManagementPageState
       child: Padding(
         padding: const EdgeInsets.all(20.0),
         child: Form(
-          key: _masterFormKey,
+          key: _formKey,
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -406,72 +453,73 @@ class _AdminPasswordManagementPageState
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: Colors.red.withOpacity(0.1),
+                      color: colorScheme.primary.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
-                      Icons.admin_panel_settings,
-                      color: Colors.red,
+                      Icons.lock,
+                      color: colorScheme.primary,
                       size: 20,
                     ),
                   ),
                   const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Master Admin Password',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.red,
-                          ),
-                        ),
-                        Text(
-                          'Full administrative access',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                        ),
-                      ],
+                  Text(
+                    'Update Your Password',
+                    style: theme.textTheme.titleLarge?.copyWith(
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Container(
-                padding: const EdgeInsets.all(12),
-                decoration: BoxDecoration(
-                  color: Colors.red.withOpacity(0.05),
-                  borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.red.withOpacity(0.2),
-                  ),
-                ),
-                child: Text(
-                  '⚠️ Master password provides full control including password management, system settings, and all administrative functions.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.red[700],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
+
+              // Current Password
               TextFormField(
-                controller: _newMasterPasswordController,
-                obscureText: _obscureMasterNew,
+                controller: _currentPasswordController,
+                obscureText: _obscureCurrentPassword,
                 decoration: InputDecoration(
-                  labelText: 'New Master Password *',
+                  labelText: 'Current Password *',
                   border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.lock),
+                  prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureMasterNew
+                      _obscureCurrentPassword
                           ? Icons.visibility
                           : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
-                        _obscureMasterNew = !_obscureMasterNew;
+                        _obscureCurrentPassword = !_obscureCurrentPassword;
+                      });
+                    },
+                  ),
+                ),
+                validator: (value) {
+                  if (value == null || value.isEmpty) {
+                    return 'Please enter your current password';
+                  }
+                  return null;
+                },
+              ),
+              const SizedBox(height: 16),
+
+              // New Password
+              TextFormField(
+                controller: _newPasswordController,
+                obscureText: _obscureNewPassword,
+                decoration: InputDecoration(
+                  labelText: 'New Password *',
+                  border: const OutlineInputBorder(),
+                  prefixIcon: const Icon(Icons.lock),
+                  suffixIcon: IconButton(
+                    icon: Icon(
+                      _obscureNewPassword
+                          ? Icons.visibility
+                          : Icons.visibility_off,
+                    ),
+                    onPressed: () {
+                      setState(() {
+                        _obscureNewPassword = !_obscureNewPassword;
                       });
                     },
                   ),
@@ -479,49 +527,45 @@ class _AdminPasswordManagementPageState
                 validator: _validatePassword,
               ),
               const SizedBox(height: 16),
+
+              // Confirm New Password
               TextFormField(
-                controller: _confirmMasterPasswordController,
-                obscureText: _obscureMasterConfirm,
+                controller: _confirmPasswordController,
+                obscureText: _obscureConfirmPassword,
                 decoration: InputDecoration(
-                  labelText: 'Confirm Master Password *',
+                  labelText: 'Confirm New Password *',
                   border: const OutlineInputBorder(),
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     icon: Icon(
-                      _obscureMasterConfirm
+                      _obscureConfirmPassword
                           ? Icons.visibility
                           : Icons.visibility_off,
                     ),
                     onPressed: () {
                       setState(() {
-                        _obscureMasterConfirm = !_obscureMasterConfirm;
+                        _obscureConfirmPassword = !_obscureConfirmPassword;
                       });
                     },
                   ),
                 ),
-                validator: (value) => _validateConfirmPassword(
-                    value, _newMasterPasswordController.text),
+                validator: _validateConfirmPassword,
               ),
               const SizedBox(height: 20),
+
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: (_isMasterLoading || !_isConnected)
-                      ? null
-                      : _updateMasterPassword,
-                  icon: _isMasterLoading
+                  onPressed: _isLoading ? null : _updateOwnPassword,
+                  icon: _isLoading
                       ? const SizedBox(
                           width: 16,
                           height: 16,
                           child: CircularProgressIndicator(strokeWidth: 2),
                         )
                       : const Icon(Icons.security),
-                  label: Text(_isMasterLoading
-                      ? 'Updating Master Password...'
-                      : 'Update Master Password'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.red,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
+                  label: Text(
+                    _isLoading ? 'Updating Password...' : 'Update Password',
                   ),
                 ),
               ),
@@ -532,144 +576,207 @@ class _AdminPasswordManagementPageState
     );
   }
 
-  Widget _buildContentPasswordSection() {
+  Widget _buildOtherAdminsSection() {
     final theme = Theme.of(context);
     final colorScheme = theme.colorScheme;
 
     return Card(
       child: Padding(
         padding: const EdgeInsets.all(20.0),
-        child: Form(
-          key: _contentFormKey,
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
-                children: [
-                  Container(
-                    padding: const EdgeInsets.all(8),
-                    decoration: BoxDecoration(
-                      color: Colors.blue.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8),
-                    ),
-                    child: Icon(
-                      Icons.edit,
-                      color: Colors.blue,
-                      size: 20,
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Row(
+              children: [
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(8),
+                  ),
+                  child: const Icon(
+                    Icons.admin_panel_settings,
+                    color: Colors.red,
+                    size: 20,
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Text(
+                  'Manage Other Admins',
+                  style: theme.textTheme.titleLarge?.copyWith(
+                    fontWeight: FontWeight.bold,
+                    color: Colors.red,
+                  ),
+                ),
+                const Spacer(),
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: Colors.red.withOpacity(0.1),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: const Text(
+                    'MASTER ONLY',
+                    style: TextStyle(
+                      fontSize: 10,
+                      color: Colors.red,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Content Team Password',
-                          style: theme.textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Colors.blue,
-                          ),
-                        ),
-                        Text(
-                          'For content contributors only',
-                          style: theme.textTheme.bodySmall?.copyWith(
-                            color: colorScheme.onSurface.withOpacity(0.7),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(height: 16),
+                ),
+              ],
+            ),
+            const SizedBox(height: 16),
+            if (_allAdmins.isEmpty) ...[
               Container(
-                padding: const EdgeInsets.all(12),
+                padding: const EdgeInsets.all(16),
                 decoration: BoxDecoration(
-                  color: Colors.blue.withOpacity(0.05),
+                  color: colorScheme.surfaceContainerHighest.withOpacity(0.5),
                   borderRadius: BorderRadius.circular(8),
-                  border: Border.all(
-                    color: Colors.blue.withOpacity(0.2),
-                  ),
                 ),
-                child: Text(
-                  'ℹ️ Content password allows adding and managing devotional content only. Share this password responsibly with trusted contributors.',
-                  style: theme.textTheme.bodySmall?.copyWith(
-                    color: Colors.blue[700],
-                  ),
+                child: const Center(
+                  child: Text('No other admins found'),
                 ),
               ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _newContentPasswordController,
-                obscureText: _obscureContentNew,
-                decoration: InputDecoration(
-                  labelText: 'New Content Password *',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.lock),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureContentNew
-                          ? Icons.visibility
-                          : Icons.visibility_off,
+            ] else ...[
+              ...List.generate(_allAdmins.length, (index) {
+                final admin = _allAdmins[index];
+                return Container(
+                  margin: const EdgeInsets.only(bottom: 12),
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: colorScheme.surface,
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: admin.isActive
+                          ? colorScheme.outline.withOpacity(0.2)
+                          : Colors.red.withOpacity(0.3),
                     ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureContentNew = !_obscureContentNew;
-                      });
-                    },
                   ),
-                ),
-                validator: _validatePassword,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
-                controller: _confirmContentPasswordController,
-                obscureText: _obscureContentConfirm,
-                decoration: InputDecoration(
-                  labelText: 'Confirm Content Password *',
-                  border: const OutlineInputBorder(),
-                  prefixIcon: const Icon(Icons.lock_outline),
-                  suffixIcon: IconButton(
-                    icon: Icon(
-                      _obscureContentConfirm
-                          ? Icons.visibility
-                          : Icons.visibility_off,
-                    ),
-                    onPressed: () {
-                      setState(() {
-                        _obscureContentConfirm = !_obscureContentConfirm;
-                      });
-                    },
+                  child: Row(
+                    children: [
+                      CircleAvatar(
+                        backgroundColor: admin.level == AdminLevel.master
+                            ? Colors.red.withOpacity(0.1)
+                            : Colors.blue.withOpacity(0.1),
+                        child: Icon(
+                          admin.level == AdminLevel.master
+                              ? Icons.star
+                              : Icons.edit,
+                          color: admin.level == AdminLevel.master
+                              ? Colors.red
+                              : Colors.blue,
+                          size: 20,
+                        ),
+                      ),
+                      const SizedBox(width: 12),
+                      Expanded(
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              admin.displayName,
+                              style: theme.textTheme.titleMedium?.copyWith(
+                                fontWeight: FontWeight.w600,
+                              ),
+                            ),
+                            Text(
+                              admin.email,
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: colorScheme.onSurface.withOpacity(0.7),
+                              ),
+                            ),
+                            Row(
+                              children: [
+                                Container(
+                                  margin: const EdgeInsets.only(top: 4),
+                                  padding: const EdgeInsets.symmetric(
+                                      horizontal: 6, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: admin.level == AdminLevel.master
+                                        ? Colors.red.withOpacity(0.1)
+                                        : Colors.blue.withOpacity(0.1),
+                                    borderRadius: BorderRadius.circular(8),
+                                  ),
+                                  child: Text(
+                                    admin.levelDisplayName,
+                                    style: TextStyle(
+                                      fontSize: 10,
+                                      color: admin.level == AdminLevel.master
+                                          ? Colors.red
+                                          : Colors.blue,
+                                      fontWeight: FontWeight.w600,
+                                    ),
+                                  ),
+                                ),
+                                const SizedBox(width: 8),
+                                if (!admin.isActive)
+                                  Container(
+                                    margin: const EdgeInsets.only(top: 4),
+                                    padding: const EdgeInsets.symmetric(
+                                        horizontal: 6, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.red.withOpacity(0.1),
+                                      borderRadius: BorderRadius.circular(8),
+                                    ),
+                                    child: const Text(
+                                      'INACTIVE',
+                                      style: TextStyle(
+                                        fontSize: 10,
+                                        color: Colors.red,
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                    ),
+                                  ),
+                              ],
+                            ),
+                          ],
+                        ),
+                      ),
+                      PopupMenuButton<String>(
+                        onSelected: (value) {
+                          switch (value) {
+                            case 'reset':
+                              _resetAdminPassword(admin);
+                              break;
+                            case 'toggle':
+                              _toggleAdminStatus(admin);
+                              break;
+                          }
+                        },
+                        itemBuilder: (context) => [
+                          const PopupMenuItem(
+                            value: 'reset',
+                            child: ListTile(
+                              leading: Icon(Icons.email),
+                              title: Text('Send Password Reset'),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                          PopupMenuItem(
+                            value: 'toggle',
+                            child: ListTile(
+                              leading: Icon(
+                                admin.isActive
+                                    ? Icons.block
+                                    : Icons.check_circle,
+                                color:
+                                    admin.isActive ? Colors.red : Colors.green,
+                              ),
+                              title: Text(
+                                  admin.isActive ? 'Deactivate' : 'Reactivate'),
+                              contentPadding: EdgeInsets.zero,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ],
                   ),
-                ),
-                validator: (value) => _validateConfirmPassword(
-                    value, _newContentPasswordController.text),
-              ),
-              const SizedBox(height: 20),
-              SizedBox(
-                width: double.infinity,
-                child: FilledButton.icon(
-                  onPressed: (_isContentLoading || !_isConnected)
-                      ? null
-                      : _updateContentPassword,
-                  icon: _isContentLoading
-                      ? const SizedBox(
-                          width: 16,
-                          height: 16,
-                          child: CircularProgressIndicator(strokeWidth: 2),
-                        )
-                      : const Icon(Icons.group),
-                  label: Text(_isContentLoading
-                      ? 'Updating Content Password...'
-                      : 'Update Content Password'),
-                  style: FilledButton.styleFrom(
-                    backgroundColor: Colors.blue,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                  ),
-                ),
-              ),
+                );
+              }),
             ],
-          ),
+          ],
         ),
       ),
     );
@@ -700,7 +807,7 @@ class _AdminPasswordManagementPageState
               ),
               const SizedBox(width: 8),
               Text(
-                'Security Guidelines',
+                'Firebase Security Features',
                 style: theme.textTheme.titleMedium?.copyWith(
                   fontWeight: FontWeight.bold,
                 ),
@@ -709,12 +816,12 @@ class _AdminPasswordManagementPageState
           ),
           const SizedBox(height: 12),
           Text(
-            '• Use strong, unique passwords (minimum 6 characters)\n'
-            '• Changes are synchronized globally via Google Sheets\n'
-            '• Master password provides full administrative control\n'
-            '• Content password is for devotional contributors only\n'
-            '• Keep passwords confidential and share responsibly\n'
-            '• Sessions expire after 2 hours for security',
+            '• Passwords are encrypted by Firebase Authentication\n'
+            '• Password reset emails use Firebase\'s secure email service\n'
+            '• Account deactivation prevents login without deleting data\n'
+            '• All password operations require current authentication\n'
+            '• Session tokens expire automatically for security\n'
+            '• Password history prevents reuse (Firebase feature)',
             style: theme.textTheme.bodySmall?.copyWith(
               color: colorScheme.onSurface.withOpacity(0.8),
               height: 1.5,
@@ -729,27 +836,28 @@ class _AdminPasswordManagementPageState
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Password Management System'),
+        title: const Text('Firebase Password Management'),
         content: const SingleChildScrollView(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               Text(
-                  'This system manages admin passwords through Google Sheets:'),
+                  'This system uses Firebase Authentication for secure password management:'),
               SizedBox(height: 12),
-              Text('🔄 Real-time Synchronization'),
-              Text('Changes are immediately available to all app instances'),
+              Text('🔐 Your Password'),
+              Text(
+                  'Update your own password with current password verification'),
               SizedBox(height: 8),
-              Text('🔐 Two-Level Access'),
-              Text('Master Admin: Full control including password management'),
-              Text('Content Admin: Devotional content management only'),
+              Text('👥 Other Admins (Master Only)'),
+              Text('Send password reset emails and manage admin access'),
               SizedBox(height: 8),
-              Text('📊 AdminCredentials Sheet'),
-              Text('Passwords are stored securely in Google Sheets'),
+              Text('🔒 Security Features'),
+              Text(
+                  '• Encrypted storage\n• Secure email delivery\n• Session management\n• Access control'),
               SizedBox(height: 8),
-              Text('⏱️ Session Management'),
-              Text('Admin sessions expire after 2 hours for security'),
+              Text('📧 Password Reset'),
+              Text('Admins receive secure reset links via email'),
             ],
           ),
         ),
