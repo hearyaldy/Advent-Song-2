@@ -132,12 +132,12 @@ class Song {
 
     if (versesData is List) {
       verses = versesData
-          .where((verse) => verse is Map<String, dynamic>)
+          .whereType<Map<String, dynamic>>()
           .map((verse) => SongVerse.fromJson(verse as Map<String, dynamic>))
           .toList();
     } else if (versesData is Map) {
       verses = versesData.values
-          .where((verse) => verse is Map<String, dynamic>)
+          .whereType<Map<String, dynamic>>()
           .map((verse) => SongVerse.fromJson(verse as Map<String, dynamic>))
           .toList();
     }
@@ -198,8 +198,9 @@ class Song {
   static List<String> _parseTags(dynamic tags) {
     if (tags == null) return [];
     if (tags is List) return tags.map((tag) => tag.toString()).toList();
-    if (tags is String)
+    if (tags is String) {
       return tags.split(',').map((tag) => tag.trim()).toList();
+    }
     return [];
   }
 
@@ -267,14 +268,14 @@ class Song {
     final buffer = StringBuffer();
 
     // Header
-    buffer.writeln('$title');
+    buffer.writeln(title);
     buffer.writeln('Song #$songNumber | $collection');
     if (author != null) buffer.writeln('by $author');
     buffer.writeln('');
 
     // Verses
     for (final verse in verses) {
-      buffer.writeln('${verse.verseNumber}');
+      buffer.writeln(verse.verseNumber);
       buffer.writeln(verse.cleanedLyrics);
       buffer.writeln('');
     }

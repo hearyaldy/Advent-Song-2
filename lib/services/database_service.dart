@@ -4,7 +4,6 @@ import 'package:flutter/foundation.dart';
 import 'package:intl/intl.dart';
 import '../models/devotional_model.dart'; // ✅ FIXED: Import DevotionalModel
 import '../models/song_model.dart';
-import '../models/admin_model.dart';
 import 'auth_service.dart';
 
 /// Database service providing clean interface for all database operations

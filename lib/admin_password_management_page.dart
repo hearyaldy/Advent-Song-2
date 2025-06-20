@@ -1,6 +1,5 @@
 // admin_password_management_page.dart - FULLY MIGRATED TO FIREBASE
 import 'package:flutter/material.dart';
-import 'package:firebase_auth/firebase_auth.dart';
 import 'services/auth_service.dart';
 import 'services/firebase_service.dart';
 import 'models/admin_model.dart';
